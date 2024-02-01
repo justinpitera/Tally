@@ -1,0 +1,15 @@
+env/
+venv/
+.venv/
+*.pyc
+__pycache__/
+db.sqlite3
+.idea/
+.vscode/
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+*.log
+*.pid
+*.seed
+cache/
