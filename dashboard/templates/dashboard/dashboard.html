@@ -6,5 +6,12 @@
       <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
     </ol>
   </nav>
+  {% if user.is_authenticated %}
+    <!-- Code to display if the user is logged in -->
+    <p>Welcome, {{ user.username }}!</p>
+{% else %}
+    <!-- Code to display if the user is not logged in -->
+    <p>Welcome, Guest!</p>
+{% endif %}
 
 {% endblock %}

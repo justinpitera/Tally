@@ -18,7 +18,6 @@
 
     <div class="sidebar">
         <h2><i class="fas fa-university"></i></h2>
-        <h2>Tally</h2>
         <ul>
           <li {% if request.path == '/' %}class="active"{% endif %}><a href="/"><i class="fas fa-home"></i>Dashboard</a></li>
           <li {% if request.path == '/coursework/' %}class="active"{% endif %}>
@@ -40,24 +39,52 @@
                 {% else %}
                     <i class="fas fa-envelope"></i>
                 {% endif %}
-                Messenger <span class="badge badge-pill badge-message-count">14</span>
+                {% if new_messages_count %}
+                  Messenger <span class="badge badge-pill badge-message-count">{{ new_messages_count }}</span>
+                {% else %}
+                  Messenger
+                {% endif %}
+
             </a>
         </li>
         </ul>                
         <div class="other_links">
           <a id="openPopupBtn" href="#"><i class="fas fa-cog"></i></a>
           <a href="#"><i class="fas fa-question-circle"></i></a>
+          <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i></a>
       </div>
+
     </div>
 
-    <body>
-      <div id="popupMenu" class="popup">
-        <div class="popup-content">
-            <span id="closePopupBtn" class="close">&times;</span>
-            <h3>Settings</h3>
-        </div>
-      </div>
-    </body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <body>
     <div class="main_content">
       <div class="info">

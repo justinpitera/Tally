@@ -1,4 +1,29 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from .models import Course, UserCourse
+from .forms import UserCourseForm, CourseForm
+
+def create_course(request):
+    if request.method == 'POST':
+        form = CourseForm(request.POST)
+        if form.is_valid():
+            form.save()  # This will save the Course instance
+            return redirect('coursework')  # Adjust the redirect as needed
+    else:
+        form = CourseForm()  # An unbound form
+    return render(request, 'coursework/create_course.html', {'form': form})
+
+def add_user_to_course(request):
+    if request.method == 'POST':
+        form = UserCourseForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            course = form.cleaned_data['course']
+            UserCourse.objects.create(user=user, course=course)  # Create the association
+            return redirect('coursework')  # Redirect to a new URL: adjust as needed
+    else:
+        form = UserCourseForm()
+    return render(request, 'coursework/add_user_to_course.html', {'form': form})
 
 def coursework_view(request):
-    return render(request, 'coursework/coursework.html', {'page_title': 'Coursework - Tally'})
+    user_courses = UserCourse.objects.filter(user=request.user).select_related('course')
+    return render(request, 'coursework/coursework.html', {'user_courses': user_courses,'page_title': 'Coursework - Tally'})

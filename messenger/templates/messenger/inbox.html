@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Inbox</h2>
+  {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li>
+          <strong>From:</strong> {{ message.sender }}<br>
+          <strong>Received:</strong> {{ message.timestamp }}<br>
+          <p>{{ message.content }}</p>
+          <!-- You can add a link to mark the message as read or to delete it -->
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You have no messages.</p>
+  {% endif %}
+{% endblock %}

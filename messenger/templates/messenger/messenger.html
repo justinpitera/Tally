@@ -7,4 +7,28 @@
     </ol>
   </nav>
 
+  <h1>Hello, {{ username }}!</h1>
+
+  {% if messages %}
+  <ul>
+    {% for message in messages %}
+      <li>
+        From: {{ message.sender.username }} <br>
+        Message: {{ message.content }} <br>
+        Sent: {{ message.timestamp }}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>You have no messages.</p>
+{% endif %}
+
+
+
+
+
+
+
+</body>
+
 {% endblock %}
