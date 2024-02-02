@@ -2,14 +2,15 @@ from django.shortcuts import render, redirect
 from .models import Course, UserCourse
 from .forms import UserCourseForm, CourseForm
 
+
 def create_course(request):
     if request.method == 'POST':
-        form = CourseForm(request.POST)
+        form = CourseForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()  # This will save the Course instance
-            return redirect('coursework')  # Adjust the redirect as needed
+            form.save()
+            return redirect('coursework')
     else:
-        form = CourseForm()  # An unbound form
+        form = CourseForm()
     return render(request, 'coursework/create_course.html', {'form': form})
 
 def add_user_to_course(request):

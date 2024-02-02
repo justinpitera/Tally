@@ -7,9 +7,11 @@ class Course(models.Model):
     instructor = models.CharField(max_length=100)
     start_date = models.DateField()
     end_date = models.DateField()
+    image = models.ImageField(upload_to='course_images/', null=True, blank=True)
 
     def __str__(self):
         return self.title
+
 
 class UserCourse(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
