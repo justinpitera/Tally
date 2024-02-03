@@ -1,7 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Course, UserCourse
 from .forms import UserCourseForm, CourseForm
 
+def view_course(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    return render(request, 'coursework/view_course.html', {'course': course})
 
 def create_course(request):
     if request.method == 'POST':
@@ -28,3 +31,5 @@ def add_user_to_course(request):
 def coursework_view(request):
     user_courses = UserCourse.objects.filter(user=request.user).select_related('course')
     return render(request, 'coursework/coursework.html', {'user_courses': user_courses,'page_title': 'Coursework - Tally'})
+
+

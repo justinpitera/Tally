@@ -5,6 +5,7 @@
 
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static '/coursework/css/styles.css' %}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 
 
@@ -20,12 +21,13 @@
     {% for user_course in user_courses %}
     <div class="col-md-4 mb-4">
       <div class="card h-100 shadow-sm" style="border-radius: 20px;">
-        <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px;" src="{{ user_course.course.image.url }}" alt="{{ user_course.course.title }} image">
+        <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px; width: 286px; height: 190px; object-fit: cover;" src="{{ user_course.course.image.url }}" alt="{{ user_course.course.title }} image">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">{{ user_course.course.title }}</h5>
           <p class="card-text">{{ user_course.course.description }}</p>
           <!-- Updated CTA Button with Custom Class -->
-          <a href="#" class="mt-auto btn learn-more-btn">View Course</a>
+          <a href="{% url 'view_course' user_course.course.id %}" class="mt-auto btn view-course-btn">View Course</a>
+
         </div>
       </div>
     </div>

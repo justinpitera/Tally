@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'coursework',
     'upcoming',
     'accounts',
+    'assignment',
 ]
 
 MIDDLEWARE = [

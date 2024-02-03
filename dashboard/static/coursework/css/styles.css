@@ -7,13 +7,13 @@
     width: 18rem; /* Adjust card width as necessary */
     margin: 15px; /* Adjust spacing between cards */
   }
-  .learn-more-btn {
+  .view-course-btn {
     background-color: #4b4276;
     color: white;
     border: none; /* Optional: removes the default border */
   }
   /* Hover effect for the button */
-  .learn-more-btn:hover {
+  .view-course-btn:hover {
     background-color: #393163; /* A slightly darker shade for hover effect */
     color: #ffffff;
   }

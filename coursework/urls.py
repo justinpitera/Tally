@@ -6,8 +6,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('coursework/', coursework_view, name='coursework'),
-    path('add_user_to_course/', views.add_user_to_course, name='add_user_to_course'),
-    path('create_course/', views.create_course, name='create_course'),
+    path('coursework/add_user_to_course/', views.add_user_to_course, name='add_user_to_course'),
+    path('coursework/create_course/', views.create_course, name='create_course'),
+    path('coursework/<int:course_id>/', views.view_course, name='view_course'),
 ]
 
 if settings.DEBUG:
