@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 class Course(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    instructor = models.CharField(max_length=100)
+    instructor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='taught_courses', null=True)
     start_date = models.DateField()
     end_date = models.DateField()
     image = models.ImageField(upload_to='course_images/', null=True, blank=True)
@@ -23,3 +23,4 @@ class UserCourse(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.course.title}"
+

@@ -4,6 +4,9 @@ from django.contrib.auth.forms import AuthenticationForm
 from .forms import RegisterForm
 from django.contrib.auth import logout
 from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.models import User
 
 def UserLogout(request):
     logout(request)
@@ -33,3 +36,7 @@ def UserLogin(request):
         form = AuthenticationForm()
     return render(request, 'accounts/login.html', {'form': form})
 
+@login_required
+def view_profile(request, user_id):
+    user_profile = get_object_or_404(User, id=user_id)
+    return render(request, 'accounts/profile.html', {'user': user_profile})

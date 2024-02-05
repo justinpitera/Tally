@@ -1,0 +1,12 @@
+<!-- coursework/confirm_remove_user.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Are you sure you want to remove "{{ user_course.user.username }}" from "{{ user_course.course.title }}"?</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="submit" value="Confirm">
+    <a href="{% url 'view_course' user_course.course.id %}">Cancel</a>
+</form>
+{% endblock %}

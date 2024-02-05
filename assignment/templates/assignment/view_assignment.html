@@ -1,0 +1,196 @@
+<!-- assignment/view_assignment.html -->
+{% extends 'base.html' %} {% block content %}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'view_course' assignment.course.id %}">{{ assignment.course.title }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ assignment.name }}</li>
+    </ol>
+</nav>  
+
+<ul class="nav nav-pills nav-justified">
+  <li class="nav-item">
+    <a class="nav-link active" href="#" onclick="showSection('section1')">Assignment</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#" onclick="showSection('section2')">Submission</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link disabled" href="#">Feedback</a>
+  </li>
+</ul>
+  
+  <!-- Sections to display based on navigation -->
+  <div id="section1" class="content-section">
+
+
+    <div class="card">
+        <div class="card-header">
+          Assignment Details
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">{{ assignment.name }}</h5>
+          <p class="card-text">
+            <strong>Assigned Date:</strong> {{ assignment.start_date }}
+            |
+            <strong>Due Date: </strong>{{ assignment.end_date }}
+            <br>
+            <strong>Submitted:</strong> {% if is_already_submitted %}Yes{% else %}No{% endif %}
+            <br>
+            <strong>Attachments: </strong>
+          </p>          
+          {% if assignment.attachments.all %}
+          {% for attachment in assignment.attachments.all %}
+
+          <button type="button" class="btn btn-outline-secondary custom-download-btn" data-url="{% url 'download_attachment' attachment.id %}">
+              Download Attachment <i class="fas fa-download"></i>
+          </button>
+          
+          
+          {% endfor %}
+          {%else%}
+          <br>
+          No attachments available
+          {%endif%}
+
+
+        </div>
+      </div>
+    <div class="assignment-details">
+        <h4>Instructions:</h4>
+        {{ assignment.instruction }}
+    </div>
+    
+
+
+
+
+
+
+  </div>
+
+  <div id="section2" class="content-section" style="display:none;">
+    <!-- Check if the assignment is already submitted for the current student -->
+    {% if is_already_submitted %}
+    <div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Assignment already submitted!</h4>
+        <p>You have already submitted this assignment. No further submissions are allowed.</p>
+    </div>
+    {% else %}
+    <br>
+
+    <form method="post" enctype="multipart/form-data" class="custom-form" action="{% url 'submit_assignment' assignment_id=assignment.id %}">
+      {% csrf_token %}
+      <div class="custom-file mb-3">
+          <input type="file" class="custom-file-input" id="inputGroupFile01" name="file">
+          <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+      </div>
+      <div class="form-group form-check">
+          <input type="checkbox" class="form-check-input" id="checkOwnWork" name="checkOwnWork" required>
+          <label class="form-check-label" for="checkOwnWork">I confirm that this submission is my own work and I have not plagiarized any part of it.</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+  
+  
+    {% endif %}
+</div>
+
+
+  
+
+<style>
+  /* Existing Styles */
+  .breadcrumb-item a {
+    color: #4b4276 !important;
+  }
+
+  .custom-download-btn {
+      border-color: #4b4276 !important;
+      color: #4b4276 !important;
+  }
+
+  .custom-download-btn:hover,
+  .custom-download-btn:focus {
+      background-color: #4b4276 !important;
+      border-color: #4b4276 !important;
+      color: #ffffff !important;
+  }
+   
+  /* Styles for Nav Pills */
+  .nav-pills .nav-link {
+      color: #4b4276; /* Default text color for nav pills */
+      border-radius: 0; /* Squared corners */
+  }
+
+  .nav-pills .nav-link.active {
+      background-color: #4b4276 !important; /* Active state background */
+      color: #ffffff !important; /* Active state text color */
+  }
+
+  /* Removed hover effects for nav pills */
+  /* .nav-pills .nav-link:hover {
+      background-color: #4b4276 !important;
+      color: #ffffff !important;
+  } */
+
+  /* New Styles for Form Elements */
+  form input, form textarea, form select, form button {
+      background-color: #4b4276 !important; /* Form elements background */
+      color: #ffffff !important; /* Text color */
+      border-color: #4b4276 !important; /* Border color */
+  }
+
+  ::placeholder {
+      color: #e0d7f9 !important; /* Lighter shade for placeholder text */
+  }
+
+  /* Unchanged content color settings */
+  body, p, h1, h2, h3, h4, h5, h6, .breadcrumb-item.active, .card-body {
+      color: inherit; /* Keeps the original text color for content outside forms */
+  }
+
+  /* Custom button and breadcrumb link adjustments */
+  .breadcrumb-item a, .custom-download-btn, .custom-download-btn:hover, .custom-download-btn:focus {
+      background-color: transparent; /* Ensures background remains transparent unless specified */
+  }
+</style>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Select all download buttons
+        var downloadButtons = document.querySelectorAll('.custom-download-btn');
+
+        // Add click event listener to each button
+        downloadButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var url = this.getAttribute('data-url'); // Get the URL from the data-url attribute
+                window.location.href = url; // Redirect the browser to the URL
+            });
+        });
+    });
+    function showSection(sectionId) {
+        // Hide all sections
+        document.querySelectorAll('.content-section').forEach(function(section) {
+          section.style.display = 'none';
+        });
+      
+        // Show the selected section
+        document.getElementById(sectionId).style.display = 'block';
+      
+        // Update nav link active state
+        document.querySelectorAll('.nav-link').forEach(function(link) {
+          link.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+      }
+    document.querySelector('.custom-file-input').addEventListener('change',function(e){
+        var fileName = document.getElementById("inputGroupFile01").files[0].name;
+        var nextSibling = e.target.nextElementSibling;
+        nextSibling.innerText = fileName;
+    });
+</script>
+
+{% endblock %}

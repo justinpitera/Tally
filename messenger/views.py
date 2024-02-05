@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 class SendMessageView(CreateView):
     model = Message
     fields = ['recipient', 'content']
-    success_url = '/'  # Adjust this to your inbox URL
+    success_url = '/inbox'  # Adjust this to your inbox URL
 
     def form_valid(self, form):
         form.instance.sender = self.request.user
@@ -19,7 +19,7 @@ class SendMessageView(CreateView):
 
 class InboxView(LoginRequiredMixin, ListView):
     model = Message
-    template_name = 'messenger/messenger.html'  # Make sure this points to the correct template
+    template_name = 'messenger/inbox.html'  # Make sure this points to the correct template
     context_object_name = 'messages'  # This is how the message list will be referred to in your template
 
     def get_queryset(self):
@@ -28,8 +28,6 @@ class InboxView(LoginRequiredMixin, ListView):
 
 
 
-def MessengerView(request):
-    return render(request, 'messenger/messenger.html', {'page_title': 'Messenger - Tally'})
 
 def ViewMessage(request):
     # Assuming the user is authenticated

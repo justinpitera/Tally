@@ -1,19 +1,41 @@
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
 {% block content %}
-  <h2>Inbox</h2>
-  {% if messages %}
+
+
+<h2>Inbox</h2>
+
+<!-- Write Message button with Font Awesome icon -->
+<a href="{% url 'send_message' %}" class="btn btn-primary" id="write-message-button">
+    <i class="fas fa-pen"></i> Draft Message</a>
+</a>
+
+{% if messages %}
     <ul>
-      {% for message in messages %}
-        <li>
-          <strong>From:</strong> {{ message.sender }}<br>
-          <strong>Received:</strong> {{ message.timestamp }}<br>
-          <p>{{ message.content }}</p>
-          <!-- You can add a link to mark the message as read or to delete it -->
-        </li>
-      {% endfor %}
+        {% for message in messages %}
+        <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                    <small><strong>Received:</strong> {{ message.timestamp }}</small>
+                </div>
+                <small>{{ message.sender }}</small>
+                <p class="mb-1">{{ message.content }}</p>
+            </a>
+        </div>
+        {% endfor %}
     </ul>
-  {% else %}
+{% else %}
     <p>You have no messages.</p>
-  {% endif %}
+{% endif %}
+
+<style>
+    /* CSS for positioning the button at the top right */
+    #write-message-button {
+        position: absolute;
+        top: 20px; /* Adjust the top position as needed */
+        right: 20px; /* Adjust the right position as needed */
+        background-color:#4b4276;
+        color:#fff;
+    }
+</style>
+
 {% endblock %}

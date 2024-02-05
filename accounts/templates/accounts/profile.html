@@ -1,0 +1,48 @@
+
+
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="profile-header d-flex justify-content-between align-items-center">
+                <h2>{{ user.username }}'s Profile</h2>
+                {% if user.is_authenticated %}
+                    {% if request.user == user_profile.user %}
+                        <a href="#" class="btn btn-primary">Edit Profile <i class="fas fa-edit"></i></a>
+                    {% else %}
+                        <a href="#" class="btn btn-primary">Message <i class="fas fa-envelope"></i></a>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="profile-body mt-3">
+                <p><i class="fas fa-envelope"></i> <strong>Email:</strong> {{ user.email }}</p>
+                <p><i class="fas fa-user"></i> <strong>Bio:</strong> BIO HERE</p>
+                <p><i class="fas fa-globe"></i> <strong>Website:</strong> <a href="#">URL HERE</a></p>
+                <!-- Add more fields as needed -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    .profile-header {
+        margin-bottom: 20px;
+    }
+    .profile-body p {
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+    .profile-body i {
+        margin-right: 5px;
+    }
+</style>
+
+{% endblock %}
+

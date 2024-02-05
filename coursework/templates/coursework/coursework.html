@@ -12,10 +12,9 @@
 
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item active" aria-current="page">Coursework</li>
+    <li class="breadcrumb-item active" aria-current="page">Courses</li>
   </ol>
 </nav>
-<h3>Enrolled Courses:</h3>
 <div class="container mt-5">
   <div class="row">
     {% for user_course in user_courses %}
@@ -25,9 +24,8 @@
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">{{ user_course.course.title }}</h5>
           <p class="card-text">{{ user_course.course.description }}</p>
-          <!-- Updated CTA Button with Custom Class -->
           <a href="{% url 'view_course' user_course.course.id %}" class="mt-auto btn view-course-btn">View Course</a>
-
+          
         </div>
       </div>
     </div>

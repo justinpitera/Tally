@@ -1,17 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
-    </ol>
-  </nav>
+
   {% if user.is_authenticated %}
     <!-- Code to display if the user is logged in -->
-    <p>Welcome, {{ user.username }}!</p>
+    
+
+
+    <div class="jumbotron">
+      <h1 class="display-4">Welcome, {{ user.username }}!</h1>
+      <p class="lead">Here, you can view your grades, stay updated with the latest notifications, and access a wealth of resources to support your learning journey. Let's make every step count towards achieving your educational goals.</p>
+      <p class="lead">
+        <a class="btn btn-primary btn-lg btn-purple" href="#" role="button">Learn more</a>
+      </p>
+      
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm">
+          'My Grades' Card Here
+        </div>
+        <div class="col-sm">
+          'Notifications' Card Here
+        </div>
+        <div class="col-sm">
+          'Resource Library' Card Here
+        </div>
+      </div>
+    </div>
 {% else %}
     <!-- Code to display if the user is not logged in -->
     <p>Welcome, Guest!</p>
 {% endif %}
-
+<style>
+  .btn-purple {
+      background-color: #4b4276 !important; /* Set the background color */
+      border-color: #4b4276 !important; /* Set the border color to match */
+  }
+  /* Optional: Change the hover and active state colors */
+  .btn-purple:hover, .btn-custom-color:active {
+      background-color: #39325c !important; /* Darker shade for hover/active */
+      border-color: #39325c !important;
+  }
+  </style>
+  
 {% endblock %}

@@ -1,79 +1,262 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="/coursework/">Coursework</a></li>
-      <li class="breadcrumb-item active" aria-current="page">{{course.title}}</li>
-    </ol>
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{course.title}}</li>
+  </ol>
 </nav>
-
-
-  <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ course.title }}</title>
-</head>
-<body>
+<!-- The DOCTYPE, html, head, and body tags are not needed since they should be part of the base.html template -->
     
-    <h1>{{ course.title }}</h1>
-
-    <div id="accordion">
-        <div class="card">
-          <div class="card-header" id="headingOne">
-            <h5 class="mb-0">
-              <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                Course Information
-              </button>
-            </h5>
-          </div>
-      
-          <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
-            <div class="card-body">
-                <p><strong>Instructor:</strong> {{ course.instructor }}</p>
-                <p><strong>Description:</strong> {{ course.description }}</p>
-                <p><strong>Start Date:</strong> {{ course.start_date }}</p>
-                <p><strong>End Date:</strong> {{ course.end_date }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header" id="headingTwo">
-            <h5 class="mb-0">
-              <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                Collapsible Group Item #2
-              </button>
-            </h5>
-          </div>
-          <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
-            <div class="card-body">
-              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header" id="headingThree">
-            <h5 class="mb-0">
-              <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                Collapsible Group Item #3
-              </button>
-            </h5>
-          </div>
-          <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
-            <div class="card-body">
-              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-            </div>
-          </div>
-        </div>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Assignments</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Grades</a>
+  </li>
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">More</a>
+    <div class="dropdown-menu">
+      <a class="dropdown-item" href="#">Message {{course.instructor}}</a>
+      <a class="dropdown-item" href="#">Enrolled Members</a>
+      <div class="dropdown-divider"></div>
+      <!-- Adjusted link to trigger modal -->
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#exampleModal">Unenroll</a>
+    </div>
+  </li>
+</ul>
+<!-- Modal Code (unchanged, included for context) -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Confirm Unenrollment</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
+      <div class="modal-body">
+        Are you sure you want to unenroll from {{ course.title }}?
+      </div>
+      <div class="modal-footer">
+        <form action="{% url 'unenroll_user_from_course' course.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Unenroll</button>
+          </form>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+      </div>
+      
+  
+    </div>
+  </div>
+</div>
+        </div>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <div id="accordion">
+          <div class="card">
+            <div class="card-header" id="headingOne">
+              <h5 class="mb-0">
+                <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  Course Information <i class="fas fa-minus" aria-hidden="true"></i><i class="fas fa-plus" aria-hidden="true" style="display:none;"></i>
+                </button>    
+              </h5>
+            </div>
+        
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+              <div class="card-body">
+                <p><strong>Instructor:</strong> <a href="{% url 'view_profile' user_id=course.instructor.id %}">{{ course.instructor }}</a>  </p>
+                <p><strong>Description:</strong> {{ course.description }}</p>
+                  <p><strong>Start Date:</strong> {{ course.start_date }}</p>
+                  <p><strong>End Date:</strong> {{ course.end_date }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header" id="headingTwo">
+              <h5 class="mb-0">
+                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                  Course Syllabus <i class="fas fa-plus" aria-hidden="true"></i><i class="fas fa-minus" aria-hidden="true" style="display:none;"></i>
+                </button>                                          
+              </h5>
+            </div>
+            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+              <div class="card-body">
+                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header" id="headingThree">
+              <h5 class="mb-0">
+                <!-- Corrected button for Course Syllabus -->
+                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                  Recommended Materials <i class="fas fa-plus" aria-hidden="true"></i><i class="fas fa-minus" aria-hidden="true" style="display:none;"></i>
+                </button>
+              </h5>
+            </div>
+            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+              <div class="card-body">
+                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+      <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+
+        {% if assignments %}
+            <ul>
+              <div class="list-group">
+                {% for assignment in assignments %}
+                  <a href="{% url 'assignment_view' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                      <h5 class="mb-1">{{assignment.name}}</h5>
+                      <small class="text-muted">Assigned: {{assignment.start_date}}</small>
+                    </div>
+                    <p class="mb-1"></p>
+                    <small class="text-muted">Due: {{assignment.end_date}} | Not Submitted</small>
+                  </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                {% endfor %}
+              </div>
+            </ul>
+        {% else %}
+            <p>No assignments for this course.</p>
+        {% endif %}
+    </div>
+    
+      <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+        <nav aria-label="Page navigation example">
+          <ul class="pagination justify-content-center">
+            <li class="page-item disabled">
+              <a class="page-link" href="?page=0" tabindex="-1">Previous</a>
+            </li>
+            <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
+            <li class="page-item"><a class="page-link" href="?page=2">2</a></li>
+            <li class="page-item"><a class="page-link" href="?page=3">3</a></li>
+            <li class="page-item">
+              <a class="page-link" href="?page=2">Next</a>
+            </li>
+          </ul>
+        </nav>
+        
+
+
+      </div>
+    </div>
+ 
 </body>
 </html>
 <style>
-    .breadcrumb-item a {
-      color: #4b4276 !important; /* Ensures this color change takes precedence */
-    }
-  </style>
+  a {
+    color: #4b4276;
+    text-decoration: none;
+  }
+  a:hover, a:active {
+    color: #4b4276; /* Changes color on hover and when active */
+    text-decoration: none; /* Also ensures underline is disabled on hover and active states */
+}
+
+  /* Remove underlines from accordion toggle buttons */
+#accordion .btn-link {
+    text-decoration: none !important;
+}
+
+  .breadcrumb-item a {
+    color: #4b4276 !important; /* Ensures this color change takes precedence */
+  }
+  .breadcrumb-item a, .btn, .form-control, .nav-link, .dropdown-item {
+    color: #4b4276 !important; /* Apply color to text */
+  }
+
+
+  .form-control {
+    border-color: #4b4276 !important; /* Apply color to form fields borders */
+  }
+
+  /* Specific to text inputs and select dropdowns */
+  input[type="text"], select.form-control {
+    color: #4b4276 !important; /* Apply color to text input and dropdown text */
+    border: 1px solid #4b4276 !important; /* Border color for inputs and selects */
+  }
+
+  /* Override the default focus glow to match the theme color */
+  .form-control:focus {
+    border-color: #4b4276;
+    box-shadow: 0 0 0 0.2rem rgba(75, 66, 118, 0.25);
+  }
+  /* Additional styles for dropdowns to ensure visibility */
+  .dropdown-menu {
+    border-color: #4b4276 !important; /* Border color for dropdown */
+  }
   
+  .dropdown-item:hover, .dropdown-item:focus {
+    background-color: #4b4276 !important; /* Background color for hovered dropdown items */
+    color: #fff !important; /* Text color change for better readability */
+  }
+  
+  /* Style adjustments for nav-tabs */
+  .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+    color: #fff !important; /* Active tab text color */
+    background-color: #4b4276 !important; /* Active tab background color */
+    border-color: #4b4276 !important; /* Active tab border color */
+    border-radius: 0;
+  }
+</style>
+
+<script>
+  $(document).ready(function(){
+    $('.collapse').on('shown.bs.collapse', function() {
+      // Find the button that controls the current accordion and update its icons
+      var controllerId = $(this).attr('id');
+      $('button[data-target="#' + controllerId + '"]').find(".fa-plus").hide();
+      $('button[data-target="#' + controllerId + '"]').find(".fa-minus").show();
+    }).on('hidden.bs.collapse', function() {
+      // Find the button that controls the current accordion and update its icons
+      var controllerId = $(this).attr('id');
+      $('button[data-target="#' + controllerId + '"]').find(".fa-minus").hide();
+      $('button[data-target="#' + controllerId + '"]').find(".fa-plus").show();
+    });
+  });
+  </script>
+  
+
+
+
+
 {% endblock %}

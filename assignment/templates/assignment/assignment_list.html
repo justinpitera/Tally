@@ -2,15 +2,16 @@
 {% extends 'base.html' %}  <!-- Extend a base template if you have one -->
 
 {% block content %}
-<h2>Assignments</h2>
-<ul>
+{% if assignments %}
+    <!-- Display the assignments -->
     {% for assignment in assignments %}
-    <li>
-        <strong>{{ assignment.name }}</strong><br>
-        Start: {{ assignment.start_date }}<br>
-        End: {{ assignment.end_date }}<br>
-        Instructions: {{ assignment.instruction }}
-    </li>
+        <div>
+            <h2>{{ assignment.name }}</h2>
+            <p>{{ assignment.instruction }}</p>
+            <!-- Add more details as needed -->
+        </div>
     {% endfor %}
-</ul>
+{% else %}
+    <p>No assignments available for this course.</p>
+{% endif %}
 {% endblock %}
