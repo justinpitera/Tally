@@ -29,14 +29,3 @@ class InboxView(LoginRequiredMixin, ListView):
 
 
 
-def ViewMessage(request):
-    # Assuming the user is authenticated
-    new_messages_count = Message.objects.filter(recipient=request.user, is_read=False).count()
-
-    # Add the count to your context
-    context = {
-        'new_messages_count': new_messages_count,
-        # include other context variables here
-    }
-
-    return render(request, 'my_template.html', context)
