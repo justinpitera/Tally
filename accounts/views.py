@@ -7,6 +7,9 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
+from .forms import RegisterForm  # Ensure this is imported
+from .models import UserProfile  # Ensure this is imported
+from django.utils.text import slugify
 
 def UserLogout(request):
     logout(request)
@@ -16,7 +19,21 @@ def Register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            form.save()
+            # This saves the User model associated with the form
+            user = form.save()
+
+            # Now, capture the role from the form. This assumes 'role' is a field in your form.
+            # You might need to adjust this based on how your form is structured.
+            role = form.cleaned_data.get('role', UserProfile.STUDENT)  # Default to STUDENT if not provided
+            
+            # Create and save the UserProfile instance
+            UserProfile.objects.create(
+                user=user,
+                role=role,
+                slug=slugify(user.username)  # Or handle slug creation in the model's save method as you already do
+            )
+            
+            # Redirect to login page or wherever you want
             return redirect('login')
     else:
         form = RegisterForm()
@@ -38,5 +55,15 @@ def UserLogin(request):
 
 @login_required
 def view_profile(request, user_id):
-    user_profile = get_object_or_404(User, id=user_id)
-    return render(request, 'accounts/profile.html', {'user': user_profile})
+    # Fetch the User instance
+    user = get_object_or_404(User, id=user_id)
+    
+    # Attempt to fetch the associated UserProfile instance
+    # This will include the role information you want to display
+    user_profile = UserProfile.objects.filter(user=user).first()
+    
+    # Pass both the User and UserProfile instances (or just the role, if preferred) to your template
+    return render(request, 'accounts/profile.html', {
+        'user': user,
+        'user_profile': user_profile  # You can also directly pass 'role': user_profile.role if you only need the role
+    })
