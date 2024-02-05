@@ -8,6 +8,7 @@ class Course(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     image = models.ImageField(upload_to='course_images/', null=True, blank=True)
+    syllabus = models.FileField(upload_to='submissions/%Y/%m/%d/', null=True)
 
     def __str__(self):
         return self.title

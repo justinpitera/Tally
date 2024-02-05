@@ -17,3 +17,14 @@
     background-color: #393163; /* A slightly darker shade for hover effect */
     color: #ffffff;
   }
+
+  .btn-controls {
+    background-color: #4b4276;
+    color: white;
+    border: none; /* Optional: removes the default border */
+  }
+  /* Hover effect for the button */
+  .btn-controls:hover {
+    background-color: #393163; /* A slightly darker shade for hover effect */
+    color: #ffffff;
+  }

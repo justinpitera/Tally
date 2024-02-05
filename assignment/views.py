@@ -75,15 +75,27 @@ def create_assignment(request):
         form = AssignmentForm(request.POST)
         if form.is_valid():
             assignment = form.save()
+            # Assuming the Assignment model has a 'course' field linking to a Course model
+            course_id = assignment.course.id  # Retrieve course ID from the saved assignment
+
             formset = AttachmentFormSet(request.POST, request.FILES, instance=assignment)
             if formset.is_valid():
                 formset.save()
-                return redirect('dashboard')
+                # Use the course_id variable to dynamically redirect to the course detail view
+                return redirect(f'{reverse("view_course", args=[course_id])}?tab=assignments')
     else:
         form = AssignmentForm()
         formset = AttachmentFormSet()
     return render(request, 'assignment/create.html', {'form': form, 'formset': formset})
 
+def get_assignment_linked_course_id(request, assignment_id):
+    try:
+        assignment = Assignment.objects.get(pk=assignment_id)
+        course_id = assignment.linked_course.id  # Accessing via the field name
+        return JsonResponse({'course_id': course_id})
+    except Assignment.DoesNotExist:
+        raise Http404("Assignment does not exist")
+    
 @login_required
 def view_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)

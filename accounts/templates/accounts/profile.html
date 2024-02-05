@@ -11,12 +11,6 @@
         <div class="col-md-8 offset-md-2">
             <div class="profile-header d-flex justify-content-between align-items-center">
                 <h2>{{ user.username }}'s Profile</h2>
-                <!-- Display the User's Username -->
-<div>Username: {{ user.username }}</div>
-
-<!-- Display the User's Role -->
-<div>Role: {{ user_profile.role }}</div>
-
                 {% if user.is_authenticated %}
                     {% if request.user == user_profile.user %}
                         <a href="#" class="btn btn-primary">Edit Profile <i class="fas fa-edit"></i></a>
@@ -26,6 +20,7 @@
                 {% endif %}
             </div>
             <div class="profile-body mt-3">
+                <p><i class="fas fa-user-tag"></i> <strong>Role:</strong> {{ user_profile.role }} </p>
                 <p><i class="fas fa-envelope"></i> <strong>Email:</strong> {{ user.email }}</p>
                 <p><i class="fas fa-user"></i> <strong>Bio:</strong> BIO HERE</p>
                 <p><i class="fas fa-globe"></i> <strong>Website:</strong> <a href="#">URL HERE</a></p>

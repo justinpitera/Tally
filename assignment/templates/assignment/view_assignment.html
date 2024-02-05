@@ -44,8 +44,8 @@
           {% for attachment in assignment.attachments.all %}
 
           <button type="button" class="btn btn-outline-secondary custom-download-btn" data-url="{% url 'download_attachment' attachment.id %}">
-              Download Attachment <i class="fas fa-download"></i>
-          </button>
+            Download Attachment <i class="fas fa-download"></i>
+        </button>
           
           
           {% endfor %}
