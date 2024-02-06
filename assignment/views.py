@@ -36,11 +36,6 @@ class AssignmentListView(ListView):
         context['course_list'] = Course.objects.all()
         context['selected_course_id'] = self.course_id
         return context
-    
-
-
-
-
 
 
 @login_required
@@ -123,7 +118,7 @@ def view_assignment(request, assignment_id):
         'assignment': assignment,
         'is_already_submitted': is_already_submitted,
         'is_instructor': is_instructor,
-        'submissions': submissions
+        'submissions': submissions,
     })
 
 

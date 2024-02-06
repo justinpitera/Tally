@@ -90,35 +90,72 @@
 
     <div id="instructor_view">
       {% if submissions %}
-
       <div class="list-group">
         {% for submission in submissions %}
-          <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
-            <div class="d-flex w-100 justify-content-between">
-              <h5 class="mb-1">{{ submission.student.username }}</h5>
-              
-              <small>Submitted: {{ submission.submitted_at }} | <b>{{ submission.grade|default:"Not graded yet" }}</b></small>
-            </div>
-            <p class="mb-1">Comments: {{ submission.comments|default:"No comments" }}<br></p>
-            <small><a href="{{ submission.file.url }}">Download Submission</a></small>
-            <!-- Button to toggle comment form -->
-            <button type="button" class="btn btn-primary" onclick="toggleCommentForm(this)">Add Comment</button>
-            <!-- Comment Form Container -->
-            <div class="comment-form" style="display:none;">
-              <form action="/path/to/comment/submit" method="post">
-                <div class="form-group">
-                  <textarea class="form-control" name="comment" placeholder="Enter your comment"></textarea>
-                </div>
-                <input type="hidden" name="submission_id" value="{{ submission.id }}">
-                <button type="submit" class="btn btn-success">Submit Comment</button>
-              </form>
-            </div>
+        <div class="card-header">
+          {{ submission.student.username }}
+          
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Submission for {{ assignment.name }}</h5>
+          Submission ID: {{ submission.id }}
+          <p class="card-text">
+            <strong>Due Date: </strong>{{ assignment.end_date }}
+            <br>
+            <strong>Submitted at: </strong>{{ submission.submitted_at}}
+          </p>          
+
+  
+          <button type="button" class="btn btn-outline-secondary custom-download-btn" data-url="{{ submission.file.url }}">
+            Download Submission <i class="fas fa-download"></i>
+          </button>
+          <a href class="btn btn-outline-secondary custom-download-btn" href="{% url 'grade_assignment' submission_id=submission.id %}">
+
+            Grade <i class="fas fa-pen-nib"></i></i>
           </a>
+  
+  
+  
+        </div>
+      </div>
         {% endfor %}
       </div>
       
       
+
   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       </div>
   {% else %}
       <p>No submissions found for this assignment.</p>
