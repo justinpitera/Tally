@@ -8,6 +8,8 @@ from django.http import FileResponse, Http404, HttpResponseRedirect, JsonRespons
 from django.contrib.auth.decorators import login_required
 from .models import Assignment, Submission
 from .forms import SubmissionForm
+from .forms import GradeSubmissionForm
+from .models import Submission
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 class AssignmentListView(ListView):
@@ -69,22 +71,26 @@ def submit_assignment(request, assignment_id):
 
     return render(request, 'assignment/view_assignment.html', {'assignment': assignment, 'form': form, 'is_already_submitted': is_already_submitted})
 
-def create_assignment(request):
+def create_assignment(request, course_id):
+    # Fetch the course instance using the course_id
+    course = get_object_or_404(Course, id=course_id)
     if request.method == 'POST':
-        form = AssignmentForm(request.POST)
+        form = AssignmentForm(request.POST, initial={'course': course_id})
         if form.is_valid():
-            assignment = form.save()
-            course_id = assignment.course.id
+            assignment = form.save(commit=False)
+            assignment.course = course  # Directly assign the course instance
+            assignment.save()
 
             formset = AttachmentFormSet(request.POST, request.FILES, instance=assignment)
             if formset.is_valid():
                 formset.save()
-                # Use the course_id variable to dynamically redirect to the course detail view
-                return redirect(f'{reverse("view_course", args=[course_id])}?tab=assignments')
+                return redirect(f'{reverse("view_course", args=[course.id])}?tab=assignments')
     else:
-        form = AssignmentForm()
-        formset = AttachmentFormSet()
-    return render(request, 'assignment/create.html', {'form': form, 'formset': formset})
+        form = AssignmentForm(initial={'course': course_id})
+        formset = AttachmentFormSet(instance=Assignment())
+
+    # Include the course name in the context
+    return render(request, 'assignment/create.html', {'form': form, 'formset': formset, 'course_name': course.title,'course_id':course_id})
 
 def get_assignment_linked_course_id(request, assignment_id):
     try:
@@ -162,3 +168,21 @@ class CourseGradesView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['course'] = get_object_or_404(Course, id=self.kwargs.get('course_id'))
         return context
+
+
+
+def grade_submission(request, submission_id):
+    submission = get_object_or_404(Submission, pk=submission_id)
+    
+
+
+    if request.method == 'POST':
+        form = GradeSubmissionForm(request.POST, instance=submission)
+        if form.is_valid():
+            form.save()
+            # Redirect to a new URL:
+            return redirect('assignment_view', submission.assignment.id)
+    else:
+        form = GradeSubmissionForm(instance=submission)
+    
+    return render(request, 'assignment/grade_submission.html', {'form': form, 'submission': submission})

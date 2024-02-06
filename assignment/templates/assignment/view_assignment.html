@@ -4,7 +4,7 @@
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'view_course' assignment.course.id %}">{{ assignment.course.title }}</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'view_course' assignment.course.id %}?tab=assignments">{{ assignment.course.title }}</a></li>
       <li class="breadcrumb-item active" aria-current="page">{{ assignment.name }}</li>
   </ol>
 </nav>  
@@ -51,11 +51,11 @@
             <br>
             <strong>Submitted:</strong> {% if is_already_submitted %}Yes{% else %}No{% endif %}
             <br>
+            <br>
             <strong>Attachments: </strong>
           </p>          
           {% if assignment.attachments.all %}
           {% for attachment in assignment.attachments.all %}
-
           <button type="button" class="btn btn-outline-secondary custom-download-btn" data-url="{% url 'download_attachment' attachment.id %}">
             Download Attachment <i class="fas fa-download"></i>
         </button>
@@ -93,12 +93,12 @@
       <div class="list-group">
         {% for submission in submissions %}
         <div class="card-header">
-          {{ submission.student.username }}
+          <b>Submission from:</b> {{ submission.student.username }}
           
         </div>
         <div class="card-body">
-          <h5 class="card-title">Submission for {{ assignment.name }}</h5>
-          Submission ID: {{ submission.id }}
+          <h5 class="card-title">Submission for '{{ assignment.name }}'</h5>
+          <strong>Grade: </strong>{{ submission.grade }}
           <p class="card-text">
             <strong>Due Date: </strong>{{ assignment.end_date }}
             <br>
@@ -109,9 +109,9 @@
           <button type="button" class="btn btn-outline-secondary custom-download-btn" data-url="{{ submission.file.url }}">
             Download Submission <i class="fas fa-download"></i>
           </button>
-          <a href class="btn btn-outline-secondary custom-download-btn" href="{% url 'grade_assignment' submission_id=submission.id %}">
+          <a class="btn btn-outline-secondary custom-download-btn" href="{% url 'grade_submission' submission_id=submission.id %}">
 
-            Grade <i class="fas fa-pen-nib"></i></i>
+            Grade Submission <i class="fas fa-pen-nib"></i></i>
           </a>
   
   

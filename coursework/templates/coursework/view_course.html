@@ -182,12 +182,12 @@
           </div>
         </ul>
             {% if is_instructor %}
-              <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_assignment' %}" role="button">Create Assignment</a>
+              <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_assignment' course_id=course.id %}" role="button">Create Assignment</a>
             {% endif %}
         {% else %}
             <p>No assignments for this course.</p>
             {% if is_instructor %}
-              <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_assignment' %}" role="button">Create Assignment</a>
+              <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_assignment' course_id=course.id %}" role="button">Create Assignment</a>
             {% endif %}
         {% endif %}
         

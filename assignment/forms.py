@@ -27,5 +27,14 @@ class SubmissionForm(forms.ModelForm):
 
 class GradeForm(forms.ModelForm):
     class Meta:
+        model = Submission 
+        fields = ['grade', 'comments']
+
+
+class GradeSubmissionForm(forms.ModelForm):
+    class Meta:
         model = Submission
         fields = ['grade', 'comments']
+        widgets = {
+            'comments': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+        }
