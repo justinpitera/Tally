@@ -49,8 +49,6 @@
             |
             <strong>Due Date: </strong>{{ assignment.end_date }}
             <br>
-            <strong>Submitted:</strong> {% if is_already_submitted %}Yes{% else %}No{% endif %}
-            <br>
             <br>
             <strong>Attachments: </strong>
           </p>          
@@ -105,6 +103,9 @@
             <strong>Submitted at: </strong>{{ submission.submitted_at}}
           </p>          
 
+
+
+          
   
           <button type="button" class="btn btn-outline-secondary custom-download-btn" data-url="{{ submission.file.url }}">
             Download Submission <i class="fas fa-download"></i>
@@ -113,8 +114,15 @@
 
             Grade Submission <i class="fas fa-pen-nib"></i></i>
           </a>
-  
-  
+          <button type="button" class="btn btn-outline-secondary custom-download-btn" data-url="#">
+            Leave Feedback <i class="fa-solid fa-comment"></i></i>
+          </button>
+          <button type="button" class="btn btn-outline-secondary custom-download-btn" data-url="#">
+            Flag Submission <i class="fa-solid fa-flag"></i></i></i>
+          </button>
+
+
+          
   
         </div>
       </div>
