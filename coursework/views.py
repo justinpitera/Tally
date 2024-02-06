@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-
+from django.contrib import messages 
 from assignment.models import Attachment
 
 from .models import Course, UserCourse
@@ -15,10 +15,6 @@ def unenroll_user_from_course(request, course_id, user_id):
         # Get the course, ensuring only an authorized user can unenroll participants
         course = get_object_or_404(Course, id=course_id)
         
-        # Optional: Check if the request.user is the instructor of the course or has other permissions
-        if course.instructor != request.user:
-            # Redirect or show an error if the user is not authorized to unenroll participants from this course
-            return redirect('coursework')
 
         # Get the UserCourse instance that links the user to the course
         user_course = get_object_or_404(UserCourse, course=course, user_id=user_id)
@@ -31,6 +27,33 @@ def unenroll_user_from_course(request, course_id, user_id):
     else:
         # If the request is not POST, redirect to a safe page; here, we use the course detail page
         return redirect('coursework')
+
+
+
+@login_required
+def delete_course(request, course_id):
+    # Ensure the request is POST for security reasons
+    if request.method != 'POST':
+        # If the request is not POST, redirect to a safe page; here, we use the course detail page
+        messages.error(request, "Invalid request method.")  # Optional: Inform the user about the error
+        return redirect('course_detail', course_id=course_id)  # Adjust the redirect as needed
+
+    course = get_object_or_404(Course, id=course_id)
+    
+    # Optional: Check if the request.user is the instructor of the course or has other permissions
+    if course.instructor != request.user:
+        # Redirect or show an error if the user is not authorized to delete this course
+        messages.error(request, "You are not authorized to delete this course.")  # Optional: Inform the user about the error
+        return redirect('course_detail', course_id=course_id)  # Adjust the redirect as needed
+
+    # Delete the course
+    course.delete()
+    
+    # Optional: Provide a success message upon deletion
+    messages.success(request, "Course deleted successfully.")
+    
+    # Redirect to the course list page or another appropriate page
+    return redirect('coursework')
 
 
 def course_detail_view(request, course_id):

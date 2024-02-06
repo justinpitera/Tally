@@ -1,9 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Create Course</button>
-</form>
+<div class="container mt-5">
+    <h2>Create Course</h2>
+    <style>
+        .wide-description {
+            width: 100%;
+        }
+        .form-control-file {
+            border: 1px solid #ced4da;
+            padding: .375rem .75rem;
+            border-radius: .25rem;
+        }
+    </style>
+    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="form-row">
+            {% for field in form %}
+                <div class="{% if field.name == 'description' %}col-12{% else %}col-md-6 mb-3{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-success">Create Course</button>
+    </form>
+</div>
 {% endblock %}

@@ -27,12 +27,15 @@
       <a class="dropdown-item" href="#">Enrolled Members</a>
       <div class="dropdown-divider"></div>
       <!-- Adjusted link to trigger modal -->
-      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#exampleModal">Unenroll</a>
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#confirmUnenroll">Unenroll</a>
+      {% if is_instructor %}
+      <a class="dropdown-item" href="#" data-toggle="modal" data-target="#confirmDelete">Delete Course</a>
+      {% endif %}
     </div>
   </li>
 </ul>
 <!-- Modal Code (unchanged, included for context) -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="confirmUnenroll" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -48,6 +51,31 @@
         <form action="{% url 'unenroll_user_from_course' course.id user.id %}" method="post">
           {% csrf_token %}
           <button type="submit" value="Unenroll" class="btn" style="color: #4b4276; border: 1px solid #4b4276; background-color: transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem;">Unenroll</button>
+
+      </form>
+        <button type="button" class="btn" data-dismiss="modal" style="color: #4b4276; border: 1px solid #4b4276; background-color: transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem;">Cancel</button>
+      </div>
+      
+  
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="confirmDelete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Confirm Deletion</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want delete {{ course.title }}?
+      </div>
+      <div class="modal-footer">
+        <form action="{% url 'delete_course' course.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit" value="Unenroll" class="btn" style="color: #4b4276; border: 1px solid #4b4276; background-color: transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem;">Delete</button>
 
       </form>
         <button type="button" class="btn" data-dismiss="modal" style="color: #4b4276; border: 1px solid #4b4276; background-color: transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem;">Cancel</button>
