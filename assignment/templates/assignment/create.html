@@ -2,6 +2,17 @@
 {% extends 'base.html' %}  <!-- Extend a base template if you have one -->
 
 {% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+        <li class="breadcrumb-item"><a href="#">{{ assignment.course.title }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">#</li>
+    </ol>
+</nav>  
+
+
+
+
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}

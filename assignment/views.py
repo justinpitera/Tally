@@ -1,14 +1,15 @@
 from django.shortcuts import get_object_or_404, render, redirect
+from accounts.models import UserProfile
 from coursework.models import Course
-from .forms import AssignmentForm, AttachmentFormSet
+from .forms import AssignmentForm, AttachmentFormSet, GradeForm
 from django.views.generic import ListView
 from .models import Assignment, Attachment
-from django.http import FileResponse, Http404, JsonResponse
+from django.http import FileResponse, Http404, HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Assignment, Submission
 from .forms import SubmissionForm
 from django.urls import reverse
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 class AssignmentListView(ListView):
     model = Assignment
     template_name = 'assignment/assignment_list.html'
@@ -35,22 +36,25 @@ class AssignmentListView(ListView):
         context['course_list'] = Course.objects.all()
         context['selected_course_id'] = self.course_id
         return context
+    
 
-# Rest of your views...
+
+
+
+
 
 @login_required
 def submit_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)
-
+    
     # Check if the student has already submitted the assignment
     submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
 
-    is_already_submitted = submission is not None  # True if submission exists, False otherwise
+    is_already_submitted = submission is not None
 
     if is_already_submitted:
         # If submission exists, assignment is already submitted for this student
         return render(request, 'assignment/view_assignment.html', {'assignment': assignment, 'is_already_submitted': is_already_submitted})
-
     if request.method == 'POST':
         form = SubmissionForm(request.POST, request.FILES)
         if form.is_valid():
@@ -64,7 +68,7 @@ def submit_assignment(request, assignment_id):
             assignment.save()
 
             # Redirect to a new URL:
-            return redirect(reverse('view_course', kwargs={'course_id': assignment.course.id}))
+            return redirect(reverse('assignment_view', kwargs={'assignment_id': assignment.id}))
     else:
         form = SubmissionForm()
 
@@ -75,8 +79,7 @@ def create_assignment(request):
         form = AssignmentForm(request.POST)
         if form.is_valid():
             assignment = form.save()
-            # Assuming the Assignment model has a 'course' field linking to a Course model
-            course_id = assignment.course.id  # Retrieve course ID from the saved assignment
+            course_id = assignment.course.id
 
             formset = AttachmentFormSet(request.POST, request.FILES, instance=assignment)
             if formset.is_valid():
@@ -99,13 +102,30 @@ def get_assignment_linked_course_id(request, assignment_id):
 @login_required
 def view_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)
+
+    # Fetch the user's profile
+    user_profile = UserProfile.objects.get(user=request.user)
     
+    # Check if the user is an instructor
+    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
+
+    # Fetch submissions for the specified assignment
+    submissions = Submission.objects.filter(assignment=assignment).select_related('student')
+
     # Check if the student has already submitted the assignment
-    submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
-    
-    is_already_submitted = submission is not None  # True if submission exists, False otherwise
-    
-    return render(request, 'assignment/view_assignment.html', {'assignment': assignment, 'is_already_submitted': is_already_submitted})
+    if not is_instructor:
+        submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
+        is_already_submitted = submission is not None
+    else:
+        is_already_submitted = False
+
+    return render(request, 'assignment/view_assignment.html', {
+        'assignment': assignment,
+        'is_already_submitted': is_already_submitted,
+        'is_instructor': is_instructor,
+        'submissions': submissions
+    })
+
 
 
 def download_attachment(request, attachment_id):
@@ -129,3 +149,21 @@ def is_submitted(request, student_id, assignment_id):
     }
     
     return JsonResponse(data)
+
+
+class CourseGradesView(LoginRequiredMixin, ListView):
+    model = Submission 
+    template_name = 'assignment/course_grades.html'
+    context_object_name = 'submissions'
+
+    def get_queryset(self):
+        # Get the course_id from the URL parameters
+        course_id = self.kwargs.get('course_id')
+        course = get_object_or_404(Course, id=course_id)
+        # Filter submissions/grades by the course
+        return Submission.objects.filter(assignment__course=course)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course'] = get_object_or_404(Course, id=self.kwargs.get('course_id'))
+        return context

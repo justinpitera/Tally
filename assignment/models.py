@@ -41,9 +41,14 @@ class Attachment(models.Model):
         return f"Attachment for {self.assignment.name}"
 
 
-
 class Submission(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions')
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     submitted_at = models.DateTimeField(auto_now_add=True, null=True)
     file = models.FileField(upload_to='submissions/%Y/%m/%d/')
+    grade = models.IntegerField(null=True, blank=True)
+    comments = models.TextField(null=True, blank=True)
+    
+    def __str__(self):
+        return f"Submission for {self.assignment.name} by {self.student.username}"
+

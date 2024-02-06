@@ -2,23 +2,36 @@
 {% extends 'base.html' %} {% block content %}
 
 <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
-        <li class="breadcrumb-item"><a href="{% url 'view_course' assignment.course.id %}">{{ assignment.course.title }}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{ assignment.name }}</li>
-    </ol>
+  <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'view_course' assignment.course.id %}">{{ assignment.course.title }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ assignment.name }}</li>
+  </ol>
 </nav>  
 
 <ul class="nav nav-pills nav-justified">
   <li class="nav-item">
     <a class="nav-link active" href="#" onclick="showSection('section1')">Assignment</a>
   </li>
+
+  {% if is_instructor %}
+  <li class="nav-item">
+    <a class="nav-link" href="#" onclick="showSection('section2')">Submissions</a>
+  </li>
+  {% else %}
   <li class="nav-item">
     <a class="nav-link" href="#" onclick="showSection('section2')">Submission</a>
   </li>
+    
   <li class="nav-item">
     <a class="nav-link disabled" href="#">Feedback</a>
   </li>
+  {% endif %}
+
+
+
+
+
 </ul>
   
   <!-- Sections to display based on navigation -->
@@ -71,30 +84,97 @@
   </div>
 
   <div id="section2" class="content-section" style="display:none;">
-    <!-- Check if the assignment is already submitted for the current student -->
-    {% if is_already_submitted %}
-    <div class="alert alert-success" role="alert">
-        <h4 class="alert-heading">Assignment already submitted!</h4>
-        <p>You have already submitted this assignment. No further submissions are allowed.</p>
-    </div>
-    {% else %}
-    <br>
 
-    <form method="post" enctype="multipart/form-data" class="custom-form" action="{% url 'submit_assignment' assignment_id=assignment.id %}">
-      {% csrf_token %}
-      <div class="custom-file mb-3">
-          <input type="file" class="custom-file-input" id="inputGroupFile01" name="file">
-          <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+
+    {% if is_instructor %}
+
+    <div id="instructor_view">
+      {% if submissions %}
+
+      <div class="list-group">
+        {% for submission in submissions %}
+          <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1">{{ submission.student.username }}</h5>
+              
+              <small>Submitted: {{ submission.submitted_at }} | <b>{{ submission.grade|default:"Not graded yet" }}</b></small>
+            </div>
+            <p class="mb-1">Comments: {{ submission.comments|default:"No comments" }}<br></p>
+            <small><a href="{{ submission.file.url }}">Download Submission</a></small>
+            <!-- Button to toggle comment form -->
+            <button type="button" class="btn btn-primary" onclick="toggleCommentForm(this)">Add Comment</button>
+            <!-- Comment Form Container -->
+            <div class="comment-form" style="display:none;">
+              <form action="/path/to/comment/submit" method="post">
+                <div class="form-group">
+                  <textarea class="form-control" name="comment" placeholder="Enter your comment"></textarea>
+                </div>
+                <input type="hidden" name="submission_id" value="{{ submission.id }}">
+                <button type="submit" class="btn btn-success">Submit Comment</button>
+              </form>
+            </div>
+          </a>
+        {% endfor %}
       </div>
-      <div class="form-group form-check">
-          <input type="checkbox" class="form-check-input" id="checkOwnWork" name="checkOwnWork" required>
-          <label class="form-check-label" for="checkOwnWork">I confirm that this submission is my own work and I have not plagiarized any part of it.</label>
+      
+      
+  
       </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
-  
-  
+  {% else %}
+      <p>No submissions found for this assignment.</p>
+  {% endif %}
+    </div>
+
+    {% else %}
+    <div id="student_view">
+      <!-- Check if the assignment is already submitted for the current student -->
+      {% if is_already_submitted %}
+      <div class="alert alert-success" role="alert">
+          <h4 class="alert-heading">Assignment already submitted!</h4>
+          <p>You have already submitted this assignment. No further submissions are allowed.</p>
+      </div>
+      {% else %}
+      <br>
+    
+      <form method="post" enctype="multipart/form-data" class="custom-form" action="{% url 'submit_assignment' assignment_id=assignment.id %}">
+        {% csrf_token %}
+        <div class="custom-file mb-3">
+            <input type="file" class="custom-file-input" id="inputGroupFile01" name="file">
+            <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+        </div>
+        <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" id="checkOwnWork" name="checkOwnWork" required>
+            <label class="form-check-label" for="checkOwnWork">I confirm that this submission is my own work and I have not plagiarized any part of it.</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    
+    
+      {% endif %}
+    
+        </div>
+
     {% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 </div>
 
 
@@ -157,7 +237,27 @@
   }
 </style>
 
-
+<script>
+  function toggleCommentForm(button) {
+    const commentForm = button.nextElementSibling; // Assumes the comment form is right after the button
+    const isVisible = commentForm.style.display === 'block';
+    // Toggle comment form visibility
+    commentForm.style.display = isVisible ? 'none' : 'block';
+    
+    // Prevent the list-group-item link from being followed
+    event.preventDefault();
+  }
+  
+  // Optional: Hide comment form when clicking outside
+  window.addEventListener('click', function(event) {
+    document.querySelectorAll('.comment-form').forEach(function(commentForm) {
+      if (!commentForm.contains(event.target) && !event.target.matches('button')) {
+        commentForm.style.display = 'none';
+      }
+    });
+  });
+  </script>
+  
   <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Select all download buttons
@@ -170,6 +270,7 @@
                 window.location.href = url; // Redirect the browser to the URL
             });
         });
+        
     });
     function showSection(sectionId) {
         // Hide all sections
@@ -191,6 +292,7 @@
         var nextSibling = e.target.nextElementSibling;
         nextSibling.innerText = fileName;
     });
+    
 </script>
 
 {% endblock %}

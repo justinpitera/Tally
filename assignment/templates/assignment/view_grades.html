@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Graded Submissions</h2>
+<ul>
+    {% for submission in graded_submissions %}
+        <li>
+            Assignment: {{ submission.assignment.name }}, Grade: {{ submission.grade }}
+        </li>
+    {% empty %}
+        <li>No graded submissions found.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
