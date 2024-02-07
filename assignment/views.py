@@ -194,6 +194,10 @@ def grade_submission(request, submission_id):
     
 @login_required
 def add_feedback(request, submission_id):
+    # Fetch the user's profile
+    user_profile = UserProfile.objects.get(user=request.user)
+    # Check if the user is an instructor
+    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
     submission = get_object_or_404(Submission, pk=submission_id)
     assignment = submission.assignment
     assignment_id = submission.assignment.id
@@ -208,4 +212,4 @@ def add_feedback(request, submission_id):
             return redirect(url)
     else:
         form = FeedbackForm()
-    return render(request, 'assignment/add_feedback.html', {'form': form, 'submission': submission, 'assignment': assignment})
+    return render(request, 'assignment/add_feedback.html', {'form': form, 'submission': submission, 'assignment': assignment, 'is_instructor':is_instructor})

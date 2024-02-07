@@ -7,7 +7,11 @@
    <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
       <li class="breadcrumb-item"><a href="{% url 'view_course' assignment.course.id %}?tab=assignments">{{assignment.course.title }}</a></li>
+      {% if is_instructor %}
       <li class="breadcrumb-item"><a href="{% url 'assignment_view' assignment.id %}?tab=section2">{{assignment.name }}</a></li>
+      {% else %}
+      <li class="breadcrumb-item"><a href="{% url 'assignment_view' assignment.id %}?tab=section3">{{assignment.name }}</a></li>
+      {% endif %}      
       <li class="breadcrumb-item active" aria-current="page">Add Feedback</li>
    </ol>
 </nav>
@@ -18,3 +22,6 @@
    <button type="submit">Submit</button>
 </form>
 {% endblock %}
+
+
+

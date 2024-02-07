@@ -149,4 +149,28 @@
 </div>
 {% endif %}
 </div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Check if URL contains the specific query string
+    if (window.location.search.indexOf('tab=section1') > -1) {
+        // Assuming the <a> tag for section 2 has an id="tab-section2", you can directly call click() on it
+        // If such an id does not exist, adjust the selector accordingly to target the tab for section 2
+        document.querySelector('[onclick="showSection(\'section1\')"]').click();
+    }
+        // Check if URL contains the specific query string
+    if (window.location.search.indexOf('tab=section2') > -1) {
+        // Assuming the <a> tag for section 2 has an id="tab-section2", you can directly call click() on it
+        // If such an id does not exist, adjust the selector accordingly to target the tab for section 2
+        document.querySelector('[onclick="showSection(\'section2\')"]').click();
+    }
+            // Check if URL contains the specific query string
+    if (window.location.search.indexOf('tab=section3') > -1) {
+        // Assuming the <a> tag for section 2 has an id="tab-section2", you can directly call click() on it
+        // If such an id does not exist, adjust the selector accordingly to target the tab for section 2
+        document.querySelector('[onclick="showSection(\'section3\')"]').click();
+    }
+});
+</script>
 {% endblock %}

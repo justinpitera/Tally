@@ -183,4 +183,22 @@
 </div>
 </body>
 </html>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Check if the URL contains the query parameter for the Assignments tab
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'assignments') {
+        // Deactivate currently active tab and its content
+        document.querySelector('.nav-link.active').classList.remove('active');
+        document.querySelector('.tab-pane.fade.show.active').classList.remove('show', 'active');
+        
+        // Activate the Assignments tab
+        document.getElementById('profile-tab').classList.add('active');
+        // Activate the Assignments tab content
+        var assignmentsContent = document.getElementById('profile');
+        assignmentsContent.classList.add('show', 'active');
+    }
+});
+
+</script>
 {% endblock %}
