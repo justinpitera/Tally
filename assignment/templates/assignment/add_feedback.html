@@ -1,0 +1,31 @@
+{% extends 'base.html' %} 
+{% block content %}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'view_course' assignment.course.id %}?tab=assignments">{{assignment.course.title }}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'assignment_view' assignment.id %}?tab=section2">{{assignment.name }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Grade Submission</li>
+    </ol>
+  </nav>  
+
+<h2>Add Feedback for {{submission.student.username}} </h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+
+
+
+<style>
+    .breadcrumb-item a {
+        color: #4b4276 !important;
+      }
+      a:hover {
+        color: #4b4276;
+        text-decoration: none;
+      }
+    </style>
+{% endblock %} 

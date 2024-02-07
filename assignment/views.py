@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from accounts.models import UserProfile
 from coursework.models import Course
-from .forms import AssignmentForm, AttachmentFormSet, GradeForm
+from .forms import AssignmentForm, AttachmentFormSet, FeedbackForm, GradeForm
 from django.views.generic import ListView
 from .models import Assignment, Attachment
 from django.http import FileResponse, Http404, HttpResponseRedirect, JsonResponse
@@ -102,6 +102,7 @@ def get_assignment_linked_course_id(request, assignment_id):
     
 @login_required
 def view_assignment(request, assignment_id):
+    form = FeedbackForm()
     assignment = get_object_or_404(Assignment, id=assignment_id)
 
     # Fetch the user's profile
@@ -116,8 +117,11 @@ def view_assignment(request, assignment_id):
     # Check if the student has already submitted the assignment
     if not is_instructor:
         submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
+        feedbacks = submission.feedbacks.all() if submission else []
         is_already_submitted = submission is not None
+        
     else:
+        feedbacks = []
         is_already_submitted = False
 
     return render(request, 'assignment/view_assignment.html', {
@@ -125,6 +129,8 @@ def view_assignment(request, assignment_id):
         'is_already_submitted': is_already_submitted,
         'is_instructor': is_instructor,
         'submissions': submissions,
+        'form': form,
+        'feedbacks': feedbacks,  # Pass feedbacks to the template
     })
 
 
@@ -173,16 +179,33 @@ class CourseGradesView(LoginRequiredMixin, ListView):
 
 def grade_submission(request, submission_id):
     submission = get_object_or_404(Submission, pk=submission_id)
-    
-
+    assignment = submission.assignment
 
     if request.method == 'POST':
         form = GradeSubmissionForm(request.POST, instance=submission)
         if form.is_valid():
             form.save()
-            # Redirect to a new URL:
-            return redirect('assignment_view', submission.assignment.id)
+            url = reverse('assignment_view', args=[submission.assignment.id]) + "?tab=section2"
+            return redirect(url)
     else:
         form = GradeSubmissionForm(instance=submission)
     
-    return render(request, 'assignment/grade_submission.html', {'form': form, 'submission': submission})
+    return render(request, 'assignment/grade_submission.html', {'form': form, 'submission': submission, 'assignment': assignment})
+    
+@login_required
+def add_feedback(request, submission_id):
+    submission = get_object_or_404(Submission, pk=submission_id)
+    assignment = submission.assignment
+    assignment_id = submission.assignment.id
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST, request.FILES)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.submission = submission
+            feedback.author = request.user
+            feedback.save()
+            url = reverse('assignment_view', args=[assignment_id]) + "?tab=section2"
+            return redirect(url)
+    else:
+        form = FeedbackForm()
+    return render(request, 'assignment/add_feedback.html', {'form': form, 'submission': submission, 'assignment': assignment})

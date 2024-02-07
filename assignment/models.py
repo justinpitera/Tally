@@ -52,3 +52,12 @@ class Submission(models.Model):
     def __str__(self):
         return f"Submission for {self.assignment.name} by {self.student.username}"
 
+class Feedback(models.Model):
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='feedbacks')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='feedback/%Y/%m/%d/',null=True, blank=True)
+    
+    def __str__(self):
+        return f"Feedback by {self.author.username} on {self.submission.assignment.name}"
