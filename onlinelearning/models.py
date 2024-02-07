@@ -28,7 +28,6 @@ class CustomContent(models.Model):
         ('url', 'URL'),
         ('text', 'Text'),
         ('assignment', 'Assignment'),
-        ('module', 'Module'),
         ('urltext', 'URLText')
     )
     content_type = models.CharField(max_length=10, choices=CONTENT_TYPES)

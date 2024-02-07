@@ -41,5 +41,7 @@ def submit_content(request, module_arg):
     return render(request, 'onlinelearning/submit_content.html', {'form': form})
 
 def module_view(request, module_id):
+    user_profile = get_object_or_404(UserProfile, user=request.user)
     module = get_object_or_404(Module, pk=module_id)
-    return render(request, 'onlinelearning/module_detail.html', {'module': module})
+    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
+    return render(request, 'onlinelearning/module_detail.html', {'module': module, 'is_instructor': is_instructor})

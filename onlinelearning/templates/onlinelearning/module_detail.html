@@ -1,44 +1,42 @@
-
-
-
-
-
 {% extends "base.html" %}
 {% block content %}
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static '/coursework/css/courseviewStyles.css' %}">
 <script src="{% static '/coursework/js/scripts.js' %}"></script>
-<!DOCTYPE html>
-<html>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-           <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
-           <li class="breadcrumb-item"><a href="{% url 'view_course' module.course.id %}?tab=onlinelearning">{{ module.course.title }}</a></li>
-           <li class="breadcrumb-item active" aria-current="page">{{module.name}}</li>
-        </ol>
-     </nav>
-<body>
-    <h1>{{ module.name }}</h1>
-    <p>{{ module.description }}</p>
-    <h2>Content:</h2>
-    <ul>
-        {% for content in module.customcontent_set.all %}
-            <li>{{ content.get_content_type_display }}: 
-                {% if content.content_type == 'file' %}
-                    <a href="{{ content.file.url }}">Download</a>
-                {% elif content.content_type == 'url' %}
-                    <a href="{{ content.url }}" target="_blank" rel="noopener noreferrer">Visit {{ content.urltext }}</a>
-                {% elif content.content_type == 'text' %}
-                    {{ content.text }}
-                {% elif content.content_type == 'assignment' %}
-                    {{ content.assignment }} - Due Date: {{ content.assignment.end_date }} <a href="{% url 'assignment_view' content.assignment.id %}">View Assigment</a>
-                {% elif content.content_type == 'module' %}
-                    Module: {{ content.module }}
-                {% endif %}
-            </li>
-        {% endfor %}
-        <a href="{% url 'submit_content' module.id %}">Add content</a>
-    </ul>
-</body>
-</html>         
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+       <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+       <li class="breadcrumb-item"><a href="{% url 'view_course' module.course.id %}?tab=onlinelearning">{{ module.course.title }}</a></li>
+       <li class="breadcrumb-item active" aria-current="page">{{ module.name }}</li>
+    </ol>
+</nav>
+
+<h1>{{ module.name }}</h1>
+<p><strong>Description: </strong><br>{{ module.description }}</p>
+<h2>Content:</h2>
+<ul>
+    {% for content in module.customcontent_set.all %}
+        <li>
+            {% if content.content_type == 'file' %}
+                <a href="{{ content.file.url }}">Download File</a>
+            {% elif content.content_type == 'url' %}
+                <a href="{{ content.url }}" target="_blank" rel="noopener noreferrer">Visit {{ content.urltext }}</a>
+            {% elif content.content_type == 'text' %}
+                {{ content.text }}
+            {% elif content.content_type == 'assignment' %}
+                {{ content.assignment }} - Due Date: {{ content.assignment.end_date }} <a href="{% url 'assignment_view' content.assignment.id %}">View Assignment</a>
+            {% elif content.content_type == 'module' %}
+                Module: {{ content.module }}
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+{% if is_instructor %}
+<a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'submit_content' module.id %}">Add content</a>
+
+{% else %}
+
+{% endif %}
+
 {% endblock %}

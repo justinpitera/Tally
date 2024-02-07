@@ -21,6 +21,7 @@ class ModuleForm(forms.ModelForm):
 class CustomContentForm(forms.ModelForm):
     class Meta:
         model = CustomContent
+        
         fields = ['content_type', 'file', 'url', 'urltext' ,'text', 'assignment', 'module']
         widgets = {
             'text': forms.Textarea(attrs={'rows': 4, 'cols': 40}),            
