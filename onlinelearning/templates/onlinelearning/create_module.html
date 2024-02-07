@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static '/coursework/css/courseviewStyles.css' %}">
+
+<html>
+<body>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+           <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+           <li class="breadcrumb-item"><a href="{% url 'view_course' course.id %}?tab=onlinelearning">{{ course.title }}</a></li>
+           <li class="breadcrumb-item active" aria-current="page">Create New Module</li>
+        </ol>
+     </nav>
+    <h2>Create New Module</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="hidden" name="course" value="{{ form.course.value }}">
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>
+{% endblock %}

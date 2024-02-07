@@ -65,15 +65,21 @@ def delete_course(request, course_id):
 def course_detail_view(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     user_profile = get_object_or_404(UserProfile, user=request.user)
-    assignments = (
-        course.assignments.all()
-    )  # Assuming your Course model has a related_name='assignments'
+    assignments = course.assignments.all()  # Assuming Course model has related_name='assignments'
+    modules = course.modules.all()  # Assuming Module model has a ForeignKey to Course
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
+    
     return render(
         request,
         "coursework/view_course.html",
-        {"course": course, "assignments": assignments, "is_instructor": is_instructor},
+        {
+            "course": course,
+            "assignments": assignments,
+            "modules": modules,  # Include modules in the context
+            "is_instructor": is_instructor,
+        },
     )
+
 
 
 @login_required  # Ensure only logged-in users can create a course
