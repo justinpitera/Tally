@@ -1,442 +1,152 @@
 <!-- assignment/view_assignment.html -->
 {% extends 'base.html' %} 
 {% block content %}
-
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static '/assignment/css/styles.css' %}">
+<script src="{% static '/assignment/js/scripts.js' %}"></script>
 <nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
+   <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
       <li class="breadcrumb-item"><a href="{% url 'view_course' assignment.course.id %}?tab=assignments">{{ assignment.course.title }}</a></li>
       <li class="breadcrumb-item active" aria-current="page">{{ assignment.name }}</li>
-  </ol>
-</nav>  
-
+   </ol>
+</nav>
 <ul class="nav nav-pills nav-justified">
-  <li class="nav-item">
-    <a class="nav-link active" onclick="showSection('section1')">Assignment</a>
-  </li>
-
-  {% if is_instructor %}
-  <li class="nav-item">
-    <a class="nav-link" onclick="showSection('section2')">Submissions</a>
-  </li>
-  {% else %}
-  <li class="nav-item">
-    <a class="nav-link" onclick="showSection('section2')">Submission</a>
-  </li>
-    
-  <li class="nav-item">
-    <a class="nav-link" onclick="showSection('section3')">Feedback</a>
-
-  </li>
-  {% endif %}
-
-
-
-
-
+   <li class="nav-item">
+      <a class="nav-link active" onclick="showSection('section1')">Assignment</a>
+   </li>
+   {% if is_instructor %}
+   <li class="nav-item">
+      <a class="nav-link" onclick="showSection('section2')">Submissions</a>
+   </li>
+   {% else %}
+   <li class="nav-item">
+      <a class="nav-link" onclick="showSection('section2')">Submission</a>
+   </li>
+   <li class="nav-item">
+      <a class="nav-link" onclick="showSection('section3')">Feedback</a>
+   </li>
+   {% endif %}
 </ul>
-
-
-
-
-
-
-
 <div id="section3" class="content-section" style="display: none;">
-  {% if feedbacks %}
-  <ul>
-  {% for feedback in feedbacks %}
+   {% if submissions %}
+   <a class="btn btn-outline-secondary custom-btn" href="{% url 'add_feedback' assignment.id %}">Respond to feedback</a>
+   </button>
+   {% endif %}
+   {% if feedbacks %}
+   <ul>
+      {% for feedback in feedbacks %}
       <li>
-          <strong>From:</strong> {{ feedback.author.username }}<br>
-          <strong>Message:</strong> {{ feedback.message }}<br>
-          {% if feedback.file %}
-              <a href="{{ feedback.file.url }}">Download Attached File</a>
-          {% endif %}
+         <strong>From:</strong> {{ feedback.author.username }}<br>
+         <strong>Message:</strong> {{ feedback.message }}<br>
+         {% if feedback.file %}
+         <button type="button" class="btn btn-outline-secondary custom-download-btn" onclick="event.preventDefault(); window.open('{{ feedback.file.url }}', '_blank');">
+         Download Attached File <i class="fas fa-download"></i>
+         </button>
+         {% endif %}
       </li>
-  {% endfor %}
-  </ul>
-{% else %}
-  <p>No feedback available.</p>
-{% endif %}
-
+      <br>
+      {% endfor %}
+   </ul>
+   {% else %}
+   <p>No feedback available.</p>
+   {% endif %}
 </div>
-
-
-
-  
-  <!-- Sections to display based on navigation -->
-  <div id="section1" class="content-section">
-
-
-    <div class="card">
-        <div class="card-header">
-          Assignment Details
-        </div>
-        <div class="card-body">
-          <h5 class="card-title">{{ assignment.name }}</h5>
-          <p class="card-text">
+<!-- Sections to display based on navigation -->
+<div id="section1" class="content-section">
+   <div class="card">
+      <div class="card-header">
+         Assignment Details
+      </div>
+      <div class="card-body">
+         <h5 class="card-title">{{ assignment.name }}</h5>
+         <p class="card-text">
             <strong>Assigned Date:</strong> {{ assignment.start_date }}
             |
             <strong>Due Date: </strong>{{ assignment.end_date }}
             <br>
             <br>
             <strong>Attachments: </strong>
-          </p>          
-          {% if assignment.attachments.all %}
-          {% for attachment in assignment.attachments.all %}
-          <button type="button" class="btn btn-outline-secondary custom-download-btn" data-url="{% url 'download_attachment' attachment.id %}">
-            Download Attachment <i class="fas fa-download"></i>
-        </button>
-          
-          
-          {% endfor %}
-          {%else%}
-          <br>
-          No attachments available
-          {%endif%}
-
-
-        </div>
+         </p>
+         {% if assignment.attachments.all %}
+         {% for attachment in assignment.attachments.all %}
+         <button type="button" class="btn btn-outline-secondary custom-download-btn" data-url="{% url 'download_attachment' attachment.id %}">
+         Download Attachment <i class="fas fa-download"></i>
+         </button>
+         {% endfor %}
+         {%else%}
+         <br>
+         No attachments available
+         {%endif%}
       </div>
-    <div class="assignment-details">
-        <h4>Instructions:</h4>
-        {{ assignment.instruction }}
-    </div>
-    
-
-
-
-
-
-
-  </div>
-
-  <div id="section2" class="content-section" style="display:none;">
-
-
-    {% if is_instructor %}
-
-    <div id="instructor_view">
+   </div>
+   <div class="assignment-details">
+      <h4>Instructions:</h4>
+      {{ assignment.instruction }}
+   </div>
+</div>
+<div id="section2" class="content-section" style="display:none;">
+   {% if is_instructor %}
+   <div id="instructor_view">
       {% if submissions %}
       <div class="list-group">
-        {% for submission in submissions %}
-        <div class="card-header">
-          <b>Submission from:</b> {{ submission.student.username }}
-          
-        </div>
-        <div class="card-body">
-          <h5 class="card-title">Submission for '{{ assignment.name }}'</h5>
-          <strong>Grade: </strong>{{ submission.grade }}
-          <p class="card-text">
-            <strong>Due Date: </strong>{{ assignment.end_date }}
-            <br>
-            <strong>Submitted at: </strong>{{ submission.submitted_at}}
-          </p>          
-          <button type="button" class="btn btn-outline-secondary custom-download-btn" onclick="event.preventDefault(); window.open('{{ submission.file.url }}', '_blank');">
+         {% for submission in submissions %}
+         <div class="card-header">
+            <b>Submission from:</b> {{ submission.student.username }}
+         </div>
+         <div class="card-body">
+            <h5 class="card-title">Submission for '{{ assignment.name }}'</h5>
+            <strong>Grade: </strong>{{ submission.grade }}
+            <p class="card-text">
+               <strong>Due Date: </strong>{{ assignment.end_date }}
+               <br>
+               <strong>Submitted at: </strong>{{ submission.submitted_at}}
+            </p>
+            <button type="button" class="btn btn-outline-secondary custom-download-btn" onclick="event.preventDefault(); window.open('{{ submission.file.url }}', '_blank');">
             Download Submission <i class="fas fa-download"></i>
-        </button>
-        
-        <a class="btn btn-outline-secondary custom-btn" href="{% url 'grade_submission' submission_id=submission.id %}">
-
-          Grade Submission <i class="fas fa-pen-nib"></i></i>
-        </a>
-          <a class="btn btn-outline-secondary custom-btn" href="{% url 'add_feedback' submission_id=submission.id %}">
-
+            </button>
+            <a class="btn btn-outline-secondary custom-btn" href="{% url 'grade_submission' submission_id=submission.id %}">
+            Grade Submission <i class="fas fa-pen-nib"></i></i>
+            </a>
+            <a class="btn btn-outline-secondary custom-btn" href="{% url 'add_feedback' submission_id=submission.id %}">
             Submission Feedback <i class="fa-solid fa-comment"></i></i>
-          </a>
-          <button type="button" class="btn btn-outline-secondary custom-btn" data-url="#">
+            </a>
+            <button type="button" class="btn btn-outline-secondary custom-btn" data-url="#">
             Flag Submission <i class="fa-solid fa-flag"></i></i></i>
-          </button>
-
-        </div>
+            </button>
+         </div>
       </div>
-
-        {% endfor %}
-      </div>
-    </div>
-  {% else %}
-      <p>No submissions found for this assignment.</p>
-  {% endif %}
+      {% endfor %}
+   </div>
 </div>
-
-    {% else %}
-    <div id="student_view">
-      <!-- Check if the assignment is already submitted for the current student -->
-      {% if is_already_submitted %}
-      <div class="alert alert-success" role="alert">
-          <h4 class="alert-heading">Assignment already submitted!</h4>
-          <p>You have already submitted this assignment. No further submissions are allowed.</p>
-      </div>
-      {% else %}
-      <br>
-    
-      <form method="post" enctype="multipart/form-data" class="custom-form" action="{% url 'submit_assignment' assignment_id=assignment.id %}">
-        {% csrf_token %}
-        <div class="custom-file mb-3">
-            <input type="file" class="custom-file-input" id="inputGroupFile01" name="file">
-            <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
-        </div>
-        <div class="form-group form-check">
-            <input type="checkbox" class="form-check-input" id="checkOwnWork" name="checkOwnWork" required>
-            <label class="form-check-label" for="checkOwnWork">I confirm that this submission is my own work and I have not plagiarized any part of it.</label>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-    
-    
-      {% endif %}
-    
-        </div>
-
-    {% endif %}
-
+{% else %}
+<p>No submissions found for this assignment.</p>
+{% endif %}
 </div>
-
-
-  
-
-<style>
-  .breadcrumb-item a {
-    color: #4b4276 !important;
-  }
-
-  .custom-download-btn {
-    border-color: #4b4276 !important;
-    color: #4b4276 !important;
-}
-
-.custom-download-btn:hover,
-.custom-download-btn:focus {
-    background-color: #4b4276 !important;
-    border-color: #4b4276 !important;
-    color: #ffffff !important;
-}
-a:hover {
-  color: #4b4276;
-  text-decoration: none;
-}
-
-
-
-.custom-btn {
-  border-color: #4b4276 !important;
-  color: #4b4276 !important;
-}
-
-.custom-btn:hover,
-.custom-btn:focus {
-  background-color: #4b4276 !important;
-  border-color: #4b4276 !important;
-  color: #ffffff !important;
-}
-   
-  /* Styles for Nav Pills */
-  .nav-pills .nav-link {
-      color: #4b4276; /* Default text color for nav pills */
-      border-radius: 0; /* Squared corners */
-  }
-
-  .nav-pills .nav-link.active {
-      background-color: #4b4276 !important; /* Active state background */
-      color: #ffffff !important; /* Active state text color */
-  }
-
-  /* Removed hover effects for nav pills */
-  /* .nav-pills .nav-link:hover {
-      background-color: #4b4276 !important;
-      color: #ffffff !important;
-  } */
-
-  /* New Styles for Form Elements */
-  form input, form textarea, form select, form button {
-      background-color: #4b4276 !important; /* Form elements background */
-      color: #ffffff !important; /* Text color */
-      border-color: #4b4276 !important; /* Border color */
-  }
-
-  ::placeholder {
-      color: #e0d7f9 !important; /* Lighter shade for placeholder text */
-  }
-
-  /* Unchanged content color settings */
-  body, p, h1, h2, h3, h4, h5, h6, .breadcrumb-item.active, .card-body {
-      color: inherit; /* Keeps the original text color for content outside forms */
-  }
-
-  /* Custom button and breadcrumb link adjustments */
-  .breadcrumb-item a, .custom-download-btn, .custom-download-btn:hover, .custom-download-btn:focus {
-      background-color: transparent; /* Ensures background remains transparent unless specified */
-  }
-</style>
-
-<script>
-  function toggleCommentForm(button) {
-    const commentForm = button.nextElementSibling; // Assumes the comment form is right after the button
-    const isVisible = commentForm.style.display === 'block';
-    // Toggle comment form visibility
-    commentForm.style.display = isVisible ? 'none' : 'block';
-    
-    // Prevent the list-group-item link from being followed
-    event.preventDefault();
-  }
-  
-  // Optional: Hide comment form when clicking outside
-  window.addEventListener('click', function(event) {
-    document.querySelectorAll('.comment-form').forEach(function(commentForm) {
-      if (!commentForm.contains(event.target) && !event.target.matches('button')) {
-        commentForm.style.display = 'none';
-      }
-    });
-  });
-  </script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Select all download buttons by class
-        var downloadButtons = document.querySelectorAll('.custom-download-btn');
-    
-        // Add click event listener to each button
-        downloadButtons.forEach(function(button) {
-            button.addEventListener('click', function(event) {
-                // Prevent the default action
-                event.preventDefault();
-    
-                // Get the URL from the data-url attribute of the button
-                var url = this.getAttribute('data-url');
-                
-                // Open the URL in a new tab
-                window.open(url, '_blank');
-            });
-        });
-    });
-    </script>
-    
-  <script>
-    function showSection(sectionId) {
-      // Hide all sections
-      document.querySelectorAll('.content-section').forEach(function(section) {
-        section.style.display = 'none';
-      });
-    
-      // Show the selected section
-      document.getElementById(sectionId).style.display = 'block';
-    
-      // Update nav link active state
-      document.querySelectorAll('.nav-link').forEach(function(link) {
-        link.classList.remove('active');
-      });
-      event.currentTarget.classList.add('active');
-    }
-  document.querySelector('.custom-file-input').addEventListener('change',function(e){
-      var fileName = document.getElementById("inputGroupFile01").files[0].name;
-      var nextSibling = e.target.nextElementSibling;
-      nextSibling.innerText = fileName;
-  });
-    
-  document.addEventListener('DOMContentLoaded', function() {
-      // Function to show a specific section
-      function showSection(sectionId) {
-          // Hide all sections
-          document.querySelectorAll('.content-section').forEach(function(section) {
-              section.style.display = 'none';
-          });
-  
-          // Show the selected section
-          const sectionToShow = document.getElementById(sectionId);
-          if (sectionToShow) {
-              sectionToShow.style.display = 'block';
-          } else {
-              console.error("Section with ID '" + sectionId + "' not found.");
-          }
-  
-          // Update nav link active state
-          document.querySelectorAll('.nav-link').forEach(function(link) {
-              link.classList.remove('active');
-              if(link.getAttribute('onclick').includes(sectionId)) {
-                  link.classList.add('active');
-              }
-          });
-      }
-  
-      // Immediately invoked function to handle auto-tab functionality based on URL query
-      (function handleAutoTab() {
-          const urlParams = new URLSearchParams(window.location.search);
-          const tab = urlParams.get('tab'); // Get 'tab' parameter from URL
-          
-          if (tab) {
-              showSection(tab); // Call showSection with the ID corresponding to the tab parameter
-          }
-      })();
-  
-      // Add event listeners for other functionalities as previously defined
-      // Handling file input changes, toggling comment forms, etc.
-      // ...
-  
-      document.querySelector('.custom-file-input')?.addEventListener('change', function(e) {
-          var fileName = e.target.files[0].name;
-          var nextSibling = e.target.nextElementSibling;
-          nextSibling.innerText = fileName;
-      });
-  });
-  
-  // Define other functions (toggleCommentForm, etc.) here as needed.
-  var downloadButtons = document.querySelectorAll('.custom-download-btn');
-
-  // Add click event listener to each button
-  downloadButtons.forEach(function(button) {
-      button.addEventListener('click', function(event) {
-          // Prevent the default action
-          event.preventDefault();
-
-          // Get the URL from the data-url attribute of the button
-          var url = this.getAttribute('data-url');
-          
-          // Open the URL in a new tab
-          window.open(url, '_blank');
-      });
-  });
-  
-  </script>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        function showSection(sectionId) {
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(function(section) {
-                section.style.display = 'none';
-            });
-    
-            // Show the selected section
-            var sectionToShow = document.getElementById(sectionId);
-            if (sectionToShow) {
-                sectionToShow.style.display = 'block';
-            }
-    
-            // Update nav link active state
-            document.querySelectorAll('.nav-pills .nav-link').forEach(function(link) {
-                if(link.getAttribute('onclick').includes(sectionId)) {
-                    document.querySelectorAll('.nav-pills .nav-link').forEach(function(l) { l.classList.remove('active'); });
-                    link.classList.add('active');
-                }
-            });
-        }
-    
-        // Read the 'tab' query parameter from the URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const tab = urlParams.get('tab');
-    
-        // If 'tab' parameter exists and it's 'section2', show Section 2 by default
-        if (tab) {
-            showSection(tab);
-        }
-    
-        // Listen for changes in the file input
-        document.querySelector('.custom-file-input')?.addEventListener('change', function(e) {
-            var fileName = e.target.files[0].name;
-            var nextSibling = e.target.nextElementSibling;
-            nextSibling.innerText = fileName;
-        });
-    });
-    
-    // You may keep other JavaScript functions and event listeners here as needed.
-    </script>
+{% else %}
+<div id="student_view">
+   <!-- Check if the assignment is already submitted for the current student -->
+   {% if is_already_submitted %}
+   <div class="alert alert-success" role="alert">
+      <h4 class="alert-heading">Assignment already submitted!</h4>
+      <p>You have already submitted this assignment. No further submissions are allowed.</p>
+   </div>
+   {% else %}
+   <br>
+   <form method="post" enctype="multipart/form-data" class="custom-form" action="{% url 'submit_assignment' assignment_id=assignment.id %}">
+      {% csrf_token %}
+      <div class="custom-file mb-3">
+         <input type="file" class="custom-file-input" id="inputGroupFile01" name="file">
+         <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+      </div>
+      <div class="form-group form-check">
+         <input type="checkbox" class="form-check-input" id="checkOwnWork" name="checkOwnWork" required>
+         <label class="form-check-label" for="checkOwnWork">I confirm that this submission is my own work and I have not plagiarized any part of it.</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+   </form>
+   {% endif %}
+</div>
+{% endif %}
+</div>
 {% endblock %}
