@@ -1,24 +1,24 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
 <head>
 	<meta charset="UTF-8">
 	<title>{{ page_title }}</title>
   <link rel="stylesheet" type="text/css" href="{% static '/global/css/styles.css' %}">
-  <script src="{% static '/global/js/popup.js' %}"></script>
   <script src="https://kit.fontawesome.com/aa741c5cdf.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
 </head>
 
 <div class="wrapper">
 
     <div class="sidebar">
         <h2><i class="fas fa-university"></i></h2>
-        <h2>Tally</h2>
         <ul>
           <li {% if request.path == '/' %}class="active"{% endif %}><a href="/"><i class="fas fa-home"></i>Dashboard</a></li>
           <li {% if request.path == '/coursework/' %}class="active"{% endif %}>
@@ -28,36 +28,63 @@
                 {% else %}
                   <i class="fas fa-book"></i>
                 {% endif %}
-                Coursework
+                Courses
             </a>
         </li>
           <li {% if request.path == '/upcoming/' %}class="active"{% endif %}><a href="/upcoming/"><i class="fas fa-check-circle"></i>Upcoming</a></li>
-          <li {% if request.path == '/online-learning/' %}class="active"{% endif %}><a href="/online-learning/"><i class="fas fa-desktop"></i>Online Learning</a></li>
-          <li {% if request.path == '/messenger/' %}class="active"{% endif %}>
-            <a href="/messenger/">
-                {% if request.path == '/messenger/' %}
+          <li {% if request.path == '/inbox/' %}class="active"{% endif %}>
+            <a href="/inbox/">
+                {% if request.path == '/inbox/' %}
                     <i class="fas fa-envelope-open"></i>
                 {% else %}
                     <i class="fas fa-envelope"></i>
                 {% endif %}
-                Messenger <span class="badge badge-pill badge-message-count">14</span>
+                {% if new_messages_count %}
+                  Messenger <span class="badge badge-pill badge-message-count">{{ new_messages_count }}</span>
+                {% else %}
+                  Messenger
+                {% endif %}
+
             </a>
         </li>
         </ul>                
         <div class="other_links">
-          <a id="openPopupBtn" href="#"><i class="fas fa-cog"></i></a>
+          <a href="#"><i class="fas fa-cog"></i></a>
           <a href="#"><i class="fas fa-question-circle"></i></a>
+          <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i></a>
       </div>
+
     </div>
 
-    <body>
-      <div id="popupMenu" class="popup">
-        <div class="popup-content">
-            <span id="closePopupBtn" class="close">&times;</span>
-            <h3>Settings</h3>
-        </div>
-      </div>
-    </body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <body>
     <div class="main_content">
       <div class="info">

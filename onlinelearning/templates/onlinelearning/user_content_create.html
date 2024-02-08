@@ -1,0 +1,13 @@
+<!-- templates/module_list.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Modules</h2>
+    <a href="{% url 'module-create' %}">Create Module</a>
+    <ul>
+        {% for module in modules %}
+            <li>{{ module.name }} - <a href="{% url 'module-update' module.pk %}">Edit</a> | <a href="{% url 'module-delete' module.pk %}">Delete</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

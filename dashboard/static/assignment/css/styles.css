@@ -1,0 +1,69 @@
+.breadcrumb-item a {
+    color: #4b4276 !important;
+  }
+
+  .custom-download-btn {
+    border-color: #4b4276 !important;
+    color: #4b4276 !important;
+}
+
+.custom-download-btn:hover,
+.custom-download-btn:focus {
+    background-color: #4b4276 !important;
+    border-color: #4b4276 !important;
+    color: #ffffff !important;
+}
+a:hover {
+  color: #4b4276;
+  text-decoration: none;
+}
+
+.custom-btn {
+  border-color: #4b4276 !important;
+  color: #4b4276 !important;
+}
+
+.custom-btn:hover,
+.custom-btn:focus {
+  background-color: #4b4276 !important;
+  border-color: #4b4276 !important;
+  color: #ffffff !important;
+}
+   
+  /* Styles for Nav Pills */
+  .nav-pills .nav-link {
+      color: #4b4276; /* Default text color for nav pills */
+      border-radius: 0; /* Squared corners */
+  }
+
+  .nav-pills .nav-link.active {
+      background-color: #4b4276 !important; /* Active state background */
+      color: #ffffff !important; /* Active state text color */
+  }
+
+  /* Removed hover effects for nav pills */
+  /* .nav-pills .nav-link:hover {
+      background-color: #4b4276 !important;
+      color: #ffffff !important;
+  } */
+
+  /* New Styles for Form Elements */
+  form input, form textarea, form select, form button {
+      background-color: #4b4276 !important; /* Form elements background */
+      color: #ffffff !important; /* Text color */
+      border-color: #4b4276 !important; /* Border color */
+  }
+
+  ::placeholder {
+      color: #e0d7f9 !important; /* Lighter shade for placeholder text */
+  }
+
+  /* Unchanged content color settings */
+  body, p, h1, h2, h3, h4, h5, h6, .breadcrumb-item.active, .card-body {
+      color: inherit; /* Keeps the original text color for content outside forms */
+  }
+
+  /* Custom button and breadcrumb link adjustments */
+  .breadcrumb-item a, .custom-download-btn, .custom-download-btn:hover, .custom-download-btn:focus {
+      background-color: transparent; /* Ensures background remains transparent unless specified */
+  }

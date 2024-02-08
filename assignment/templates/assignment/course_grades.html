@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Grades for {{ course.name }}</h2>
+  <ul>
+    {% for submission in submissions %}
+      <li>{{ submission.student.username }}: Grade - {{ submission.grade }}</li>
+    {% empty %}
+      <li>No grades available yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

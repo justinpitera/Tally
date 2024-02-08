@@ -1,0 +1,59 @@
+   /* General Container Spacing */
+   .container {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+/* Module Header */
+.module-header .module-title {
+    color: #4b4276; /* Adjust the color to fit your theme */
+    margin-bottom: 15px;
+}
+
+.module-description {
+    padding: 10px;
+    background-color: #f2f2f2; /* Light grey background */
+    border-left: 4px solid #4b4276; /* Themed left border */
+    margin-bottom: 20px;
+}
+
+/* Content List Styles */
+.module-content-list {
+    list-style-type: none; /* Remove default list bullets */
+    padding-left: 0; /* Remove default padding */
+}
+
+.module-content-list li {
+    background-color: #ffffff; /* White background */
+    border: 1px solid #ddd; /* Light grey border */
+    padding: 10px 15px;
+    margin-bottom: 10px; /* Space between items */
+    border-radius: 5px; /* Slightly rounded corners for a soft look */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+}
+
+.module-content-list li a {
+    color: #4b4276; /* Bootstrap primary blue */
+    text-decoration: none; /* No underline */
+}
+
+.module-content-list li a:hover {
+    text-decoration: underline; /* Underline on hover for clarity */
+}
+
+.module-content-list li p {
+    margin: 0; /* Remove default paragraph margin for inline display */
+}
+
+/* Add Content Button */
+.add-content-button .btn-create-assignment {
+    display: block; /* Make the button take the full container width */
+    width: auto;
+    padding: 10px;
+    margin-top: 20px; /* Space above the button */
+    background-color: #4b4276; /* Bootstrap success green */
+    color: #ffffff !important; /* White text */
+    border-radius: 5px; /* Match list items */
+    text-align: center; /* Center button text */
+    border: none; /* Remove default border */
+}

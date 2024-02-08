@@ -1,0 +1,68 @@
+.btn-download-attachment {
+    border-color: #4b4276; /* Custom border color */
+    color: #4b4276; /* Custom text color */
+}
+
+.btn-download-attachment:hover,
+.btn-download-attachment:focus { /* Ensure it covers focus for accessibility */
+    background-color: #4b4276; /* Background color on hover/focus */
+    color: #ffffff !important; 
+}
+
+.btn-create-assignment {
+  border-color: #4b4276;
+}
+a {
+  color: #4b4276;
+  text-decoration: none;
+}
+a:hover, a:active {
+  color: #4b4276; /* Changes color on hover and when active */
+  text-decoration: none; /* Also ensures underline is disabled on hover and active states */
+}
+
+/* Remove underlines from accordion toggle buttons */
+#accordion .btn-link {
+  text-decoration: none !important;
+}
+
+.breadcrumb-item a {
+  color: #4b4276 !important; /* Ensures this color change takes precedence */
+}
+.breadcrumb-item a, .btn, .form-control, .nav-link, .dropdown-item {
+  color: #4b4276 !important; /* Apply color to text */
+}
+
+
+.form-control {
+  border-color: #4b4276 !important; /* Apply color to form fields borders */
+}
+
+/* Specific to text inputs and select dropdowns */
+input[type="text"], select.form-control {
+  color: #4b4276 !important; /* Apply color to text input and dropdown text */
+  border: 1px solid #4b4276 !important; /* Border color for inputs and selects */
+}
+
+/* Override the default focus glow to match the theme color */
+.form-control:focus {
+  border-color: #4b4276;
+  box-shadow: 0 0 0 0.2rem rgba(75, 66, 118, 0.25);
+}
+/* Additional styles for dropdowns to ensure visibility */
+.dropdown-menu {
+  border-color: #4b4276 !important; /* Border color for dropdown */
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+  background-color: #4b4276 !important; /* Background color for hovered dropdown items */
+  color: #fff !important; /* Text color change for better readability */
+}
+
+/* Style adjustments for nav-tabs */
+.nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+  color: #fff !important; /* Active tab text color */
+  background-color: #4b4276 !important; /* Active tab background color */
+  border-color: #4b4276 !important; /* Active tab border color */
+  border-radius: 0;
+}

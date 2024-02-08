@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static '/coursework/css/courseviewStyles.css' %}">
+<script src="{% static '/coursework/js/scripts.js' %}"></script>
+
+<nav aria-label="breadcrumb">
+   <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{course.title}}</li>
+   </ol>
+</nav>
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+   <li class="nav-item">
+      <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
+   </li>
+   <li class="nav-item">
+      <a class="nav-link" id="online-learning-tab" data-toggle="tab" href="#online-learning" role="tab" aria-controls="online-learning" aria-selected="false">Learning Modules</a>
+   </li>
+   <li class="nav-item">
+      <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Assignments</a>
+   </li>
+   <li class="nav-item">
+      <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Grades</a>
+   </li>
+   <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">More</a>
+      <div class="dropdown-menu">
+         <a class="dropdown-item" href="{% url 'send_message' %}">Message {{course.instructor}}</a>
+         <a class="dropdown-item" href="#">Enrolled Members</a>
+         <div class="dropdown-divider"></div>
+         <button class="dropdown-item" href="#" data-toggle="modal" data-target="#confirmUnenroll">Unenroll</button>
+         {% if is_instructor %}
+         <div class="dropdown-divider"></div>
+         <a class="dropdown-item" href="{% url 'edit_course' course.id%}">Edit Course</a>
+         <button class="dropdown-item" href="#" data-toggle="modal" data-target="#confirmDelete">Delete Course</button>
+         {% endif %}
+      </div>
+   </li>
+</ul>
+
+
+
+<div class="modal fade" id="confirmUnenroll" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+   <div class="modal-dialog" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Confirm Unenrollment</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+         <div class="modal-body">
+            Are you sure you want to unenroll from {{ course.title }}?
+         </div>
+         <div class="modal-footer">
+            <form action="{% url 'direct_unenroll' course.id user.id %}" method="post">
+               {% csrf_token %}
+               <button type="submit" value="Unenroll" class="btn" style="color: #4b4276; border: 1px solid #4b4276; background-color: transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem;">Unenroll</button>
+            </form>
+            <button type="button" class="btn" data-dismiss="modal" style="color: #4b4276; border: 1px solid #4b4276; background-color: transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem;">Cancel</button>
+         </div>
+      </div>
+   </div>
+</div>
+<div class="modal fade" id="confirmDelete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+   <div class="modal-dialog" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Confirm Deletion</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+         </div>
+         <div class="modal-body">
+            Are you sure you want delete {{ course.title }}?
+         </div>
+         <div class="modal-footer">
+            <form action="{% url 'delete_course' course.id %}" method="post">
+               {% csrf_token %}
+               <button type="submit" value="Unenroll" class="btn" style="color: #4b4276; border: 1px solid #4b4276; background-color: transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem;">Delete</button>
+            </form>
+            <button type="button" class="btn" data-dismiss="modal" style="color: #4b4276; border: 1px solid #4b4276; background-color: transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem;">Cancel</button>
+         </div>
+      </div>
+   </div>
+</div>
+</div>
+</li>
+</ul>
+
+   
+
+
+<div class="tab-content" id="myTabContent">
+   <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+      <div id="accordion">
+         <div class="card">
+            <div class="card-header" id="headingOne">
+               <h5 class="mb-0">
+                  <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  Course Information <i class="fas fa-minus" aria-hidden="true"></i><i class="fas fa-plus" aria-hidden="true" style="display:none;"></i>
+                  </button>    
+               </h5>
+            </div>
+            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+               <div class="card-body">
+                  <p><strong>Instructor:</strong> <a href="{% url 'view_profile' user_id=course.instructor.id %}">{{ course.instructor }}</a>  </p>
+                  <p><strong>Description:</strong> {{ course.description }}</p>
+                  <p><strong>Start Date:</strong> {{ course.start_date }}</p>
+                  <p><strong>End Date:</strong> {{ course.end_date }}</p>
+               </div>
+            </div>
+         </div>
+         <div class="card">
+            <div class="card-header" id="headingTwo">
+               <h5 class="mb-0">
+                  <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                  Course Syllabus <i class="fas fa-plus" aria-hidden="true"></i><i class="fas fa-minus" aria-hidden="true" style="display:none;"></i>
+                  </button>                                          
+               </h5>
+            </div>
+            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+               <div class="card-body">
+                  {% if course.syllabus %}
+                  <a href="{{ course.syllabus.url }}" class="btn btn-download-attachment" download>Download Syllabus</a>
+                  <object data="{{ course.syllabus.url }}" type="application/pdf" width="600" height="500">
+                     <p>Syllabus not available for live view, please download the file.</p>
+                  </object>
+                  {% else %}
+                  <p>Syllabus not available.</p>
+                  {% endif %}
+               </div>
+            </div>
+         </div>
+         <div class="card">
+            <div class="card-header" id="headingThree">
+               <h5 class="mb-0">
+                  <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                  Recommended Materials <i class="fas fa-plus" aria-hidden="true"></i><i class="fas fa-minus" aria-hidden="true" style="display:none;"></i>
+                  </button>
+               </h5>
+            </div>
+            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+               <div class="card-body">
+                  Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+      <div class="card">
+         <div class="card-body">
+            {% if assignments %}
+            <ul>
+               <div class="list-group">
+                  {% for assignment in assignments %}
+                  <a href="{% url 'assignment_view' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                     <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{assignment.name}}</h5>
+                        <small class="text-muted"><strong>Assigned: </strong>{{assignment.start_date}} | <strong>Due: </strong>{{assignment.end_date}}</small>
+                     </div>
+                     <p class="mb-1"></p>
+                     <h6>{{assignment.instruction|truncatechars:100}}</h6>
+                     <small class="text-muted">Not Submitted</small>
+                  </a>
+                  {% endfor %}
+               </div>
+            </ul>
+            {% if is_instructor %}
+            <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_assignment' course_id=course.id %}" role="button">Create Assignment <i class="fas fa-plus-square"></i></a>
+            {% endif %}
+            {% else %}
+            <p>No assignments for this course.</p>
+            {% if is_instructor %}
+            <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_assignment' course_id=course.id %}" role="button">Create Assignment <i class="fas fa-plus-square"></i> </a>
+            {% endif %}
+            {% endif %}
+         </div>
+      </div>
+   </div>
+   <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+      <nav aria-label="Page navigation example">
+         <ul class="pagination justify-content-center">
+            <li class="page-item disabled">
+               <a class="page-link" href="?page=0" tabindex="-1">Previous</a>
+            </li>
+            <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
+            <li class="page-item"><a class="page-link" href="?page=2">2</a></li>
+            <li class="page-item"><a class="page-link" href="?page=3">3</a></li>
+            <li class="page-item">
+               <a class="page-link" href="?page=2">Next</a>
+            </li>
+         </ul>
+      </nav>
+   </div>
+</div>
+<!-- Online Learning tab content -->
+<div class="tab-pane fade" id="online-learning" role="tabpanel" aria-labelledby="online-learning-tab">
+   <div class="card">
+      <div class="card-body">
+         {% if modules %}
+         <ul>
+            <div class="list-group">
+               {% for module in modules %}
+               <a href="{% url 'module_view' module.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                  <div class="d-flex w-100 justify-content-between">
+                     <h5 class="mb-1">{{module.name}}</h5>
+                     <small class="text-muted"><strong>Begins: </strong>{{module.start_date}} | <strong>Ends: </strong>{{module.end_date}}</small>
+                  </div>
+                  <p class="mb-1"></p>
+                  <h6>{{module.description|truncatechars:100}}</h4>
+                  <small class="text-muted">Not Completed</small>
+               </a>
+               {% endfor %}
+            </div>
+         </ul>
+         {% if is_instructor %}
+         <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_module' course_id=course.id %}" role="button">Create Module <i class="fas fa-plus-square"></i></a>
+         {% endif %}
+         {% else %}
+         <p>No modules for this course.</p>
+         {% if is_instructor %}
+         <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_module' course_id=course.id %}" role="button">Create Module <i class="fas fa-plus-square"></i></a>
+         {% endif %}
+         {% endif %}
+      </div>
+   </div>
+</div>
+</body>
+</html>
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+      var tabLinks = document.querySelectorAll('.nav-link:not(.dropdown-toggle)');
+      var dropdownLinks = document.querySelectorAll('.dropdown-menu a');
+  
+      // Function to deactivate all tabs and contents
+      function deactivateAllTabsAndContents() {
+          tabLinks.forEach(function(link) {
+              if (!link.classList.contains('dropdown-toggle')) { // Check to ensure it's not a dropdown toggle link
+                  link.classList.remove('active');
+                  var contentId = link.getAttribute('href');
+                  var tabContent = document.querySelector(contentId);
+                  if (tabContent) {
+                      tabContent.classList.remove('show', 'active');
+                  }
+              }
+          });
+      }
+  
+      // Function to activate tab and its content
+      function activateTabAndContent(tabLink) {
+          if (!tabLink.classList.contains('dropdown-toggle')) { // Again, ensure it's not a dropdown toggle
+              tabLink.classList.add('active');
+              var contentId = tabLink.getAttribute('href');
+              var tabContent = document.querySelector(contentId);
+              if (tabContent) {
+                  tabContent.classList.add('show', 'active');
+              }
+          }
+      }
+  
+      // Attach click event listeners to all tab links, excluding the dropdown toggle
+      tabLinks.forEach(function(tabLink) {
+          tabLink.addEventListener('click', function(event) {
+              event.preventDefault();
+  
+              // Deactivate all tabs and contents, ensuring dropdown interactions are excluded
+              deactivateAllTabsAndContents();
+  
+              // Activate clicked tab and its content, ensuring dropdown interactions are excluded
+              activateTabAndContent(this);
+          });
+      });
+  
+      // No changes required here for dropdownLinks, as we're not modifying dropdown behavior directly
+      dropdownLinks.forEach(function(link) {
+          link.addEventListener('click', function(event) {
+              event.stopPropagation(); // This remains to prevent unintended behavior, but the primary issue is addressed above
+          });
+      });
+  
+      // The remaining part of the script for activating tabs based on URL parameters or default logic remains unchanged
+  });
+  
+   document.addEventListener('DOMContentLoaded', function () {
+      // Check if the URL contains the query parameter for the Assignments tab
+      var urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('tab') === 'assignments') {
+         // Deactivate currently active tab and its content
+         document.querySelector('.nav-link.active').classList.remove('active');
+         document.querySelector('.tab-pane.fade.show.active').classList.remove('show', 'active');
+         
+         // Activate the Assignments tab
+         document.getElementById('profile-tab').classList.add('active');
+         // Activate the Assignments tab content
+         var assignmentsContent = document.getElementById('profile');
+         assignmentsContent.classList.add('show', 'active');
+     }
+     if (urlParams.get('tab') === 'onlinelearning') {
+      // Deactivate currently active tab and its content
+      document.querySelector('.nav-link.active').classList.remove('active');
+      document.querySelector('.tab-pane.fade.show.active').classList.remove('show', 'active');
+      
+      // Activate the Assignments tab
+      document.getElementById('online-learning-tab').classList.add('active');
+      // Activate the Assignments tab content
+      var assignmentsContent = document.getElementById('online-learning');
+      assignmentsContent.classList.add('show', 'active');
+  }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <title>Register User - Tally</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css"> 
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-card">
+            <h2 class="icon-container"><i class="fas fa-university"></i></h2> 
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="form-group">
+                    {{ form.role.label_tag }}
+                    <select class="custom-select" name="role">
+                        {% for value, label in form.role.field.choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                </div>
+
+                <div class="form-group">
+                    {{ form.email.label_tag }}
+                    {{ form.email }}
+                </div>
+
+
+                <div class="form-group">
+                    {{ form.password1.label_tag }}
+                    {{ form.password1 }}
+                </div>
+            
+                <div class="form-group">
+                    {{ form.password2.label_tag }}
+                    {{ form.password2 }}
+                </div>
+
+
+            
+                
+            
+                <button type="submit" class="btn btn-primary register-user-btn">Register</button>
+            </form>
+            
+                     
+        </div>
+    </div>
+</body>
+</html>
+
+<style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+    
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #4b4276;
+    }
+    
+    .register-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+    .register-card {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        width: 300px;
+        text-align: center; /* Aligns content (including icon and form) to the center */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center aligns all elements in the register card */
+    }
+
+    .icon-container {
+        font-size: 40px; /* Adjust icon size */
+        color: #4b4276; /* Icon color */
+        margin-bottom: 20px; /* Spacing between icon and form */
+    }
+    
+    form {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    button {
+        background-color: #4b4276;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    
+    button:hover {
+        background-color: #3a3460;
+    }
+
+input[type="text"], input[type="password"], input[type="email"] {
+    padding: 10px;
+    margin: 5px 0 20px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 20px; /* Rounded corners for text boxes */
+    width: 100%; /* Full width of the container */
+    box-sizing: border-box; /* Include padding and border in the element's width */
+}
+
+input[type="text"]::placeholder, input[type="password"]::placeholder {
+    color: #aaa; /* Lighter color for placeholder text */
+}
+
+input[type="submit"] {
+    background-color: #4b4276;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 20px; /* Rounded corners for the button */
+    cursor: pointer;
+    width: 80%; /* Increased width of the button */
+    max-width: 300px; /* Maximum width to prevent overly wide buttons on large screens */
+    box-sizing: border-box; /* Include padding and border in the button's width */
+}
+
+input[type="submit"]:hover {
+    background-color: #3a3460;
+}
+
+
+
+
+
+/* Style adjustments for better alignment */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center align the form items */
+}
+
+/* Additional styling for the form */
+form p {
+    text-align: left; /* Align text to the left */
+    width: 100%;
+}
+.register-user-btn {
+    background-color: #4b4276;
+    color: white;
+    border: none; /* Optional: removes the default border */
+  }
+  /* Hover effect for the button */
+  .register-user-btn:hover {
+    background-color: #393163; /* A slightly darker shade for hover effect */
+    color: #ffffff;
+  }
+</style>

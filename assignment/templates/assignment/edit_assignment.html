@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <h2>Edit Assignment</h2>
+  <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {{ form.management_form }}
+      {% for hidden_field in form.hidden_fields %}
+        {{ hidden_field }}
+      {% endfor %}
+      
+      {% for field in form.visible_fields %}
+        {% if field.name != 'course' %}
+          <p>{{ field.label_tag }} {{ field }}</p>
+        {% else %}
+          {{ field.as_hidden }}
+        {% endif %}
+      {% endfor %}
+      {{ formset }}
+      <div id="attachments-container">
+          <!-- Render the management form and existing attachments -->
+          {{ formset.management_form }}
+          {% for form in formset %}
+              <div class="attachment-form">
+                  {{ form.as_p }}
+              </div>
+          {% endfor %}
+      </div>
+      <button type="button" id="add-file" class="btn btn-info">Add More Files</button>
+      <br><br>
+      <button type="submit" class="btn btn-primary">Save changes</button>
+      <a href="{% url 'assignment_view' assignment.id %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('add-file').addEventListener('click', function() {
+            var totalForms = document.getElementById('id_attachments-TOTAL_FORMS');
+            var currentFormCount = parseInt(totalForms.value, 10);
+    
+            var newFileInput = document.createElement('input');
+            newFileInput.type = 'file';
+            newFileInput.name = 'form-' + currentFormCount + '-file'; // Adjust name according to formset naming
+            newFileInput.id = 'id_form-' + currentFormCount + '-file'; // Adjust ID according to formset naming
+    
+            newFileInput.classList.add('form-control', 'mt-2');
+    
+            var container = document.getElementById('attachments-container');
+            container.appendChild(newFileInput);
+    
+            totalForms.value = currentFormCount + 1; // Increment the TOTAL_FORMS count
+        });
+    });
+</script>
+{% endblock %}

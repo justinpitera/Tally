@@ -1,0 +1,26 @@
+{% extends 'base.html' %}  <!-- Extend a base template if you have one -->
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/coursework/" style="color: #4b4276 !important;">Courses</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'view_course' course_id=course_id %}?tab=assignments" style="color: #4b4276 !important;">{{course_name }} </a>       </li>
+        <li class="breadcrumb-item active" aria-current="page">Create Assignment</li>
+    </ol>
+</nav>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <!-- Include the course field as a hidden input -->
+    <input type="hidden" name="course" value="{{ form.course.value }}">
+    
+    <!-- Render the rest of the form excluding the course field -->
+    {% for field in form %}
+        {% if field.name != "course" %}
+            <p>{{ field.label_tag }} {{ field }}</p>
+        {% endif %}
+    {% endfor %}
+    
+    {{ formset }}
+    <button type="submit">Save</button>
+</form>
+{% endblock %}

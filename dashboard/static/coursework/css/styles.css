@@ -1,0 +1,33 @@
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px; /* Adjust spacing around the cards */
+  }
+  .card {
+    width: 18rem; /* Adjust card width as necessary */
+    margin: 15px; /* Adjust spacing between cards */
+  }
+  .view-course-btn {
+    background-color: #4b4276;
+    color: white;
+    border: none; /* Optional: removes the default border */
+  }
+  /* Hover effect for the button */
+  .view-course-btn:hover {
+    background-color: #393163; /* A slightly darker shade for hover effect */
+    color: #ffffff;
+  }
+
+  .btn-controls {
+    background-color: #4b4276;
+    color: white;
+    border: none; /* Optional: removes the default border */
+  }
+  /* Hover effect for the button */
+  .btn-controls:hover {
+    background-color: #393163; /* A slightly darker shade for hover effect */
+    color: #ffffff;
+  }
+  
+
+  

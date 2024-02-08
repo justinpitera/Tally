@@ -1,0 +1,256 @@
+<!-- assignment/view_assignment.html -->
+{% extends 'base.html' %} 
+{% block content %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static '/assignment/css/styles.css' %}">
+<script src="{% static '/assignment/js/scripts.js' %}"></script>
+<nav aria-label="breadcrumb">
+   <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'view_course' assignment.course.id %}?tab=assignments">{{ assignment.course.title }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ assignment.name }}</li>
+   </ol>
+</nav>
+<ul class="nav nav-pills nav-justified">
+   <li class="nav-item">
+      <a class="nav-link active" onclick="showSection('section1')">Assignment</a>
+   </li>
+   {% if is_instructor %}
+   <li class="nav-item">
+      <a class="nav-link" onclick="showSection('section2')">Submissions</a>
+   </li>
+   {% else %}
+   <li class="nav-item">
+      <a class="nav-link" onclick="showSection('section2')">Submission</a>
+   </li>
+   <li class="nav-item">
+      <a class="nav-link" onclick="showSection('section3')">Feedback</a>
+   </li>
+   {% endif %}
+</ul>
+<div id="section3" class="content-section" style="display: none;">
+   {% if submissions %}
+   <a class="btn btn-outline-secondary custom-btn" href="{% url 'add_feedback' assignment.id %}">Respond to feedback</a>
+   </button>
+   {% endif %}
+   {% if feedbacks %}
+   <ul>
+      {% for feedback in feedbacks %}
+      <li>
+         <strong>From:</strong> {{ feedback.author.username }}<br>
+         <strong>Message:</strong> {{ feedback.message }}<br>
+         {% if feedback.file %}
+         <button type="button" class="btn btn-outline-secondary custom-download-btn" onclick="event.preventDefault(); window.open('{{ feedback.file.url }}', '_blank');">
+         Download Attached File <i class="fas fa-download"></i>
+         </button>
+         {% endif %}
+      </li>
+      <br>
+      {% endfor %}
+   </ul>
+   {% else %}
+   <p>No feedback available.</p>
+   {% endif %}
+</div>
+<!-- Sections to display based on navigation -->
+<div id="section1" class="content-section">
+   <div class="card">
+      <div class="card-header">
+         Assignment Details 
+
+
+         
+      </div>
+
+      <div class="card-body d-flex justify-content-between align-items-start">
+         <div>
+           <p class="card-text mb-2">
+             <strong>Assignment Name: </strong> {{ assignment.name }}
+             <br>
+             <strong>Assigned Date:</strong> {{ assignment.start_date }}
+             |
+             <strong>Due Date: </strong>{{ assignment.end_date }}
+           </p>
+           <p class="card-text">
+             <strong>Attachments: </strong>
+             {% if assignment.attachments.all %}
+               {% for attachment in assignment.attachments.all %}
+                 <button type="button" class="btn btn-outline-secondary custom-download-btn mt-1" data-url="{% url 'download_attachment' attachment.id %}">
+                   Download Attachment <i class="fas fa-download"></i>
+                 </button>
+               {% endfor %}
+             {% else %}
+               No attachments available
+             {% endif %}
+           </p>
+         </div>
+         {% if is_instructor %}
+<!-- Example Edit Button for an Assignment -->
+<button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#editAssignmentModal" data-assignment-id="{{ assignment.id }}">
+   <i class="far fa-edit"></i> Edit
+</button>
+
+         {% endif %}
+       </div>
+       
+
+
+
+
+   </div>
+   <div class="assignment-details">
+      <h4>Instructions:</h4>
+      {{ assignment.instruction }}
+   </div>
+</div>
+<div id="section2" class="content-section" style="display:none;">
+   {% if is_instructor %}
+   <div id="instructor_view">
+      {% if submissions %}
+      <div class="list-group">
+         {% for submission in submissions %}
+         <div class="card-header">
+            <b>Submission from:</b> {{ submission.student.username }}
+         </div>
+         <div class="card-body">
+            <h5 class="card-title">Submission for '{{ assignment.name }}'</h5>
+            <strong>Grade: </strong>{{ submission.grade }}
+            <p class="card-text">
+               <strong>Due Date: </strong>{{ assignment.end_date }}
+               <br>
+               <strong>Submitted at: </strong>{{ submission.submitted_at}}
+            </p>
+            <button type="button" class="btn btn-outline-secondary custom-download-btn" onclick="event.preventDefault(); window.open('{{ submission.file.url }}', '_blank');">
+            Download Submission <i class="fas fa-download"></i>
+            </button>
+            <a class="btn btn-outline-secondary custom-btn" href="{% url 'grade_submission' submission_id=submission.id %}">
+            Grade Submission <i class="fas fa-pen-nib"></i></i>
+            </a>
+            <a class="btn btn-outline-secondary custom-btn" href="{% url 'add_feedback' submission_id=submission.id %}">
+            Submission Feedback <i class="fa-solid fa-comment"></i></i>
+            </a>
+            <button type="button" class="btn btn-outline-secondary custom-btn" data-url="#">
+            Flag Submission <i class="fa-solid fa-flag"></i></i></i>
+            </button>
+         </div>
+      </div>
+      {% endfor %}
+   </div>
+</div>
+{% else %}
+<p>No submissions found for this assignment.</p>
+{% endif %}
+</div>
+{% else %}
+<div id="student_view">
+   <!-- Check if the assignment is already submitted for the current student -->
+   {% if is_already_submitted %}
+   <div class="alert alert-success" role="alert">
+      <h4 class="alert-heading">Assignment already submitted!</h4>
+      <p>You have already submitted this assignment. No further submissions are allowed.</p>
+   </div>
+   {% else %}
+   <br>
+   <form method="post" enctype="multipart/form-data" class="custom-form" action="{% url 'submit_assignment' assignment_id=assignment.id %}">
+      {% csrf_token %}
+      <div class="custom-file mb-3">
+         <input type="file" class="custom-file-input" id="inputGroupFile01" name="file">
+         <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+      </div>
+      <div class="form-group form-check">
+         <input type="checkbox" class="form-check-input" id="checkOwnWork" name="checkOwnWork" required>
+         <label class="form-check-label" for="checkOwnWork">I confirm that this submission is my own work and I have not plagiarized any part of it.</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+   </form>
+   {% endif %}
+</div>
+{% endif %}
+</div>
+
+<!-- Edit Assignment Modal -->
+<div class="modal fade" id="editAssignmentModal" tabindex="-1" role="dialog" aria-labelledby="editAssignmentModalLabel" aria-hidden="true">
+   <div class="modal-dialog" role="document">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h5 class="modal-title" id="editAssignmentModalLabel">Edit Assignment</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <form method="post" action="{% url 'assignment_view' assignment_id=assignment.id %}">
+               {% csrf_token %}
+               <div class="modal-body">
+                       <h2>Edit Assignment</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ form.management_form }}
+        {% for hidden_field in form.hidden_fields %}
+          {{ hidden_field }}
+        {% endfor %}
+        
+        {% for field in form.visible_fields %}
+          {% if field.name != 'course' %}
+            <p>{{ field.label_tag }} {{ field }}</p>
+          {% else %}
+            {{ field.as_hidden }}
+          {% endif %}
+        {% endfor %}
+
+        <div id="attachments-container">
+            <!-- Render the management form and existing attachments -->
+            {{ formset.management_form }}
+            {% for form in formset %}
+                <div class="attachment-form">
+
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-file" class="btn btn-info">Add More Files</button>
+        <br><br>
+        <div class="modal-footer">
+         <input type="hidden" name="assignment_edit" value="1"/>
+         <button type="submit" class="btn btn-primary">Save changes</button>
+         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+     </div>
+    </form>
+               </div>
+
+           </form>
+       </div>
+   </div>
+</div>
+
+
+<script>
+    $('#editAssignmentModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var assignmentId = button.data('assignment-id'); // Extract assignment ID from data-* attributes
+        var modal = $(this);
+        var formAction = `{% url 'edit_assignment' 0 %}`.replace('/0/', `/${assignmentId}/`); // Dynamically set form action
+        modal.find('#editAssignmentForm').attr('action', formAction);
+    });
+</script>
+
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+       document.getElementById('add-file').addEventListener('click', function() {
+           var totalForms = document.getElementById('id_attachments-TOTAL_FORMS');
+           var currentFormCount = parseInt(totalForms.value, 10);
+   
+           var newFileInput = document.createElement('input');
+           newFileInput.type = 'file';
+           newFileInput.name = 'attachments-' + currentFormCount + '-file'; // Adjust name according to formset naming
+           newFileInput.id = 'id_attachments-' + currentFormCount + '-file'; // Adjust ID according to formset naming
+   
+           newFileInput.classList.add('form-control', 'mt-2');
+   
+           var container = document.getElementById('attachments-container');
+           container.appendChild(newFileInput);
+   
+           totalForms.value = currentFormCount + 1; // Increment the TOTAL_FORMS count
+       });
+   });
+</script>
+{% endblock %}
