@@ -56,31 +56,47 @@
 <div id="section1" class="content-section">
    <div class="card">
       <div class="card-header">
-         Assignment Details
-      </div>
-      <div class="card-body">
+         Assignment Details 
+
+
          
-         <p class="card-text">
-            <strong>Assignment Name: </strong> {{ assignment.name }}
-            <br>
-            <strong>Assigned Date:</strong> {{ assignment.start_date }}
-            |
-            <strong>Due Date: </strong>{{ assignment.end_date }}
-            <br>
-            <br>
-            <strong>Attachments: </strong>
-         </p>
-         {% if assignment.attachments.all %}
-         {% for attachment in assignment.attachments.all %}
-         <button type="button" class="btn btn-outline-secondary custom-download-btn" data-url="{% url 'download_attachment' attachment.id %}">
-         Download Attachment <i class="fas fa-download"></i>
-         </button>
-         {% endfor %}
-         {%else%}
-         <br>
-         No attachments available
-         {%endif%}
       </div>
+
+      <div class="card-body d-flex justify-content-between align-items-start">
+         <div>
+           <p class="card-text mb-2">
+             <strong>Assignment Name: </strong> {{ assignment.name }}
+             <br>
+             <strong>Assigned Date:</strong> {{ assignment.start_date }}
+             |
+             <strong>Due Date: </strong>{{ assignment.end_date }}
+           </p>
+           <p class="card-text">
+             <strong>Attachments: </strong>
+             {% if assignment.attachments.all %}
+               {% for attachment in assignment.attachments.all %}
+                 <button type="button" class="btn btn-outline-secondary custom-download-btn mt-1" data-url="{% url 'download_attachment' attachment.id %}">
+                   Download Attachment <i class="fas fa-download"></i>
+                 </button>
+               {% endfor %}
+             {% else %}
+               No attachments available
+             {% endif %}
+           </p>
+         </div>
+         {% if is_instructor %}
+<!-- Example Edit Button for an Assignment -->
+<button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#editAssignmentModal" data-assignment-id="{{ assignment.id }}">
+   <i class="far fa-edit"></i> Edit
+</button>
+
+         {% endif %}
+       </div>
+       
+
+
+
+
    </div>
    <div class="assignment-details">
       <h4>Instructions:</h4>
@@ -152,27 +168,60 @@
 {% endif %}
 </div>
 
+<!-- Edit Assignment Modal -->
+<div class="modal fade" id="editAssignmentModal" tabindex="-1" role="dialog" aria-labelledby="editAssignmentModalLabel" aria-hidden="true">
+   <div class="modal-dialog" role="document">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h5 class="modal-title" id="editAssignmentModalLabel">Edit Assignment</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <form method="post" action="{% url 'assignment_view' assignment_id=assignment.id %}">
+               {% csrf_token %}
+               <div class="modal-body">
+                   {{ assignmentForm.as_p }}
+               </div>
+               <div class="modal-footer">
+                   <input type="hidden" name="assignment_edit" value="1"/>
+                   <button type="submit" class="btn btn-primary">Save changes</button>
+                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
+
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Check if URL contains the specific query string
-    if (window.location.search.indexOf('tab=section1') > -1) {
-        // Assuming the <a> tag for section 2 has an id="tab-section2", you can directly call click() on it
-        // If such an id does not exist, adjust the selector accordingly to target the tab for section 2
-        document.querySelector('[onclick="showSection(\'section1\')"]').click();
-    }
-        // Check if URL contains the specific query string
-    if (window.location.search.indexOf('tab=section2') > -1) {
-        // Assuming the <a> tag for section 2 has an id="tab-section2", you can directly call click() on it
-        // If such an id does not exist, adjust the selector accordingly to target the tab for section 2
-        document.querySelector('[onclick="showSection(\'section2\')"]').click();
-    }
-            // Check if URL contains the specific query string
-    if (window.location.search.indexOf('tab=section3') > -1) {
-        // Assuming the <a> tag for section 2 has an id="tab-section2", you can directly call click() on it
-        // If such an id does not exist, adjust the selector accordingly to target the tab for section 2
-        document.querySelector('[onclick="showSection(\'section3\')"]').click();
-    }
-});
+    $('#editAssignmentModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var assignmentId = button.data('assignment-id'); // Extract assignment ID from data-* attributes
+        var modal = $(this);
+        var formAction = `{% url 'edit_assignment' 0 %}`.replace('/0/', `/${assignmentId}/`); // Dynamically set form action
+        modal.find('#editAssignmentForm').attr('action', formAction);
+    });
+</script>
+
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+       document.getElementById('add-file').addEventListener('click', function() {
+           var totalForms = document.getElementById('id_attachments-TOTAL_FORMS');
+           var currentFormCount = parseInt(totalForms.value, 10);
+   
+           var newFileInput = document.createElement('input');
+           newFileInput.type = 'file';
+           newFileInput.name = 'attachments-' + currentFormCount + '-file'; // Adjust name according to formset naming
+           newFileInput.id = 'id_attachments-' + currentFormCount + '-file'; // Adjust ID according to formset naming
+   
+           newFileInput.classList.add('form-control', 'mt-2');
+   
+           var container = document.getElementById('attachments-container');
+           container.appendChild(newFileInput);
+   
+           totalForms.value = currentFormCount + 1; // Increment the TOTAL_FORMS count
+       });
+   });
 </script>
 {% endblock %}

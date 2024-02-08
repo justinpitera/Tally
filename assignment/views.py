@@ -4,7 +4,7 @@ from coursework.models import Course
 from .forms import AssignmentForm, AttachmentFormSet, FeedbackForm, GradeForm
 from django.views.generic import ListView
 from .models import Assignment, Attachment
-from django.http import FileResponse, Http404, HttpResponseRedirect, JsonResponse
+from django.http import FileResponse, Http404, HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Assignment, Submission
 from .forms import SubmissionForm
@@ -12,6 +12,11 @@ from .forms import GradeSubmissionForm
 from .models import Submission
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
+
+
+
+    
+
 class AssignmentListView(ListView):
     model = Assignment
     template_name = 'assignment/assignment_list.html'
@@ -70,7 +75,8 @@ def submit_assignment(request, assignment_id):
         form = SubmissionForm()
 
     return render(request, 'assignment/view_assignment.html', {'assignment': assignment, 'form': form, 'is_already_submitted': is_already_submitted})
-
+    
+@login_required
 def create_assignment(request, course_id):
     # Fetch the course instance using the course_id
     course = get_object_or_404(Course, id=course_id)
@@ -102,24 +108,26 @@ def get_assignment_linked_course_id(request, assignment_id):
     
 @login_required
 def view_assignment(request, assignment_id):
-    form = FeedbackForm()
     assignment = get_object_or_404(Assignment, id=assignment_id)
-
-    # Fetch the user's profile
     user_profile = UserProfile.objects.get(user=request.user)
-    
-    # Check if the user is an instructor
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
 
-    # Fetch submissions for the specified assignment
-    submissions = Submission.objects.filter(assignment=assignment).select_related('student')
+    if request.method == 'POST' and 'assignment_edit' in request.POST:
+        # Handle the assignment edit form
+        assignment_form = AssignmentForm(request.POST, instance=assignment)
+        if assignment_form.is_valid():
+            assignment_form.save()
+            return redirect('assignment_view', assignment_id=assignment_id)
+    else:
+        assignment_form = AssignmentForm(instance=assignment)
 
-    # Check if the student has already submitted the assignment
+    form = FeedbackForm()  # For feedbacks
+    submissions = Submission.objects.filter(assignment=assignment).select_related('student')
+    
     if not is_instructor:
         submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
         feedbacks = submission.feedbacks.all() if submission else []
         is_already_submitted = submission is not None
-        
     else:
         feedbacks = []
         is_already_submitted = False
@@ -130,8 +138,10 @@ def view_assignment(request, assignment_id):
         'is_instructor': is_instructor,
         'submissions': submissions,
         'form': form,
-        'feedbacks': feedbacks,  # Pass feedbacks to the template
+        'feedbacks': feedbacks,
+        'assignmentForm': assignment_form,  # Include the form for editing
     })
+
 
 
 
@@ -157,6 +167,7 @@ def is_submitted(request, student_id, assignment_id):
     
     return JsonResponse(data)
 
+    
 
 class CourseGradesView(LoginRequiredMixin, ListView):
     model = Submission 
@@ -176,7 +187,7 @@ class CourseGradesView(LoginRequiredMixin, ListView):
         return context
 
 
-
+@login_required
 def grade_submission(request, submission_id):
     submission = get_object_or_404(Submission, pk=submission_id)
     assignment = submission.assignment
@@ -192,6 +203,32 @@ def grade_submission(request, submission_id):
     
     return render(request, 'assignment/grade_submission.html', {'form': form, 'submission': submission, 'assignment': assignment})
     
+
+
+@login_required
+def edit_assignment(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    if user_profile.role != UserProfile.INSTRUCTOR:
+        return HttpResponseForbidden("You are not authorized to edit assignments.")
+
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST, instance=assignment)
+        formset = AttachmentFormSet(request.POST, request.FILES, instance=assignment)
+
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            return redirect(reverse('assignment_view', kwargs={'assignment_id': assignment.id}))
+    else:
+        form = AssignmentForm(instance=assignment)
+        formset = AttachmentFormSet(instance=assignment)
+
+    return render(request, 'assignment/view_assignment.html', {'form': form, 'formset': formset, 'assignment': assignment})
+
+
+
 @login_required
 def add_feedback(request, submission_id):
     # Fetch the user's profile

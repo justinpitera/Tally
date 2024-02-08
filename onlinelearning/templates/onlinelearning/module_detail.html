@@ -1,42 +1,124 @@
+
+
 {% extends "base.html" %}
 {% block content %}
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static '/coursework/css/courseviewStyles.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static '/onlinelearning/css/styles.css' %}">
 <script src="{% static '/coursework/js/scripts.js' %}"></script>
-
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-       <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
-       <li class="breadcrumb-item"><a href="{% url 'view_course' module.course.id %}?tab=onlinelearning">{{ module.course.title }}</a></li>
-       <li class="breadcrumb-item active" aria-current="page">{{ module.name }}</li>
+        <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'view_course' module.course.id %}?tab=onlinelearning">{{ module.course.title }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ module.name }}</li>
     </ol>
 </nav>
 
-<h1>{{ module.name }}</h1>
-<p><strong>Description: </strong><br>{{ module.description }}</p>
-<h2>Content:</h2>
-<ul>
-    {% for content in module.customcontent_set.all %}
-        <li>
-            {% if content.content_type == 'file' %}
-                <a href="{{ content.file.url }}">Download File</a>
-            {% elif content.content_type == 'url' %}
-                <a href="{{ content.url }}" target="_blank" rel="noopener noreferrer">Visit {{ content.urltext }}</a>
-            {% elif content.content_type == 'text' %}
-                {{ content.text }}
-            {% elif content.content_type == 'assignment' %}
-                {{ content.assignment }} - Due Date: {{ content.assignment.end_date }} <a href="{% url 'assignment_view' content.assignment.id %}">View Assignment</a>
-            {% elif content.content_type == 'module' %}
-                Module: {{ content.module }}
-            {% endif %}
-        </li>
-    {% endfor %}
-</ul>
-{% if is_instructor %}
-<a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'submit_content' module.id %}">Add content</a>
+<div class="container mt-4">
+    <div class="module-header">
+        <h1 class="module-title">{{ module.name }}</h1>
+        <p class="module-description"><strong>Description: </strong><br>{{ module.description }}</p>
+    </div>
+    
+    <div class="module-content">
+        <h2>Content:</h2>
+        <ul class="module-content-list">
+            {% for content in module.customcontent_set.all %}
+            <li class="d-flex justify-content-between align-items-center">
+                <div class="flex-grow-1">
+                    <!-- Content description based on its type -->
+                    {% if content.content_type == 'file' %}
+                    <a href="{{ content.file.url }}">Download File</a>
+                    {% elif content.content_type == 'url' %}
+                    <a href="{{ content.url }}" target="_blank" rel="noopener noreferrer">Visit {{ content.urltext }}</a>
+                    {% elif content.content_type == 'text' %}
+                    {{ content.text }}
+                    {% elif content.content_type == 'assignment' %}
+                    <strong>Assignment: </strong><a href="{% url 'assignment_view' content.assignment.id %}">{{ content.assignment }}</a> - Due Date: {{ content.assignment.end_date }} 
+                    {% elif content.content_type == 'module' %}
+                    Module: {{ content.module }}
+                    {% endif %}
+                </div>
+                {% if is_instructor %}
+                <div class="ml-auto action-buttons">
+                    <!-- Edit Button -->
+                    <a href="#" class="btn btn-outline-secondary btn-sm" style="margin-right: 5px;">
+                        <i class="far fa-edit"></i>
+                    </a>
+                    <!-- Delete Button Trigger -->
+                    <a href="#" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" data-content-url="{% url 'delete_custom_content' content.id %}">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+                {% endif %}
 
-{% else %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 
-{% endif %}
+    {% if is_instructor %}
+    <div class="add-content-button">
+        <a class="btn btn-outline-secondary btn-create-assignment" style="background-color:#fff !important; color:#4b4276 !important; border-color:#4b4276 !important; border-style: solid !important; border: 1px solid transparent;" data-toggle="modal" data-target="#exampleModalCenter">Add Content <i class="fas fa-plus-square"></i></a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modals -->
+<!-- Modal for Adding Content -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Add Content</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" enctype="multipart/form-data" action="{% url 'submit_content' module.id %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" style="background-color:#4b4276 !important; color:#fff !important; border-color:#4b4276 !important;">Add content to module</button>
+                        <button type="button" class="btn btn-secondary" style="background-color:#4b4276 !important; color:#fff !important; border-color:#4b4276 !important;" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirm Delete</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this content?
+            </div>
+            <div class="modal-footer">
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" style="background-color:#4b4276 !important; color:#fff !important; border-color:#4b4276 !important;">Delete</button>
+                    <button type="button" class="btn btn-secondary" style="background-color:#4b4276 !important; color:#fff !important; border-color:#4b4276 !important;" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#deleteConfirmationModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var contentUrl = button.data('content-url'); // Extract info from data-* attributes
+        var modal = $(this);
+        modal.find('#deleteForm').attr('action', contentUrl); // Set the form action
+    });
+</script>
 
 {% endblock %}

@@ -42,7 +42,6 @@ def delete_course(request, course_id):
 
     course = get_object_or_404(Course, id=course_id)
 
-    # Optional: Check if the request.user is the instructor of the course or has other permissions
     if course.instructor != request.user:
         # Redirect or show an error if the user is not authorized to delete this course
         messages.error(
@@ -61,7 +60,7 @@ def delete_course(request, course_id):
     # Redirect to the course list page or another appropriate page
     return redirect("coursework")
 
-
+@login_required
 def course_detail_view(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     user_profile = get_object_or_404(UserProfile, user=request.user)
@@ -80,6 +79,25 @@ def course_detail_view(request, course_id):
         },
     )
 
+@login_required
+def edit_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+
+    # Check if the request.user is the instructor of the course or has other permissions
+    if course.instructor != request.user:
+        messages.error(request, "You are not authorized to edit this course.")
+        return redirect('course_detail', course_id=course_id)
+
+    if request.method == "POST":
+        form = CourseForm(request.POST, request.FILES, instance=course)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Course updated successfully.")
+            return redirect('view_course', course_id=course_id)
+    else:
+        form = CourseForm(instance=course)
+
+    return render(request, 'coursework/edit_course.html', {'form': form, 'course': course})
 
 
 @login_required  # Ensure only logged-in users can create a course
@@ -99,7 +117,7 @@ def create_course(request):
         form = CourseForm()
     return render(request, "coursework/create_course.html", {"form": form})
 
-
+@login_required
 def add_user_to_course(request):
     if request.method == "POST":
         form = UserCourseForm(request.POST)
@@ -120,7 +138,7 @@ def add_user_to_course(request):
         form = UserCourseForm()
     return render(request, "coursework/add_user_to_course.html", {"form": form})
 
-
+@login_required
 def coursework_view(request):
     user_profile = get_object_or_404(UserProfile, user=request.user)
     user_courses = UserCourse.objects.filter(user=request.user).select_related("course")
@@ -135,7 +153,7 @@ def coursework_view(request):
         },
     )
 
-
+@login_required
 def download_attachment(request, attachment_id):
     attachment = get_object_or_404(Attachment, id=attachment_id)
     try:

@@ -11,6 +11,7 @@ urlpatterns = [
     path('coursework/add_user_to_course/', views.add_user_to_course, name='add_user_to_course'),
     path('coursework/delete/<int:course_id>', views.delete_course, name='delete_course'),
     path('course/<int:course_id>/unenroll/<int:user_id>/', views.unenroll_user_from_course, name='unenroll_user_from_course'),
+    path('course/<int:course_id>/edit/', views.edit_course, name='edit_course'),
     path('coursework/create_course/', views.create_course, name='create_course'),
     path('coursework/<int:course_id>/', views.course_detail_view, name='view_course'),
     path('coursework/<int:course_id>/assignments/', AssignmentListView.as_view(), name='course_assignments'),
