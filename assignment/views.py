@@ -76,27 +76,6 @@ def submit_assignment(request, assignment_id):
 
     return render(request, 'assignment/view_assignment.html', {'assignment': assignment, 'form': form, 'is_already_submitted': is_already_submitted})
     
-@login_required
-def create_assignment(request, course_id):
-    # Fetch the course instance using the course_id
-    course = get_object_or_404(Course, id=course_id)
-    if request.method == 'POST':
-        form = AssignmentForm(request.POST, initial={'course': course_id})
-        if form.is_valid():
-            assignment = form.save(commit=False)
-            assignment.course = course  # Directly assign the course instance
-            assignment.save()
-
-            formset = AttachmentFormSet(request.POST, request.FILES, instance=assignment)
-            if formset.is_valid():
-                formset.save()
-                return redirect(f'{reverse("view_course", args=[course.id])}?tab=assignments')
-    else:
-        form = AssignmentForm(initial={'course': course_id})
-        formset = AttachmentFormSet(instance=Assignment())
-
-    # Include the course name in the context
-    return render(request, 'assignment/create.html', {'form': form, 'formset': formset, 'course_name': course.title,'course_id':course_id})
 
 def get_assignment_linked_course_id(request, assignment_id):
     try:
@@ -105,7 +84,7 @@ def get_assignment_linked_course_id(request, assignment_id):
         return JsonResponse({'course_id': course_id})
     except Assignment.DoesNotExist:
         raise Http404("Assignment does not exist")
-    
+
 @login_required
 def view_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)

@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import inlineformset_factory
+from django.forms import HiddenInput, inlineformset_factory
 from .models import Assignment, Attachment, Submission
 from django.forms import DateInput
 class AssignmentForm(forms.ModelForm):
@@ -7,9 +7,18 @@ class AssignmentForm(forms.ModelForm):
         model = Assignment
         fields = ['course', 'name', 'instruction', 'start_date', 'end_date']
         widgets = {
-            'start_date': DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
-            'end_date': DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'start_date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'end_date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
         }
+
+    def __init__(self, *args, **kwargs):
+        # Extract the course_id from kwargs if it exists
+        course_id = kwargs.pop('course_id', None)
+        super(AssignmentForm, self).__init__(*args, **kwargs)  # Ensure any extra kwargs are passed to super
+        # Now, safely use course_id without affecting the superclass initialization
+        if course_id is not None:
+            self.fields['course'].initial = course_id
+            self.fields['course'].widget = HiddenInput()
 
 AttachmentFormSet = inlineformset_factory(
     Assignment, Attachment, 

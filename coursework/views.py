@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from assignment.models import Attachment
+from django.urls import reverse
+from assignment.forms import AssignmentForm, AttachmentFormSet
+from assignment.models import Assignment, Attachment
 from .models import Course, UserCourse
 from .forms import UserCourseForm, CourseForm
 from django.contrib.auth.decorators import login_required
@@ -60,24 +62,58 @@ def delete_course(request, course_id):
     # Redirect to the course list page or another appropriate page
     return redirect("coursework")
 
+
+
+
+@login_required
+def create_assignment(request, course_id):
+
+
+    # Include the course name in the context
+    return render(request, 'assignment/view_course.html', {})
+
+
+
+
+
 @login_required
 def course_detail_view(request, course_id):
+    # Fetch the course instance using the course_id
     course = get_object_or_404(Course, id=course_id)
     user_profile = get_object_or_404(UserProfile, user=request.user)
     assignments = course.assignments.all()  # Assuming Course model has related_name='assignments'
     modules = course.modules.all()  # Assuming Module model has a ForeignKey to Course
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
-    
-    return render(
-        request,
-        "coursework/view_course.html",
-        {
-            "course": course,
-            "assignments": assignments,
-            "modules": modules,  # Include modules in the context
-            "is_instructor": is_instructor,
-        },
-    )
+
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST, course_id=course_id)  # Pass the course_id here
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.course = course  # Directly assign the course instance
+            assignment.save()
+
+            formset = AttachmentFormSet(request.POST, request.FILES, instance=assignment)
+            if formset.is_valid():
+                formset.save()
+                return redirect(f'{reverse("view_course", args=[course.id])}?tab=assignments')
+    else:
+        form = AssignmentForm(course_id=course_id)  # Initialize form with course_id
+        formset = AttachmentFormSet(instance=Assignment())
+
+    # Add the form and formset to the context for rendering
+    context = {
+        'form': form,
+        'formset': formset,
+        'course': course,
+        'assignments': assignments,
+        'modules': modules,
+        'is_instructor': is_instructor,
+    }
+
+    # Specify the path to your template
+    return render(request, 'coursework/view_course.html', context)
+
+@login_required
 
 @login_required
 def edit_course(request, course_id):
@@ -98,6 +134,9 @@ def edit_course(request, course_id):
         form = CourseForm(instance=course)
 
     return render(request, 'coursework/edit_course.html', {'form': form, 'course': course})
+
+
+
 
 
 @login_required

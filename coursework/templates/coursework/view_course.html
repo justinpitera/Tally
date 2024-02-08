@@ -154,30 +154,31 @@
       <div class="card">
          <div class="card-body">
             {% if assignments %}
-            <ul>
-               <div class="list-group">
-                  {% for assignment in assignments %}
-                  <a href="{% url 'assignment_view' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
-                     <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">{{assignment.name}}</h5>
-                        <small class="text-muted"><strong>Assigned: </strong>{{assignment.start_date}} | <strong>Due: </strong>{{assignment.end_date}}</small>
-                     </div>
-                     <p class="mb-1"></p>
-                     <h6>{{assignment.instruction|truncatechars:100}}</h6>
-                     <small class="text-muted">Not Submitted</small>
-                  </a>
-                  {% endfor %}
-               </div>
-            </ul>
-            {% if is_instructor %}
-            <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_assignment' course_id=course.id %}" role="button">Create Assignment <i class="fas fa-plus-square"></i></a>
+               <ul>
+                  <div class="list-group">
+                     {% for assignment in assignments %}
+                     <a href="{% url 'assignment_view' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                        <div class="d-flex w-100 justify-content-between">
+                           <h5 class="mb-1">{{assignment.name}}</h5>
+                           <small class="text-muted"><strong>Assigned: </strong>{{assignment.start_date}} | <strong>Due: </strong>{{assignment.end_date}}</small>
+                        </div>
+                        <p class="mb-1"></p>
+                        <h6>{{assignment.instruction|truncatechars:100}}</h6>
+                        <small class="text-muted">Not Submitted</small>
+                     </a>
+                     {% endfor %}
+                  </div>
+               </ul>
+                  {% if is_instructor %}
+                     <button type="button" class="btn btn-outline-secondary btn-create-assignment" data-toggle="modal" data-target="#createCourseModal" data-assignment-id="{{ assignment.id }}">
+                        <i class="fas fa-plus-square"></i> Create Assignment
+                     </button>
+                  {% else %}
+                     <p>No assignments for this course.</p>
+                  {% endif %}
             {% endif %}
-            {% else %}
-            <p>No assignments for this course.</p>
-            {% if is_instructor %}
-            <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_assignment' course_id=course.id %}" role="button">Create Assignment <i class="fas fa-plus-square"></i> </a>
-            {% endif %}
-            {% endif %}
+
+
          </div>
       </div>
    </div>
@@ -229,6 +230,56 @@
       </div>
    </div>
 </div>
+
+<!-- Edit Assignment Modal -->
+<!-- Modal Structure -->
+<div class="modal fade" id="createCourseModal" tabindex="-1" role="dialog" aria-labelledby="createCourseModalLabel" aria-hidden="true">
+   <div class="modal-dialog" role="document">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h5 class="modal-title" id="createCourseModalLabel">Create Assignment</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <div class="modal-body">
+               <!-- Form Starts Here -->
+               <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                  {% csrf_token %}
+                  <div class="form-row">
+                      {% for field in form %}
+                          {% if field.name != "course" %} <!-- Check if the field is not 'course' -->
+                              <div class="{% if field.name == 'description' %}col-12{% else %}col-md-12 mb-3{% endif %}">
+                                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                  {{ field }}
+                                  {% if field.help_text %}
+                                      <small class="form-text text-muted">{{ field.help_text }}</small>
+                                  {% endif %}
+                                  {% for error in field.errors %}
+                                      <div class="invalid-feedback">
+                                          {{ error }}
+                                      </div>
+                                  {% endfor %}
+                              </div>
+                          {% else %}
+                              {{ field.as_hidden }} <!-- Render 'course' field as hidden -->
+                          {% endif %}
+                      {% endfor %}
+                  </div>
+                  <!-- Adjusted button classes and layout for modal context -->
+                  <button type="submit" class="btn btn-outline-secondary btn-create-assignment">Save Changes</button>
+              </form>
+              
+               <!-- Form Ends Here -->
+           </div>
+       </div>
+   </div>
+</div>
+
+
+
+
+
 </body>
 </html>
 <script>

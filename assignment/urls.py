@@ -1,9 +1,9 @@
 from django.urls import path, include
-from .views import create_assignment
+#from .views import create_assignment
 from . import views
 
 urlpatterns = [
-    path('create/<int:course_id>', views.create_assignment, name='create_assignment'),
+    #path('create/<int:course_id>', views.create_assignment, name='create_assignment'),
     path('list/<int:course_id>/', views.AssignmentListView.as_view(), name='assignment_list'),
     path('view/<int:assignment_id>/', views.view_assignment, name='assignment_view'),
     path('attachments/download/<int:attachment_id>/', views.download_attachment, name='download_attachment'),
