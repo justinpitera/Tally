@@ -41,7 +41,7 @@
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">Enroll</h5>
           <p class="card-text">Explore our courses and join our learning community today.</p>
-          <a href="{% url 'add_user_to_course' %}" class="mt-auto btn view-course-btn">Enroll Now</a>
+          <a href="{% url 'direct_enroll' user.id %}" class="mt-auto btn view-course-btn">Enroll Now</a>
         </div>
       </div>
     </div>

@@ -181,13 +181,42 @@
            <form method="post" action="{% url 'assignment_view' assignment_id=assignment.id %}">
                {% csrf_token %}
                <div class="modal-body">
-                   {{ assignmentForm.as_p }}
+                       <h2>Edit Assignment</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ form.management_form }}
+        {% for hidden_field in form.hidden_fields %}
+          {{ hidden_field }}
+        {% endfor %}
+        
+        {% for field in form.visible_fields %}
+          {% if field.name != 'course' %}
+            <p>{{ field.label_tag }} {{ field }}</p>
+          {% else %}
+            {{ field.as_hidden }}
+          {% endif %}
+        {% endfor %}
+
+        <div id="attachments-container">
+            <!-- Render the management form and existing attachments -->
+            {{ formset.management_form }}
+            {% for form in formset %}
+                <div class="attachment-form">
+
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-file" class="btn btn-info">Add More Files</button>
+        <br><br>
+        <div class="modal-footer">
+         <input type="hidden" name="assignment_edit" value="1"/>
+         <button type="submit" class="btn btn-primary">Save changes</button>
+         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+     </div>
+    </form>
                </div>
-               <div class="modal-footer">
-                   <input type="hidden" name="assignment_edit" value="1"/>
-                   <button type="submit" class="btn btn-primary">Save changes</button>
-                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-               </div>
+
            </form>
        </div>
    </div>

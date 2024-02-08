@@ -112,6 +112,7 @@ def view_assignment(request, assignment_id):
     user_profile = UserProfile.objects.get(user=request.user)
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
 
+
     if request.method == 'POST' and 'assignment_edit' in request.POST:
         # Handle the assignment edit form
         assignment_form = AssignmentForm(request.POST, instance=assignment)
@@ -120,6 +121,7 @@ def view_assignment(request, assignment_id):
             return redirect('assignment_view', assignment_id=assignment_id)
     else:
         assignment_form = AssignmentForm(instance=assignment)
+        
 
     form = FeedbackForm()  # For feedbacks
     submissions = Submission.objects.filter(assignment=assignment).select_related('student')

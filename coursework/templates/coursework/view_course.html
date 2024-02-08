@@ -10,7 +10,7 @@
       <li class="breadcrumb-item active" aria-current="page">{{course.title}}</li>
    </ol>
 </nav>
-<!-- The DOCTYPE, html, head, and body tags are not needed since they should be part of the base.html template -->
+
 <ul class="nav nav-tabs" id="myTab" role="tablist">
    <li class="nav-item">
       <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
@@ -30,7 +30,6 @@
          <a class="dropdown-item" href="{% url 'send_message' %}">Message {{course.instructor}}</a>
          <a class="dropdown-item" href="#">Enrolled Members</a>
          <div class="dropdown-divider"></div>
-         <!-- Adjusted link to trigger modal -->
          <button class="dropdown-item" href="#" data-toggle="modal" data-target="#confirmUnenroll">Unenroll</button>
          {% if is_instructor %}
          <div class="dropdown-divider"></div>
@@ -42,7 +41,7 @@
 </ul>
 
 
-<!-- Modal Code (unchanged, included for context) -->
+
 <div class="modal fade" id="confirmUnenroll" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
    <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -56,7 +55,7 @@
             Are you sure you want to unenroll from {{ course.title }}?
          </div>
          <div class="modal-footer">
-            <form action="{% url 'unenroll_user_from_course' course.id user.id %}" method="post">
+            <form action="{% url 'direct_unenroll' course.id user.id %}" method="post">
                {% csrf_token %}
                <button type="submit" value="Unenroll" class="btn" style="color: #4b4276; border: 1px solid #4b4276; background-color: transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem;">Unenroll</button>
             </form>

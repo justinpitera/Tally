@@ -9,7 +9,7 @@ from django.http import FileResponse, Http404
 
 
 @login_required
-def unenroll_user_from_course(request, course_id, user_id):
+def direct_unenroll(request, course_id, user_id):
     # Ensure the request is POST for security reasons
     if request.method == "POST":
         # Get the course, ensuring only an authorized user can unenroll participants
@@ -100,19 +100,24 @@ def edit_course(request, course_id):
     return render(request, 'coursework/edit_course.html', {'form': form, 'course': course})
 
 
-@login_required  # Ensure only logged-in users can create a course
+@login_required
 def create_course(request):
     if request.method == "POST":
         form = CourseForm(request.POST, request.FILES)
         if form.is_valid():
-            course = form.save(
-                commit=False
-            )  # Save the form temporarily without committing to the database
+            # Temporarily save the course to assign an instructor before committing to the database
+            course = form.save(commit=False)
             course.instructor = request.user  # Set the current user as the instructor
-            course.save()  # Now save the course to the database
-            return redirect(
-                "coursework"
-            )  # Redirect to a success page or the list of courses
+            course.save()  # Commit the course to the database
+
+            # Automatically enroll the user in the course they just created
+            # Here, we assume the user should be added as an instructor.
+            # If you have different roles, adjust accordingly.
+            UserCourse.objects.create(user=request.user, course=course)
+            
+            # Redirect to a success page or the list of courses
+            messages.success(request, "Course created and you were enrolled successfully.")
+            return redirect("coursework")
     else:
         form = CourseForm()
     return render(request, "coursework/create_course.html", {"form": form})
@@ -162,3 +167,19 @@ def download_attachment(request, attachment_id):
         )
     except FileNotFoundError:
         raise Http404("File does not exist")
+
+
+@login_required
+def direct_enroll(request, user_id):
+    user = get_object_or_404(UserProfile, id=user_id)
+    
+    if request.method == "POST":
+        form = UserCourseForm(request.POST, user=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "User enrolled in the course successfully.")
+            return redirect('coursework')  # Adjust the redirect as needed
+    else:
+        form = UserCourseForm(user=user)
+    
+    return render(request, "coursework/direct_enroll.html", {'form': form, 'user_id': user_id})
