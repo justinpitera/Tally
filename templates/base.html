@@ -51,7 +51,13 @@
         <div class="other_links">
           <a href="#"><i class="fas fa-cog"></i></a>
           <a href="#"><i class="fas fa-question-circle"></i></a>
-          <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i></a>
+            {% if user.is_authenticated %}
+              <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i></a>
+            {% else %}
+              <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i></a>
+            {% endif %}
+          
+          
       </div>
 
     </div>
