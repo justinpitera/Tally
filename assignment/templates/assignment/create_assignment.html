@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+{%load static%}
+<link rel="stylesheet" type="text/css" href="{% static '/coursework/css/courseviewStyles.css' %}">
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+       <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+       <li class="breadcrumb-item"><a href="{% url 'view_course' course.id %}?tab=assignments">{{ course.title }}</a></li>
+       <li class="breadcrumb-item active" aria-current="page">Create New Module</li>
+    </ol>
+ </nav>
+  <h2>Create Assignment for Course: {{ course.name }}</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Create Assignment</button>
+  </form>
+{% endblock %}
+

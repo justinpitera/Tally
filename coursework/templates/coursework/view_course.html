@@ -169,9 +169,9 @@
                   </div>
                </ul>
                   {% if is_instructor %}
-                     <button type="button" class="btn btn-outline-secondary btn-create-assignment" data-toggle="modal" data-target="#createCourseModal" data-assignment-id="{{ assignment.id }}">
+                     <a href="{% url 'create_assignment' course_id=course.id %}" class="btn btn-download-attachment">
                         <i class="fas fa-plus-square"></i> Create Assignment
-                     </button>
+                     </a>
                   {% else %}
                      <p>No assignments for this course.</p>
                   {% endif %}
@@ -196,39 +196,46 @@
          </ul>
       </nav>
    </div>
-</div>
-<!-- Online Learning tab content -->
-<div class="tab-pane fade" id="online-learning" role="tabpanel" aria-labelledby="online-learning-tab">
-   <div class="card">
-      <div class="card-body">
-         {% if modules %}
-         <ul>
-            <div class="list-group">
-               {% for module in modules %}
-               <a href="{% url 'module_view' module.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
-                  <div class="d-flex w-100 justify-content-between">
-                     <h5 class="mb-1">{{module.name}}</h5>
-                     <small class="text-muted"><strong>Begins: </strong>{{module.start_date}} | <strong>Ends: </strong>{{module.end_date}}</small>
-                  </div>
-                  <p class="mb-1"></p>
-                  <h6>{{module.description|truncatechars:100}}</h4>
-                  <small class="text-muted">Not Completed</small>
-               </a>
-               {% endfor %}
-            </div>
-         </ul>
-         {% if is_instructor %}
-         <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_module' course_id=course.id %}" role="button">Create Module <i class="fas fa-plus-square"></i></a>
-         {% endif %}
-         {% else %}
-         <p>No modules for this course.</p>
-         {% if is_instructor %}
-         <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_module' course_id=course.id %}" role="button">Create Module <i class="fas fa-plus-square"></i></a>
-         {% endif %}
-         {% endif %}
+   <!-- Online Learning tab content -->
+   <div class="tab-pane fade" id="online-learning" role="tabpanel" aria-labelledby="online-learning-tab">
+      <div class="card">
+         <div class="card-body">
+            {% if modules %}
+
+            <ul>
+               {% if is_instructor %}
+               <a class="btn btn-download-attachment" href="{% url 'create_module' course_id=course.id %}" role="button">Create Module <i class="fas fa-plus-square"></i></a>
+               {% endif %}
+               <br>
+               <br>
+               <div class="list-group">
+                  {% for module in modules %}
+                  <a href="{% url 'module_view' module.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                     <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{module.name}}</h5>
+                        <small class="text-muted"><strong>Begins: </strong>{{module.start_date}} | <strong>Ends: </strong>{{module.end_date}}</small>
+                     </div>
+                     <p class="mb-1"></p>
+                     <h6>{{module.description|truncatechars:100}}</h4>
+                     <small class="text-muted">Not Completed</small>
+                  </a>
+                  {% endfor %}
+               </div>
+            </ul>
+            {% if is_instructor %}
+            <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_module' course_id=course.id %}" role="button">Create Module <i class="fas fa-plus-square"></i></a>
+            {% endif %}
+            {% else %}
+            <p>No modules for this course.</p>
+            {% if is_instructor %}
+            <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_module' course_id=course.id %}" role="button">Create Module <i class="fas fa-plus-square"></i></a>
+            {% endif %}
+            {% endif %}
+         </div>
       </div>
    </div>
 </div>
+
 
 <!-- Edit Assignment Modal -->
 <!-- Modal Structure -->

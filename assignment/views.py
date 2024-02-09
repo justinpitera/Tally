@@ -1,3 +1,4 @@
+from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from accounts.models import UserProfile
 from coursework.models import Course
@@ -12,7 +13,7 @@ from .forms import GradeSubmissionForm
 from .models import Submission
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.contrib import messages
 
 
     
@@ -231,3 +232,30 @@ def add_feedback(request, submission_id):
     else:
         form = FeedbackForm()
     return render(request, 'assignment/add_feedback.html', {'form': form, 'submission': submission, 'assignment': assignment, 'is_instructor':is_instructor})
+
+
+
+@login_required
+def create_assignment(request, course_id):
+    # Ensure the user is an instructor
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+    if user_profile.role != UserProfile.INSTRUCTOR:
+        messages.error(request, "You are not authorized to create assignments.")
+        return redirect('home')  # Redirect to a suitable template
+
+    course = get_object_or_404(Course, id=course_id)
+
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.course = course  # Assuming the Assignment model has a foreign key to Course
+            assignment.save()
+            messages.success(request, "Assignment created successfully.")
+            # Redirect to the assignment detail view or any other relevant view
+            url = reverse('view_course', args=[course_id]) + "?tab=assignments"
+            return redirect(url)
+    else:
+        form = AssignmentForm()
+
+    return render(request, 'assignment/create_assignment.html', {'form': form, 'course': course})
