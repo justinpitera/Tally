@@ -39,28 +39,35 @@ def create_module(request, course_id):
 
 @login_required
 def module_view(request, module_id):
-    # Retrieve the module object based on the provided module_id
     module = get_object_or_404(Module, pk=module_id)
-    
-    # Extract the associated course_id from the module
-    course_id = module.course.id
-    
-    # Fetch the course instance using the course_id
-    course = get_object_or_404(Course, id=course_id)
-    assignments = course.assignments.all()
+    course = get_object_or_404(Course, id=module.course.id)
+    assignments = course.assignments.prefetch_related('submissions').all()
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
 
-    # Initialize a dictionary to hold assignment submission status, now including late status
     assignments_submission_status = {}
-    current_date = datetime.now().date()
-
     for assignment in assignments:
-        submission_exists = Submission.objects.filter(student=request.user, assignment=assignment).exists()
-        assignment_end_date = assignment.end_date
-        is_late = assignment_end_date < current_date
-        # Update to include both submission status and lateness
+        submissions = assignment.submissions.filter(student=request.user)
+        submission_exists = submissions.exists()
+        is_late = False
+        submission_count = 0
+
+        # Check if there are submissions and if any were submitted late
+        if submission_exists:
+            for submission in submissions:
+                # Ensure there's an end date to compare with and that the submission was late
+                if assignment.end_date and submission.submitted_at.date() > assignment.end_date:
+                    is_late = True
+                    break  # Found a late submission, no need to check further
+
+        # Count submissions if the user is an instructor
+        if is_instructor:
+            submission_count = assignment.submissions.count()
+
         assignments_submission_status[assignment.id] = {
             'submitted': submission_exists,
-            'is_late': is_late
+            'is_late': is_late,
+            'submission_count': submission_count  # Include the submission count here
         }
 
     if request.method == 'POST':
@@ -71,19 +78,16 @@ def module_view(request, module_id):
     else:
         form = CustomContentForm(module_arg=module_id)
 
-    # Retrieve the user profile to check if the user is an instructor
-    user_profile = get_object_or_404(UserProfile, user=request.user)
-    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
-    
     context = {
         'module': module,
-        'course_id': course_id,
+        'course_id': course.id,
         'form': form,
         'is_instructor': is_instructor,
         'assignments_submission_status': assignments_submission_status,
     }
-    
+
     return render(request, 'onlinelearning/view_module.html', context)
+
 
 
 @login_required

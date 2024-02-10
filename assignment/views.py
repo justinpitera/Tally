@@ -92,6 +92,12 @@ def view_assignment(request, assignment_id):
     user_profile = UserProfile.objects.get(user=request.user)
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
 
+    # Initialize the number of submissions to zero
+    num_submissions = 0
+
+    # Count the number of submissions for this assignment if the user is an instructor
+    if is_instructor:
+        num_submissions = Submission.objects.filter(assignment=assignment).count()
 
     if request.method == 'POST' and 'assignment_edit' in request.POST:
         # Handle the assignment edit form
@@ -101,11 +107,10 @@ def view_assignment(request, assignment_id):
             return redirect('view_assignment', assignment_id=assignment_id)
     else:
         assignment_form = AssignmentForm(instance=assignment)
-        
 
     form = FeedbackForm()  # For feedbacks
     submissions = Submission.objects.filter(assignment=assignment).select_related('student')
-    
+
     if not is_instructor:
         submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
         feedbacks = submission.feedbacks.all() if submission else []
@@ -122,6 +127,7 @@ def view_assignment(request, assignment_id):
         'form': form,
         'feedbacks': feedbacks,
         'assignmentForm': assignment_form,  # Include the form for editing
+        'num_submissions': num_submissions,  # Pass the count of submissions to the context
     })
 
 
@@ -220,17 +226,32 @@ def add_feedback(request, submission_id):
     submission = get_object_or_404(Submission, pk=submission_id)
     assignment = submission.assignment
     assignment_id = submission.assignment.id
-    if request.method == 'POST':
-        form = FeedbackForm(request.POST, request.FILES)
-        if form.is_valid():
-            feedback = form.save(commit=False)
-            feedback.submission = submission
-            feedback.author = request.user
-            feedback.save()
-            url = reverse('view_assignment', args=[assignment_id]) + "?tab=section2"
-            return redirect(url)
+
+    if is_instructor:
+        if request.method == 'POST':
+            form = FeedbackForm(request.POST, request.FILES)
+            if form.is_valid():
+                feedback = form.save(commit=False)
+                feedback.submission = submission
+                feedback.author = request.user
+                feedback.save()
+                url = reverse('view_assignment', args=[assignment_id]) + "?tab=section2"
+                return redirect(url)
+        else:
+            form = FeedbackForm()
     else:
-        form = FeedbackForm()
+        if request.method == 'POST':
+            form = FeedbackForm(request.POST, request.FILES)
+            if form.is_valid():
+                feedback = form.save(commit=False)
+                feedback.submission = submission
+                feedback.author = request.user
+                feedback.save()
+                url = reverse('view_assignment', args=[assignment_id]) + "?tab=section3"
+                return redirect(url)
+        else:
+            form = FeedbackForm()
+
     return render(request, 'assignment/add_feedback.html', {'form': form, 'submission': submission, 'assignment': assignment, 'is_instructor':is_instructor})
 
 

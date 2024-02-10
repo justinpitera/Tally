@@ -67,28 +67,36 @@ def delete_course(request, course_id):
 
 
 
+
 @login_required
 def course_detail_view(request, course_id):
-    # Fetch the course instance using the course_id
     course = get_object_or_404(Course, id=course_id)
     user_profile = get_object_or_404(UserProfile, user=request.user)
-    assignments = course.assignments.all()
+    assignments = course.assignments.prefetch_related('submissions').all()
     modules = course.modules.all()
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
 
-    # Initialize a dictionary to hold assignment submission status and lateness
+    current_date = datetime.now().date()
     assignments_submission_status = {}
 
-    current_date = datetime.now().date()
-
     for assignment in assignments:
-        submission_exists = Submission.objects.filter(student=request.user, assignment=assignment).exists()
-        assignment_end_date = assignment.end_date
-        is_late = assignment_end_date < current_date
-        # Update to include both submission status and lateness
+        submissions = assignment.submissions.filter(student=request.user)
+        submission_exists = submissions.exists()
+        is_late = False
+        submission_count = 0
+
+        if submission_exists:
+            # Assuming 'submitted_at' is a DateTimeField in Submission model
+            latest_submission_date = submissions.latest('submitted_at').submitted_at.date()
+            is_late = assignment.end_date < latest_submission_date if assignment.end_date else False
+        
+        if is_instructor:
+            submission_count = assignment.submissions.count()
+        
         assignments_submission_status[assignment.id] = {
             'submitted': submission_exists,
-            'is_late': is_late
+            'is_late': is_late,
+            'submission_count': submission_count
         }
 
     if request.method == 'POST':

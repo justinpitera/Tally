@@ -38,26 +38,29 @@
                     <a href="{{ content.url }}" target="_blank" rel="noopener noreferrer">Visit {{ content.urltext }}</a>
                     {% elif content.content_type == 'text' %}
                     {{ content.text }}
+                    <!-- Assuming you're inside a loop or logic where `content` is defined -->
                     {% elif content.content_type == 'assignment' %}
-                    <strong>Assignment: </strong>
-                    <a href="{% url 'view_assignment' content.assignment.id %}">{{ content.assignment }}</a>
-                    - Due Date: {{ content.assignment.end_date }}
-                    <br>
-                    {% if not is_instructor %}
-                    <!-- Dynamically access each assignment's late status -->
-                    <!-- Accessing assignment submission status and lateness -->
-                    {% with status=assignments_submission_status|default_if_none:""|get_item:content.assignment.id %}
-                        {% if status.is_late %}
-                            <span class="badge bg-danger text-dark">Late</span>
-                        {% endif %}
-                        
-                        {% if status.submitted %}
-                            <span class="badge bg-success text-dark">Completed</span>
+                        <strong>Assignment: </strong>
+                        <a href="{% url 'view_assignment' content.assignment.id %}">{{ content.assignment }}</a>
+                        - Due Date: {{ content.assignment.end_date }}
+                        <br>
+                        {% if is_instructor %}
+                            {% with status=assignments_submission_status|get_item:content.assignment.id %}
+                                <span class="badge bg-info text-dark">Submissions: {{ status.submission_count }}</span>
+                            {% endwith %}
                         {% else %}
-                            <span class="badge bg-warning text-dark">Not Completed</span>
+                            {% with status=assignments_submission_status|get_item:content.assignment.id %}
+                                {% if status.is_late %}
+                                    <span class="badge bg-danger text-dark">Late</span>
+                                {% endif %}
+                            
+                                {% if status.submitted %}
+                                    <span class="badge bg-success text-dark">Completed</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Not Completed</span>
+                                {% endif %}
+                            {% endwith %}
                         {% endif %}
-                    {% endwith %}
-                {% endif %}
 
 
                     {% elif content.content_type == 'module' %}
