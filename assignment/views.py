@@ -71,7 +71,7 @@ def submit_assignment(request, assignment_id):
             assignment.save()
 
             # Redirect to a new URL:
-            return redirect(reverse('assignment_view', kwargs={'assignment_id': assignment.id}))
+            return redirect(reverse('view_assignment', kwargs={'assignment_id': assignment.id})+ "?tab=section2")
     else:
         form = SubmissionForm()
 
@@ -98,7 +98,7 @@ def view_assignment(request, assignment_id):
         assignment_form = AssignmentForm(request.POST, instance=assignment)
         if assignment_form.is_valid():
             assignment_form.save()
-            return redirect('assignment_view', assignment_id=assignment_id)
+            return redirect('view_assignment', assignment_id=assignment_id)
     else:
         assignment_form = AssignmentForm(instance=assignment)
         
@@ -178,7 +178,7 @@ def grade_submission(request, submission_id):
         form = GradeSubmissionForm(request.POST, instance=submission)
         if form.is_valid():
             form.save()
-            url = reverse('assignment_view', args=[submission.assignment.id]) + "?tab=section2"
+            url = reverse('view_assignment', args=[submission.assignment.id]) + "?tab=section2"
             return redirect(url)
     else:
         form = GradeSubmissionForm(instance=submission)
@@ -202,7 +202,7 @@ def edit_assignment(request, assignment_id):
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
-            return redirect(reverse('assignment_view', kwargs={'assignment_id': assignment.id}))
+            return redirect(reverse('view_assignment', kwargs={'assignment_id': assignment.id}))
     else:
         form = AssignmentForm(instance=assignment)
         formset = AttachmentFormSet(instance=assignment)
@@ -227,7 +227,7 @@ def add_feedback(request, submission_id):
             feedback.submission = submission
             feedback.author = request.user
             feedback.save()
-            url = reverse('assignment_view', args=[assignment_id]) + "?tab=section2"
+            url = reverse('view_assignment', args=[assignment_id]) + "?tab=section2"
             return redirect(url)
     else:
         form = FeedbackForm()

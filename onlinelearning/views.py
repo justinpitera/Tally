@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from accounts.models import UserProfile
 from django.contrib.auth.decorators import login_required
-from assignment.models import Assignment
+from assignment.models import Assignment, Submission
 from coursework.models import Course
 from onlinelearning.models import CustomContent, Module
 from .forms import CustomContentForm, ModuleForm
@@ -11,6 +11,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.views.generic import DeleteView
 from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
+from datetime import datetime
+
+
+
 @login_required
 def onlinelearning_view(request):
     return render(request, 'onlinelearning/onlinelearning.html', {'page_title': 'Online Learning - Tally'})
@@ -41,29 +45,44 @@ def module_view(request, module_id):
     # Extract the associated course_id from the module
     course_id = module.course.id
     
+    # Fetch the course instance using the course_id
+    course = get_object_or_404(Course, id=course_id)
+    assignments = course.assignments.all()
+
+    # Initialize a dictionary to hold assignment submission status, now including late status
+    assignments_submission_status = {}
+    current_date = datetime.now().date()
+
+    for assignment in assignments:
+        submission_exists = Submission.objects.filter(student=request.user, assignment=assignment).exists()
+        assignment_end_date = assignment.end_date
+        is_late = assignment_end_date < current_date
+        # Update to include both submission status and lateness
+        assignments_submission_status[assignment.id] = {
+            'submitted': submission_exists,
+            'is_late': is_late
+        }
+
     if request.method == 'POST':
         form = CustomContentForm(request.POST, request.FILES, module_arg=module_id)
         if form.is_valid():
-            # If the form is valid, save the form and redirect
             form.save()
-            # Redirect back to the module view or another view as needed
             return redirect('module_view', module_id=module_id)
     else:
-        # Instantiate the form with any initial arguments if needed
         form = CustomContentForm(module_arg=module_id)
+
     # Retrieve the user profile to check if the user is an instructor
     user_profile = get_object_or_404(UserProfile, user=request.user)
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
     
-    # Pass the module, course_id, form, and is_instructor flag to the template
     context = {
         'module': module,
-        'course_id': course_id,  # Include the course_id in the context
+        'course_id': course_id,
         'form': form,
-        'is_instructor': is_instructor
+        'is_instructor': is_instructor,
+        'assignments_submission_status': assignments_submission_status,
     }
     
-    # Render the template with the provided context
     return render(request, 'onlinelearning/view_module.html', context)
 
 

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 {% load static %}
+{% load custom_filters %}
 <link rel="stylesheet" type="text/css" href="{% static '/coursework/css/courseviewStyles.css' %}">
 <script src="{% static '/coursework/js/scripts.js' %}"></script>
 <nav aria-label="breadcrumb">
@@ -100,7 +101,7 @@
             <div class="card-header" id="headingOne">
                <h5 class="mb-0">
                   <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                  Course Information <i class="fas fa-minus" aria-hidden="true"></i><i class="fas fa-plus" aria-hidden="true" style="display:none;"></i>
+                  Course Information</i><i class="fas fa-plus" aria-hidden="true" style="display:none;"></i>
                   </button>    
                </h5>
             </div>
@@ -117,14 +118,14 @@
             <div class="card-header" id="headingTwo">
                <h5 class="mb-0">
                   <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                  Course Syllabus <i class="fas fa-plus" aria-hidden="true"></i><i class="fas fa-minus" aria-hidden="true" style="display:none;"></i>
+                  Course Syllabus</i><i class="fas fa-minus" aria-hidden="true" style="display:none;"></i>
                   </button>                                          
                </h5>
             </div>
             <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
                <div class="card-body">
                   {% if course.syllabus %}
-                  <a href="{{ course.syllabus.url }}" class="btn btn-download-attachment" download>Download Syllabus</a>
+                  <a href="{{ course.syllabus.url }}" class="btn btn-download-attachment" download><i class="fa-solid fa-download"></i> Download Syllabus</a>
                   <object data="{{ course.syllabus.url }}" type="application/pdf" width="600" height="500">
                      <br>
                      <br>
@@ -140,7 +141,7 @@
             <div class="card-header" id="headingThree">
                <h5 class="mb-0">
                   <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                  Recommended Materials <i class="fas fa-plus" aria-hidden="true"></i><i class="fas fa-minus" aria-hidden="true" style="display:none;"></i>
+                  Recommended Materials</i><i class="fas fa-minus" aria-hidden="true" style="display:none;"></i>
                   </button>
                </h5>
             </div>
@@ -167,21 +168,39 @@
                   <div class="list-group">
                      {% for assignment in assignments %}
                      <a href="{% url 'view_assignment' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
-                        <div class="d-flex w-100 justify-content-between">
-                           <h5 class="mb-1">{{assignment.name}}</h5>
-                           <small class="text-muted"><strong>Assigned: </strong>{{assignment.start_date}} | <strong>Due: </strong>{{assignment.end_date}}</small>
-                        </div>
-                        <p class="mb-1"></p>
-                        <h6>{{assignment.instruction|truncatechars:100}}</h6>
-                        <small class="text-muted">Not Submitted</small>
+                         <div class="d-flex w-100 justify-content-between">
+                             <h5 class="mb-1">{{ assignment.name }}</h5>
+                             <small class="text-muted"><strong>Assigned: </strong>{{ assignment.start_date }} | <strong>Due: </strong>{{ assignment.end_date }}</small>
+                         </div>
+                         <p class="mb-1"></p>
+                         <h6>{{ assignment.instruction|truncatechars:100 }}</h6>
+                         {% if not is_instructor %}
+                         {% with status=assignments_submission_status|default_if_none:""|get_item:assignment.id %}
+                         {% if status.is_late %}
+                             <span class="badge bg-danger text-dark">Late</span>
+                         {% endif %}
+                         
+                         {% if status.submitted %}
+                             <span class="badge bg-success text-dark">Completed</span>
+                         {% else %}
+                             <span class="badge bg-warning text-dark">Not Completed</span>
+                         {% endif %}
+                     {% endwith %}
+                         {% endif %}
                      </a>
-                     {% endfor %}
-                  </div>
+                 {% endfor %}
+                 
+                 </div>
+                 
                </ul>
 
+
+            {% else %}
+
+               <p>No assignments for this course.</p>
             {% endif %}
 
-            <p>No assignments for this course.</p>
+            
             {% if is_instructor %}
             <a href="{% url 'create_assignment' course_id=course.id %}" class="btn btn-download-attachment">
                <i class="fas fa-plus-square"></i> Create Assignment
@@ -229,20 +248,30 @@
                      </div>
                      <p class="mb-1"></p>
                      <h6>{{module.description|truncatechars:100}}</h4>
-                     <small class="text-muted">Not Completed</small>
+                        {% if is_instructor %}
+                           
+                        {% else %}
+                          <!-- Check the submission status using assignment.id as the key -->
+                             <span class="badge bg-success text-dark">Completed</span>
+                             <span class="badge bg-warning text-dark">Not Completed</span>                      
+                        {% endif %}
                   </a>
                   {% endfor %}
                </div>
             </ul>
-            {% if is_instructor %}
-            <a class="btn btn-download-attachment" href="{% url 'create_module' course_id=course.id %}" role="button"><i class="fas fa-plus-square"></i> Create Module</a>
-            {% endif %}
-            {% else %}
-            <p>No modules for this course.</p>
-            {% if is_instructor %}
-            <a class="btn btn-download-attachment" href="{% url 'create_module' course_id=course.id %}" role="button"><i class="fas fa-plus-square"></i> Create Module</a> 
-            {% endif %}
-            {% endif %}
+         {% else %}
+
+            <p>No assignments for this course.</p>
+         {% endif %}
+
+         
+         {% if is_instructor %}
+         <a class="btn btn-download-attachment" href="{% url 'create_module' course_id=course.id %}" role="button"><i class="fas fa-plus-square"></i> Create Module</a> 
+         {% else %}
+         
+         {% endif %}
+
+
          </div>
       </div>
    </div>

@@ -41,7 +41,7 @@
          <strong>Message:</strong> {{ feedback.message }}<br>
          {% if feedback.file %}
          <button type="button" class="btn btn-outline-secondary custom-download-btn" onclick="event.preventDefault(); window.open('{{ feedback.file.url }}', '_blank');">
-         Download Attached File <i class="fas fa-download"></i>
+            <i class="fas fa-download"> Download Attached File</i>
          </button>
          {% endif %}
       </li>
@@ -76,7 +76,7 @@
              {% if assignment.attachments.all %}
                {% for attachment in assignment.attachments.all %}
                  <button type="button" class="btn btn-outline-secondary custom-download-btn mt-1" data-url="{% url 'download_attachment' attachment.id %}">
-                   Download Attachment <i class="fas fa-download"></i>
+                  <i class="fas fa-download"></i> Download Attachment
                  </button>
                {% endfor %}
              {% else %}
@@ -129,16 +129,16 @@
                <strong>Submitted at: </strong>{{ submission.submitted_at}}
             </p>
             <button type="button" class="btn btn-outline-secondary custom-download-btn" onclick="event.preventDefault(); window.open('{{ submission.file.url }}', '_blank');">
-            Download Submission <i class="fas fa-download"></i>
+               <i class="fas fa-download"></i> Download Submission
             </button>
             <a class="btn btn-outline-secondary custom-btn" href="{% url 'grade_submission' submission_id=submission.id %}">
-            Grade Submission <i class="fas fa-pen-nib"></i></i>
+               <i class="fas fa-pen-nib"></i> Grade Submission
             </a>
             <a class="btn btn-outline-secondary custom-btn" href="{% url 'add_feedback' submission_id=submission.id %}">
-            Submission Feedback <i class="fa-solid fa-comment"></i></i>
+               <i class="fa-solid fa-comment"> </i>Submission Feedback
             </a>
             <button type="button" class="btn btn-outline-secondary custom-btn" data-url="#">
-            Flag Submission <i class="fa-solid fa-flag"></i></i></i>
+               <i class="fa-solid fa-flag"></i> Flag Submission
             </button>
          </div>
       </div>

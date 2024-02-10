@@ -1,8 +1,9 @@
+from datetime import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse
 from assignment.forms import AssignmentForm, AttachmentFormSet
-from assignment.models import Assignment, Attachment
+from assignment.models import Assignment, Attachment, Submission
 from .models import Course, UserCourse
 from .forms import UserCourseForm, CourseForm
 from django.contrib.auth.decorators import login_required
@@ -65,31 +66,36 @@ def delete_course(request, course_id):
 
 
 
-@login_required
-def create_assignment(request, course_id):
-
-
-    # Include the course name in the context
-    return render(request, 'assignment/view_course.html', {})
-
-
-
-
 
 @login_required
 def course_detail_view(request, course_id):
     # Fetch the course instance using the course_id
     course = get_object_or_404(Course, id=course_id)
     user_profile = get_object_or_404(UserProfile, user=request.user)
-    assignments = course.assignments.all()  # Assuming Course model has related_name='assignments'
-    modules = course.modules.all()  # Assuming Module model has a ForeignKey to Course
+    assignments = course.assignments.all()
+    modules = course.modules.all()
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
 
+    # Initialize a dictionary to hold assignment submission status and lateness
+    assignments_submission_status = {}
+
+    current_date = datetime.now().date()
+
+    for assignment in assignments:
+        submission_exists = Submission.objects.filter(student=request.user, assignment=assignment).exists()
+        assignment_end_date = assignment.end_date
+        is_late = assignment_end_date < current_date
+        # Update to include both submission status and lateness
+        assignments_submission_status[assignment.id] = {
+            'submitted': submission_exists,
+            'is_late': is_late
+        }
+
     if request.method == 'POST':
-        form = AssignmentForm(request.POST, course_id=course_id)  # Pass the course_id here
+        form = AssignmentForm(request.POST, course_id=course_id)
         if form.is_valid():
             assignment = form.save(commit=False)
-            assignment.course = course  # Directly assign the course instance
+            assignment.course = course
             assignment.save()
 
             formset = AttachmentFormSet(request.POST, request.FILES, instance=assignment)
@@ -97,10 +103,9 @@ def course_detail_view(request, course_id):
                 formset.save()
                 return redirect(f'{reverse("view_course", args=[course.id])}?tab=assignments')
     else:
-        form = AssignmentForm(course_id=course_id)  # Initialize form with course_id
+        form = AssignmentForm(course_id=course_id)
         formset = AttachmentFormSet(instance=Assignment())
 
-    # Add the form and formset to the context for rendering
     context = {
         'form': form,
         'formset': formset,
@@ -108,12 +113,12 @@ def course_detail_view(request, course_id):
         'assignments': assignments,
         'modules': modules,
         'is_instructor': is_instructor,
+        'assignments_submission_status': assignments_submission_status,
     }
 
-    # Specify the path to your template
     return render(request, 'coursework/view_course.html', context)
 
-@login_required
+
 
 @login_required
 def edit_course(request, course_id):

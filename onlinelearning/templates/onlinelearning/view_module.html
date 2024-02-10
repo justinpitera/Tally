@@ -3,6 +3,7 @@
 {% extends "base.html" %}
 {% block content %}
 {% load static %}
+{% load custom_filters %}
 <link rel="stylesheet" type="text/css" href="{% static '/coursework/css/courseviewStyles.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static '/onlinelearning/css/styles.css' %}">
 <script src="{% static '/coursework/js/scripts.js' %}"></script>
@@ -21,11 +22,15 @@
     </div>
     
     <div class="module-content">
-        <h2>Content:</h2>
+        <h5>Content:</h5>
+
+
+        
         <ul class="module-content-list">
             {% for content in module.customcontent_set.all %}
             <li class="d-flex justify-content-between align-items-center">
                 <div class="flex-grow-1">
+                    
                     <!-- Content description based on its type -->
                     {% if content.content_type == 'file' %}
                     <a href="{{ content.file.url }}">Download File</a>
@@ -34,7 +39,27 @@
                     {% elif content.content_type == 'text' %}
                     {{ content.text }}
                     {% elif content.content_type == 'assignment' %}
-                    <strong>Assignment: </strong><a href="{% url 'assignment_view' content.assignment.id %}">{{ content.assignment }}</a> - Due Date: {{ content.assignment.end_date }} 
+                    <strong>Assignment: </strong>
+                    <a href="{% url 'view_assignment' content.assignment.id %}">{{ content.assignment }}</a>
+                    - Due Date: {{ content.assignment.end_date }}
+                    <br>
+                    {% if not is_instructor %}
+                    <!-- Dynamically access each assignment's late status -->
+                    <!-- Accessing assignment submission status and lateness -->
+                    {% with status=assignments_submission_status|default_if_none:""|get_item:content.assignment.id %}
+                        {% if status.is_late %}
+                            <span class="badge bg-danger text-dark">Late</span>
+                        {% endif %}
+                        
+                        {% if status.submitted %}
+                            <span class="badge bg-success text-dark">Completed</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Not Completed</span>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+
+
                     {% elif content.content_type == 'module' %}
                     Module: {{ content.module }}
                     {% endif %}
