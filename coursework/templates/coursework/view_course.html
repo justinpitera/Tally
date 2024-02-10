@@ -166,7 +166,7 @@
                   <br>
                   <div class="list-group">
                      {% for assignment in assignments %}
-                     <a href="{% url 'assignment_view' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                     <a href="{% url 'view_assignment' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
                         <div class="d-flex w-100 justify-content-between">
                            <h5 class="mb-1">{{assignment.name}}</h5>
                            <small class="text-muted"><strong>Assigned: </strong>{{assignment.start_date}} | <strong>Due: </strong>{{assignment.end_date}}</small>

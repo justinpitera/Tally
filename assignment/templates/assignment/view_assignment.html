@@ -186,7 +186,7 @@
                    <span aria-hidden="true">&times;</span>
                </button>
            </div>
-           <form method="post" action="{% url 'assignment_view' assignment_id=assignment.id %}">
+           <form method="post" action="{% url 'view_assignment' assignment_id=assignment.id %}">
                {% csrf_token %}
                <div class="modal-body">
                        <h2>Edit Assignment</h2>

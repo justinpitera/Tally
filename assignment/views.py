@@ -237,42 +237,33 @@ def add_feedback(request, submission_id):
 
 @login_required
 def create_assignment(request, course_id):
-    # Fetch the course for which the assignment is being created
-    course = get_object_or_404(Course, id=course_id)
-    
-    # Ensure the user has the right to create an assignment for this course
-    # This step depends on your application's specific authorization requirements
-    # For example, check if the request.user is the instructor of the course
-    # if not request.user == course.instructor:
-    #     messages.error(request, "You are not authorized to create assignments for this course.")
-    #     return redirect('some_view_name')
-
+    course = get_object_or_404(Course, pk=course_id)
     if request.method == 'POST':
-        # Initialize the form with posted data and the hidden course_id
-        assignment_form = AssignmentForm(request.POST)
-        attachment_formset = AttachmentFormSet(request.POST, request.FILES, instance=Assignment())
-
-        if assignment_form.is_valid() and attachment_formset.is_valid():
-            assignment = assignment_form.save(commit=False)
-            assignment.course = course  # Ensure the course is correctly associated
+        form = AssignmentForm(request.POST, course_id=course_id)
+        formset = AttachmentFormSet(request.POST, request.FILES)
+        if form.is_valid() and formset.is_valid():
+            assignment = form.save(commit=False)
+            assignment.course = course
             assignment.save()
-
-            # Save the attachments
-            attachment_formset.instance = assignment
-            attachment_formset.save()
-
-            messages.success(request, "Assignment created successfully.")
-            return redirect(reverse('assignment_list', kwargs={'course_id': course_id}))  # Adjust the redirect as needed
+            formset.instance = assignment
+            formset.save()
+            return redirect('view_assignment', assignment_id=assignment.id)
     else:
-        # Initialize the forms with the hidden course_id for GET requests
-        assignment_form = AssignmentForm()
-        attachment_formset = AttachmentFormSet(instance=Assignment())
-
+        form = AssignmentForm(course_id=course_id)
+        formset = AttachmentFormSet()
     return render(request, 'assignment/create_assignment.html', {
-        'assignment_form': assignment_form,
-        'attachment_formset': attachment_formset,
-        'course': course
+        'form': form,
+        'formset': formset,
+        'course': course,
     })
+
+
+
+
+
+
+
+
 
 @login_required
 def delete_assignment(request, assignment_id):
