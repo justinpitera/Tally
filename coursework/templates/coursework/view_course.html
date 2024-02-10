@@ -178,15 +178,17 @@
                      {% endfor %}
                   </div>
                </ul>
-                  {% if is_instructor %}
-                  <a href="{% url 'create_assignment' course_id=course.id %}" class="btn btn-download-attachment">
-                     <i class="fas fa-plus-square"></i> Create Assignment
-                  </a>
-                  {% else %}
-                     <p>No assignments for this course.</p>
-                  {% endif %}
+
             {% endif %}
 
+            <p>No assignments for this course.</p>
+            {% if is_instructor %}
+            <a href="{% url 'create_assignment' course_id=course.id %}" class="btn btn-download-attachment">
+               <i class="fas fa-plus-square"></i> Create Assignment
+            </a>
+            {% else %}
+            
+            {% endif %}
 
          </div>
       </div>
@@ -214,7 +216,7 @@
 
             <ul>
                {% if is_instructor %}
-               <a class="btn btn-download-attachment" href="{% url 'create_module' course_id=course.id %}" role="button">Create Module <i class="fas fa-plus-square"></i></a>
+               <a class="btn btn-download-attachment" href="{% url 'create_module' course_id=course.id %}" role="button"><i class="fas fa-plus-square"></i> Create Module</a>
                {% endif %}
                <br>
                <br>
@@ -233,12 +235,12 @@
                </div>
             </ul>
             {% if is_instructor %}
-            <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_module' course_id=course.id %}" role="button">Create Module <i class="fas fa-plus-square"></i></a>
+            <a class="btn btn-download-attachment" href="{% url 'create_module' course_id=course.id %}" role="button"><i class="fas fa-plus-square"></i> Create Module</a>
             {% endif %}
             {% else %}
             <p>No modules for this course.</p>
             {% if is_instructor %}
-            <a class="btn btn-outline-secondary btn-create-assignment" href="{% url 'create_module' course_id=course.id %}" role="button">Create Module <i class="fas fa-plus-square"></i></a>
+            <a class="btn btn-download-attachment" href="{% url 'create_module' course_id=course.id %}" role="button"><i class="fas fa-plus-square"></i> Create Module</a> 
             {% endif %}
             {% endif %}
          </div>
