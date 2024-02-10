@@ -116,3 +116,46 @@ def delete_custom(request, content_id):
     
     # Redirect to the module view or another success URL
     return redirect('module_view', module_id=module_id)
+
+@login_required
+def edit_module(request, module_id):
+    # Get the module instance to edit
+    module = get_object_or_404(Module, id=module_id)
+    course = get_object_or_404(Course, id=module.course.id)
+    course_id = course.id
+    # If this is a POST request, process the Form data
+    if request.method == 'POST':
+        # Create a form instance and populate it with data from the request (binding):
+        form = ModuleForm(request.POST, instance=module)
+        if form.is_valid():
+            # Save the updated module back to the database
+            form.save()
+            # Redirect to a new URL:
+            return redirect(reverse('view_course', kwargs={'course_id': course_id}) + "?tab=onlinelearning")
+    # If this is a GET (or any other method), create the default form.
+    else:
+        form = ModuleForm(instance=module)
+
+    context = {
+        'form': form,
+        'module': module
+    }
+
+    return render(request, 'onlinelearning/edit_module.html', context)
+
+
+
+@login_required  # Optional: Require user login for this action
+def delete_module(request, module_id):
+
+   
+    module = get_object_or_404(Module, id=module_id)
+    course = get_object_or_404(Course, id=module.course.id)
+    course_id = course.id
+    if request.method == 'POST':
+        # Delete the module and redirect to a success page, such as the list of modules.
+        module.delete()
+        return redirect(reverse('view_course', kwargs={'course_id': course_id}) + "?tab=onlinelearning")
+
+    # If not a POST request, display confirmation page
+    return render(request, 'onlinelearning/delete_module.html', {'module': module})

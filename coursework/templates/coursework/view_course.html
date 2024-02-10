@@ -42,6 +42,33 @@
 </ul>
 
 
+<!-- Create Assignment Modal -->
+<div class="modal fade" id="createAssignmentModal" tabindex="-1" aria-labelledby="createAssignmentModalLabel" aria-hidden="true">
+   <div class="modal-dialog modal-lg">
+     <div class="modal-content">
+       <div class="modal-header">
+         <h5 class="modal-title" id="createAssignmentModalLabel">Create New Assignment</h5>
+         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+       </div>
+       <form method="POST" enctype="multipart/form-data">
+         <div class="modal-body">
+           {% csrf_token %}
+           <!-- Assignment Form Fields -->
+           {{ form.as_p }}
+           <!-- Attachment FormSet -->
+           {{ formset.management_form }}
+           {% for form in formset %}
+             {{ form.as_p }}
+           {% endfor %}
+         </div>
+         <div class="modal-footer">
+           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+           <button type="submit" class="btn btn-primary">Save Assignment</button>
+         </div>
+       </form>
+     </div>
+   </div>
+ </div>
 
 <div class="modal fade" id="confirmUnenroll" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
    <div class="modal-dialog" role="document">
@@ -158,13 +185,6 @@
          <div class="card-body">
             {% if assignments %}
                <ul>
-                  {% if is_instructor %}
-                     <a href="{% url 'create_assignment' course_id=course.id %}" class="btn btn-download-attachment">
-                        <i class="fas fa-plus-square"></i> Create Assignment
-                     </a>
-                     {% endif %}
-                  <br>
-                  <br>
                   <div class="list-group">
                      {% for assignment in assignments %}
                      <a href="{% url 'view_assignment' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
@@ -191,17 +211,11 @@
                                  <span class="badge bg-warning text-dark">Not Completed</span>
                               {% endif %}
                            {% endwith %}
-                        {% endif %}
-                        
+                        {% endif %}     
                      </a>
-                     {% endfor %}
-
-                 
-                 </div>
-                 
+                     {% endfor %}    
+                 </div>        
                </ul>
-
-
             {% else %}
 
                <p>No assignments for this course.</p>
@@ -209,9 +223,7 @@
 
             
             {% if is_instructor %}
-            <a href="{% url 'create_assignment' course_id=course.id %}" class="btn btn-download-attachment">
-               <i class="fas fa-plus-square"></i> Create Assignment
-            </a>
+            <a href="{% url 'create_assignment' course_id=course.id %}" class="btn btn-download-attachment" ><i class="fas fa-plus-square"></i> Create Assignment</a>
             {% else %}
             
             {% endif %}
@@ -234,19 +246,14 @@
          </ul>
       </nav>
    </div>
-   
+
    <!-- Online Learning tab content -->
    <div class="tab-pane fade" id="online-learning" role="tabpanel" aria-labelledby="online-learning-tab">
       <div class="card">
          <div class="card-body">
-            {% if modules %}
 
+            {% if modules %}
             <ul>
-               {% if is_instructor %}
-               <a class="btn btn-download-attachment" href="{% url 'create_module' course_id=course.id %}" role="button"><i class="fas fa-plus-square"></i> Create Module</a>
-               <br>
-               <br>
-               {% endif %}
                <div class="list-group">
                   {% for module in modules %}
                   <a href="{% url 'module_view' module.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
@@ -274,7 +281,8 @@
 
          
          {% if is_instructor %}
-         <a class="btn btn-download-attachment" href="{% url 'create_module' course_id=course.id %}" role="button"><i class="fas fa-plus-square"></i> Create Module</a> 
+
+         <a href="{% url 'create_module' course_id=course.id %}" class="btn btn-download-attachment"><i class="fas fa-plus-square"></i> Create Module</a>
          {% else %}
          
          {% endif %}
@@ -286,6 +294,10 @@
 </div>
 
 
+
+
+
+ 
 
 
 

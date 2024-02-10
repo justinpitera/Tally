@@ -10,18 +10,18 @@
        <li class="breadcrumb-item active" aria-current="page">Create New Assignment</li>
     </ol>
  </nav>
-  <h2>Create Assignment for Course: {{ course.name }}</h2>
+  <h2>Create Assignment for Course: {{ course.title }}</h2>
 
 <!-- create_assignment.html -->
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
     {{ formset }}
-    <button type="submit">Save Assignment</button>
-</form>
-
     <input type="hidden" name="course" value="{{ form.course.value }}">
     <button type="submit" class="btn btn-primary">Create Assignment</button>
+</form>
+
+
 </form>
 
 {% endblock %}

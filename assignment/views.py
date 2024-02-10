@@ -92,12 +92,23 @@ def view_assignment(request, assignment_id):
     user_profile = UserProfile.objects.get(user=request.user)
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
 
-    # Initialize the number of submissions to zero
+    # Initialize variables
     num_submissions = 0
+    submission_grade = None 
+    submission_comments = None
 
-    # Count the number of submissions for this assignment if the user is an instructor
     if is_instructor:
+        # Count the number of submissions for this assignment if the user is an instructor
         num_submissions = Submission.objects.filter(assignment=assignment).count()
+    
+    submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
+    if submission:
+        # If there is a submission by the user, retrieve the grade
+        submission_grade = submission.grade
+        submission_comments = submission.comments
+        is_already_submitted = True
+    else:
+        is_already_submitted = False
 
     if request.method == 'POST' and 'assignment_edit' in request.POST:
         # Handle the assignment edit form
@@ -110,15 +121,10 @@ def view_assignment(request, assignment_id):
 
     form = FeedbackForm()  # For feedbacks
     submissions = Submission.objects.filter(assignment=assignment).select_related('student')
+    feedbacks = []
 
     if not is_instructor:
-        submission = Submission.objects.filter(assignment=assignment, student=request.user).first()
         feedbacks = submission.feedbacks.all() if submission else []
-        is_already_submitted = submission is not None
-    else:
-        feedbacks = []
-        is_already_submitted = False
-
     return render(request, 'assignment/view_assignment.html', {
         'assignment': assignment,
         'is_already_submitted': is_already_submitted,
@@ -126,8 +132,10 @@ def view_assignment(request, assignment_id):
         'submissions': submissions,
         'form': form,
         'feedbacks': feedbacks,
-        'assignmentForm': assignment_form,  # Include the form for editing
-        'num_submissions': num_submissions,  # Pass the count of submissions to the context
+        'assignmentForm': assignment_form,
+        'num_submissions': num_submissions,
+        'submission_grade': submission_grade,
+        'submission_comments': submission_comments,
     })
 
 
