@@ -14,6 +14,7 @@ class AssignmentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         # Extract the course_id from kwargs if it exists
         course_id = kwargs.pop('course_id', None)
+        
         super(AssignmentForm, self).__init__(*args, **kwargs)  # Ensure any extra kwargs are passed to super
         # Now, safely use course_id without affecting the superclass initialization
         if course_id is not None:

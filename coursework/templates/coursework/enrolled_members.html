@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static '/coursework/css/courseviewStyles.css' %}">
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+       <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+       <li class="breadcrumb-item"><a href="{% url 'view_course' course.id %}">{{ course.title }}</a></li>
+       <li class="breadcrumb-item" aria-current="page">Enrolled Members</li>
+    </ol>
+ </nav>
+
+<h2>Users in {{ course.title }}</h2>
+<div class="contact-book">
+    {% for member in users %}
+    
+    <div class="contact-card">
+        <div class="contact-info">
+            <h4>{{ member.username }}</h4>
+            <p>{{ member.email }}</p>
+        </div>
+        {% if user.id != member.id %}<h3><a style="color:#4b4276 !important;" href="{% url 'send_message' user.id %}" class="message-link" ><i class="fas fa-envelope"></i></a></h3>{% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    .contact-book {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .contact-card {
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        border-radius: 8px;
+        padding: 20px;
+        width: calc(33.333% - 20px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-sizing: border-box;
+    }
+    .contact-info {
+        flex-grow: 1;
+    }
+    .message-link {
+        margin-left: 20px;
+        color: #007bff; /* Bootstrap primary color for example */
+        text-decoration: none;
+    }
+    .message-link:hover {
+        color: #0056b3;
+    }
+    @media (max-width: 768px) {
+        .contact-card {
+            width: calc(50% - 20px);
+        }
+    }
+    @media (max-width: 480px) {
+        .contact-card {
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .message-link {
+            margin-left: 0;
+            margin-top: 10px;
+        }
+    }
+</style>
+{% endblock %}

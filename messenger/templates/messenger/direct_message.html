@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Send a Message</h2>
+<form method="post">
+    {% csrf_token %}
+    <label for="id_content">Message:</label>
+    <textarea id="id_content" name="content" cols="40" rows="10">{{ form.content.value }}</textarea>
+    {% if form.content.errors %}
+        <div class="error">{{ form.content.errors.as_text }}</div>
+    {% endif %}
+    <input type="submit" value="Send">
+</form>
+{% endblock %}

@@ -10,7 +10,7 @@ from .forms import CustomContentForm, ModuleForm
 from django.contrib.contenttypes.models import ContentType
 from django.views.generic import DeleteView
 from django.views.decorators.http import require_POST
-
+from django.contrib.auth.models import User
 @login_required
 def onlinelearning_view(request):
     return render(request, 'onlinelearning/onlinelearning.html', {'page_title': 'Online Learning - Tally'})
@@ -64,7 +64,7 @@ def module_view(request, module_id):
     }
     
     # Render the template with the provided context
-    return render(request, 'onlinelearning/module_detail.html', context)
+    return render(request, 'onlinelearning/view_module.html', context)
 
 
 @login_required
@@ -76,11 +76,11 @@ def submit_content(request, module_arg):
             return redirect('module_view', module_arg)  # Redirect to a new URL
     else:
         form = CustomContentForm(module_arg=module_arg)
-    return render(request, 'onlinelearning/module_detail.html', {'form': form})
+    return render(request, 'onlinelearning/view_module.html', {'form': form})
 
 @login_required
 @require_POST  # Ensure that this view can only be called with a POST request
-def delete_custom_content(request, content_id):
+def delete_custom(request, content_id):
     content = get_object_or_404(CustomContent, id=content_id)
 
     # Optional: Check if the user has the permission to delete

@@ -26,8 +26,9 @@
    <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">More</a>
       <div class="dropdown-menu">
-         <a class="dropdown-item" href="{% url 'send_message' %}">Message {{course.instructor}}</a>
-         <a class="dropdown-item" href="#">Enrolled Members</a>
+
+         {% if user.id == course.instructor.id == False %}<a class="dropdown-item" href="{% url 'send_message' course.instructor.id %}">Message {{course.instructor}}</a>{% endif %}
+         <a class="dropdown-item" href="{% url 'enrolled_members' course.id %}">Enrolled Members</a>
          <div class="dropdown-divider"></div>
          <button class="dropdown-item" href="#" data-toggle="modal" data-target="#confirmUnenroll">Unenroll</button>
          {% if is_instructor %}
@@ -56,9 +57,9 @@
          <div class="modal-footer">
             <form action="{% url 'direct_unenroll' course.id user.id %}" method="post">
                {% csrf_token %}
-               <button type="submit" value="Unenroll" class="btn" style="color: #4b4276; border: 1px solid #4b4276; background-color: transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem;">Unenroll</button>
+               <button type="submit" value="Unenroll" class="btn btn-download-attachment">Unenroll</button>
             </form>
-            <button type="button" class="btn" data-dismiss="modal" style="color: #4b4276; border: 1px solid #4b4276; background-color: transparent; padding: .375rem .75rem; font-size: 1rem; line-height: 1.5; border-radius: .25rem;">Cancel</button>
+            <button type="button" data-dismiss="modal" class="btn btn-download-attachment">Cancel</button>
          </div>
       </div>
    </div>
@@ -125,6 +126,8 @@
                   {% if course.syllabus %}
                   <a href="{{ course.syllabus.url }}" class="btn btn-download-attachment" download>Download Syllabus</a>
                   <object data="{{ course.syllabus.url }}" type="application/pdf" width="600" height="500">
+                     <br>
+                     <br>
                      <p>Syllabus not available for live view, please download the file.</p>
                   </object>
                   {% else %}
@@ -154,6 +157,13 @@
          <div class="card-body">
             {% if assignments %}
                <ul>
+                  {% if is_instructor %}
+                     <a href="{% url 'create_assignment' course_id=course.id %}" class="btn btn-download-attachment">
+                        <i class="fas fa-plus-square"></i> Create Assignment
+                     </a>
+                     {% endif %}
+                  <br>
+                  <br>
                   <div class="list-group">
                      {% for assignment in assignments %}
                      <a href="{% url 'assignment_view' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
@@ -169,9 +179,9 @@
                   </div>
                </ul>
                   {% if is_instructor %}
-                     <a href="{% url 'create_assignment' course_id=course.id %}" class="btn btn-download-attachment">
-                        <i class="fas fa-plus-square"></i> Create Assignment
-                     </a>
+                  <a href="{% url 'create_assignment' course_id=course.id %}" class="btn btn-download-attachment">
+                     <i class="fas fa-plus-square"></i> Create Assignment
+                  </a>
                   {% else %}
                      <p>No assignments for this course.</p>
                   {% endif %}
@@ -237,50 +247,7 @@
 </div>
 
 
-<!-- Edit Assignment Modal -->
-<!-- Modal Structure -->
-<div class="modal fade" id="createCourseModal" tabindex="-1" role="dialog" aria-labelledby="createCourseModalLabel" aria-hidden="true">
-   <div class="modal-dialog" role="document">
-       <div class="modal-content">
-           <div class="modal-header">
-               <h5 class="modal-title" id="createCourseModalLabel">Create Assignment</h5>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
-               </button>
-           </div>
-           <div class="modal-body">
-               <!-- Form Starts Here -->
-               <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                  {% csrf_token %}
-                  <div class="form-row">
-                      {% for field in form %}
-                          {% if field.name != "course" %} <!-- Check if the field is not 'course' -->
-                              <div class="{% if field.name == 'description' %}col-12{% else %}col-md-12 mb-3{% endif %}">
-                                  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                  {{ field }}
-                                  {% if field.help_text %}
-                                      <small class="form-text text-muted">{{ field.help_text }}</small>
-                                  {% endif %}
-                                  {% for error in field.errors %}
-                                      <div class="invalid-feedback">
-                                          {{ error }}
-                                      </div>
-                                  {% endfor %}
-                              </div>
-                          {% else %}
-                              {{ field.as_hidden }} <!-- Render 'course' field as hidden -->
-                          {% endif %}
-                      {% endfor %}
-                  </div>
-                  <!-- Adjusted button classes and layout for modal context -->
-                  <button type="submit" class="btn btn-outline-secondary btn-create-assignment">Save Changes</button>
-              </form>
-              
-               <!-- Form Ends Here -->
-           </div>
-       </div>
-   </div>
-</div>
+
 
 
 

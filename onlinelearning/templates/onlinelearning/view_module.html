@@ -46,8 +46,8 @@
                         <i class="far fa-edit"></i>
                     </a>
                     <!-- Delete Button Trigger -->
-                    <a href="#" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" data-content-url="{% url 'delete_custom_content' content.id %}">
-                        <i class="fas fa-times"></i>
+                    <a href="#" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#deleteConfirmationModal" data-content-url="{% url 'delete_content' content.id %}">
+                        <i class="fas fa-trash"></i>
                     </a>
                 </div>
                 {% endif %}

@@ -19,6 +19,7 @@ urlpatterns = [
     path('coursework/<int:course_id>/', views.course_detail_view, name='view_course'),
     path('coursework/<int:course_id>/assignments/', AssignmentListView.as_view(), name='course_assignments'),
     path('attachments/download/<int:attachment_id>/', views.download_attachment, name='download_attachment'),
+    path('courses/<int:course_id>/members/', views.enrolled_members, name='enrolled_members'),
 ]
 
 if settings.DEBUG:

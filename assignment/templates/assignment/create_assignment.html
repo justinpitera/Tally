@@ -7,15 +7,50 @@
     <ol class="breadcrumb">
        <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
        <li class="breadcrumb-item"><a href="{% url 'view_course' course.id %}?tab=assignments">{{ course.title }}</a></li>
-       <li class="breadcrumb-item active" aria-current="page">Create New Module</li>
+       <li class="breadcrumb-item active" aria-current="page">Create New Assignment</li>
     </ol>
  </nav>
   <h2>Create Assignment for Course: {{ course.name }}</h2>
 
-  <form method="post">
+<!-- create_assignment.html -->
+<form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
+    <div class="form-group">
+        {{ assignment_form.course }}
+    </div>
+    <div class="form-group">
+        {{ assignment_form.name.label_tag }}
+        {{ assignment_form.name }}
+    </div>
+    <div class="form-group">
+        {{ assignment_form.instruction.label_tag }}
+        {{ assignment_form.instruction }}
+    </div>
+    <div class="form-group">
+        {{ assignment_form.start_date.label_tag }}
+        {{ assignment_form.start_date }}
+    </div>
+    <div class="form-group">
+        {{ assignment_form.end_date.label_tag }}
+        {{ assignment_form.end_date }}
+    </div>
+
+    <!-- Attachment Formset -->
+    {{ attachment_formset.management_form }}
+    {% for form in attachment_formset %}
+    <div class="form-group">
+        {{ form.file.label_tag }}
+        {{ form.file }}
+    </div>
+    {% endfor %}
+
+    <input type="hidden" name="course" value="{{ form.course.value }}">
     <button type="submit" class="btn btn-primary">Create Assignment</button>
-  </form>
+</form>
+
 {% endblock %}
+
+
+
+
 

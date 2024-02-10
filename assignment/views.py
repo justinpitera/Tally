@@ -237,25 +237,66 @@ def add_feedback(request, submission_id):
 
 @login_required
 def create_assignment(request, course_id):
-    # Ensure the user is an instructor
-    user_profile = get_object_or_404(UserProfile, user=request.user)
-    if user_profile.role != UserProfile.INSTRUCTOR:
-        messages.error(request, "You are not authorized to create assignments.")
-        return redirect('home')  # Redirect to a suitable template
-
+    # Fetch the course for which the assignment is being created
     course = get_object_or_404(Course, id=course_id)
+    
+    # Ensure the user has the right to create an assignment for this course
+    # This step depends on your application's specific authorization requirements
+    # For example, check if the request.user is the instructor of the course
+    # if not request.user == course.instructor:
+    #     messages.error(request, "You are not authorized to create assignments for this course.")
+    #     return redirect('some_view_name')
 
     if request.method == 'POST':
-        form = AssignmentForm(request.POST)
-        if form.is_valid():
-            assignment = form.save(commit=False)
-            assignment.course = course  # Assuming the Assignment model has a foreign key to Course
-            assignment.save()
-            messages.success(request, "Assignment created successfully.")
-            # Redirect to the assignment detail view or any other relevant view
-            url = reverse('view_course', args=[course_id]) + "?tab=assignments"
-            return redirect(url)
-    else:
-        form = AssignmentForm()
+        # Initialize the form with posted data and the hidden course_id
+        assignment_form = AssignmentForm(request.POST)
+        attachment_formset = AttachmentFormSet(request.POST, request.FILES, instance=Assignment())
 
-    return render(request, 'assignment/create_assignment.html', {'form': form, 'course': course})
+        if assignment_form.is_valid() and attachment_formset.is_valid():
+            assignment = assignment_form.save(commit=False)
+            assignment.course = course  # Ensure the course is correctly associated
+            assignment.save()
+
+            # Save the attachments
+            attachment_formset.instance = assignment
+            attachment_formset.save()
+
+            messages.success(request, "Assignment created successfully.")
+            return redirect(reverse('assignment_list', kwargs={'course_id': course_id}))  # Adjust the redirect as needed
+    else:
+        # Initialize the forms with the hidden course_id for GET requests
+        assignment_form = AssignmentForm()
+        attachment_formset = AttachmentFormSet(instance=Assignment())
+
+    return render(request, 'assignment/create_assignment.html', {
+        'assignment_form': assignment_form,
+        'attachment_formset': attachment_formset,
+        'course': course
+    })
+
+@login_required
+def delete_assignment(request, assignment_id):
+    # Fetch the assignment to be deleted
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    # Fetch the user's profile to check if they have the right to delete
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    # Only allow instructors (or other authorized roles) to delete assignments
+    if user_profile.role != UserProfile.INSTRUCTOR:
+        return HttpResponseForbidden("You are not authorized to delete this assignment.")
+
+    course_id = assignment.course.id  # Save course id for redirect
+
+    # Perform the deletion
+    assignment.delete()
+
+    # Optionally, display a success message
+    messages.success(request, "Assignment deleted successfully.")
+
+    # Redirect to the assignment list, or another appropriate page
+    return redirect(reverse('view_course', kwargs={'course_id': course_id}) + "?tab=assignments")
+
+
+
+

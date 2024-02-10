@@ -189,7 +189,7 @@ def coursework_view(request):
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
     return render(
         request,
-        "coursework/coursework.html",
+        "coursework/view_courses.html",
         {
             "user_courses": user_courses,
             "page_title": "Coursework - Tally",
@@ -222,3 +222,22 @@ def direct_enroll(request, user_id):
         form = UserCourseForm(user=user)
     
     return render(request, "coursework/direct_enroll.html", {'form': form, 'user_id': user_id})
+
+
+@login_required
+def enrolled_members(request, course_id):
+    # Fetch the course using the course_id
+    course = get_object_or_404(Course, id=course_id)
+    
+    # Get all UserCourse instances related to the course
+    user_courses = UserCourse.objects.filter(course=course)
+    
+    # Fetch all UserProfile instances from user_courses
+    users = [user_course.user for user_course in user_courses]
+    
+    # Alternatively, if you have a direct many-to-many relationship set up in your Course model to UserProfile,
+    # you can directly access users like this: course.userprofile_set.all()
+    # This assumes your Course model has a ManyToManyField to UserProfile
+
+    # Pass the users to the template
+    return render(request, "coursework/enrolled_members.html", {"course": course, "users": users})
