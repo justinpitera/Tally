@@ -65,8 +65,62 @@
                   <small>Donec id elit non mi porta.</small>
                 </a>
             </div>   
-        {% endif %}
-        {% endfor %}
+            {% endif %}
+
+
+
+    {% if content.content_type == 'text' %}
+    <div class="list-group">
+        <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">Post</h5>
+            <small>Posted: {{content.posted}}</small>
+          </div>
+          <p class="mb-1">{{content.text}}</p>
+          <small>{{content.text}}</small>
+        </a>
+    </div>   
+    {% endif %}
+
+    {% if content.content_type == 'url' %}
+    <div class="list-group">
+        <a href="{{content.url}}" class="list-group-item list-group-item-action flex-column align-items-start">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">Post</h5>
+            <small>Posted: {{content.posted}}</small>
+          </div>
+          <p class="mb-1">Visit Site: <span class="visit-site" style="color=#4b4276 !important;" data-url="{{ content.url }}">Link</span></p>
+          <small></small>
+        </a>
+    </div>
+    
+    {% endif %}
+    <style>
+        .visit-site {
+            color: #4b4276; /* Link color */
+            cursor: pointer; /* Changes the mouse cursor to indicate clickable items */
+            text-decoration: underline; /* Makes it look like a traditional hyperlink */
+        }
+        
+        /* Optionally, to change the appearance on hover: */
+        .visit-site:hover {
+            text-decoration: none; /* Removes underline on hover for a different effect, or change the color */
+            color: #352a4a; /* Darker shade of purple for hover effect, adjust as needed */
+        }
+    </style>
+
+
+<script>
+    document.querySelectorAll('.visit-site').forEach(item => {
+        item.addEventListener('click', function() {
+            window.location.href = this.getAttribute('data-url');
+        });
+    });
+    
+</script>
+
+    
+    {% endfor %}
 
 
 
@@ -92,7 +146,7 @@
                         {% if content.content_type == 'file' %}
                         <a href="{{ content.file.url }}">Download File</a>
                         {% elif content.content_type == 'url' %}
-                            <a href="{{ content.url }}" target="_blank" rel="noopener noreferrer">Visit {{ content.urltext }}</a>
+                        <a href="{{ content.url }}" target="_blank" rel="noopener noreferrer">Visit {{ content.urltext }}</a>
                             {% elif content.content_type == 'text' %}
                             {{ content.text }}
                         {% elif content.content_type == 'assignment' %}
