@@ -2,6 +2,7 @@
 {% block content %}
 {% load static %}
 {% load custom_filters %}
+
 <link rel="stylesheet" type="text/css" href="{% static '/coursework/css/courseviewStyles.css' %}">
 <script src="{% static '/coursework/js/scripts.js' %}"></script>
 <nav aria-label="breadcrumb">
@@ -41,8 +42,6 @@
    </li>
 </ul>
 
-
-<!-- Create Assignment Modal -->
 <div class="modal fade" id="createAssignmentModal" tabindex="-1" aria-labelledby="createAssignmentModalLabel" aria-hidden="true">
    <div class="modal-dialog modal-lg">
      <div class="modal-content">
@@ -53,9 +52,7 @@
        <form method="POST" enctype="multipart/form-data">
          <div class="modal-body">
            {% csrf_token %}
-           <!-- Assignment Form Fields -->
            {{ form.as_p }}
-           <!-- Attachment FormSet -->
            {{ formset.management_form }}
            {% for form in formset %}
              {{ form.as_p }}
@@ -117,10 +114,6 @@
 </div>
 </li>
 </ul>
-
-   
-
-
 <div class="tab-content" id="myTabContent">
    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
       <div id="accordion">
@@ -232,26 +225,63 @@
       </div>
    </div>
    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-      <nav aria-label="Page navigation example">
-         <ul class="pagination justify-content-center">
-            <li class="page-item disabled">
-               <a class="page-link" href="?page=0" tabindex="-1">Previous</a>
-            </li>
-            <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
-            <li class="page-item"><a class="page-link" href="?page=2">2</a></li>
-            <li class="page-item"><a class="page-link" href="?page=3">3</a></li>
-            <li class="page-item">
-               <a class="page-link" href="?page=2">Next</a>
-            </li>
-         </ul>
-      </nav>
+      {% if not is_instructor %}
+      
+      <!-- Student grade view -->
+      <table>
+         <thead>
+            <tr>
+               <th>Assignment</th>
+               <th>Grade</th>
+            </tr>
+         </thead>
+         <tbody>
+            {% for assignment_id, status in assignments_submission_status.items %}
+               <tr>
+                  <td><a href="{% url 'view_assignment' status.assignment_id %}">{{status.assignment_name}}</td>
+                  <td>{{ status.grade }}</td>
+               </tr>
+            {% endfor %}
+         </tbody>
+      </table>
+  
+      {% endif %}
+
+      {% if is_instructor %}
+      <form id="searchForm" data-course-id="{{ course.id }}" class="d-flex">
+         <input type="text" id="searchInput" name="q" placeholder="Search by student name..." class="form-control me-2">
+         <button type="submit" class="btn btn-download-attachment" >Search</button>
+     </form>
+     
+
+     <table>
+      <thead>
+          <tr>
+              <th>Student Name</th>
+              <th>Email</th>
+              <th>Grade Average</th>
+          </tr>
+      </thead>
+      <tbody id="resultsTableBody">
+          <!-- Rows filled by JavaScript -->
+      </tbody>
+  </table>
+
+      {% endif %}
+
+
+  {% if assignments_submission_status %}
+
+  {% else %}
+      <p>No grades available.</p>
+  {% endif %}
+  
    </div>
 
    <!-- Online Learning tab content -->
    <div class="tab-pane fade" id="online-learning" role="tabpanel" aria-labelledby="online-learning-tab">
       <div class="card">
          <div class="card-body">
-
             {% if modules %}
             <ul>
                <div class="list-group">
@@ -275,16 +305,12 @@
                </div>
             </ul>
          {% else %}
-
             <p>No assignments for this course.</p>
          {% endif %}
 
          
          {% if is_instructor %}
-
          <a href="{% url 'create_module' course_id=course.id %}" class="btn btn-download-attachment"><i class="fas fa-plus-square"></i> Create Module</a>
-         {% else %}
-         
          {% endif %}
 
 
@@ -292,99 +318,6 @@
       </div>
    </div>
 </div>
-
-
-
-
-
- 
-
-
-
-
-
-
 </body>
 </html>
-<script>
-   document.addEventListener('DOMContentLoaded', function () {
-      var tabLinks = document.querySelectorAll('.nav-link:not(.dropdown-toggle)');
-      var dropdownLinks = document.querySelectorAll('.dropdown-menu a');
-  
-      // Function to deactivate all tabs and contents
-      function deactivateAllTabsAndContents() {
-          tabLinks.forEach(function(link) {
-              if (!link.classList.contains('dropdown-toggle')) { // Check to ensure it's not a dropdown toggle link
-                  link.classList.remove('active');
-                  var contentId = link.getAttribute('href');
-                  var tabContent = document.querySelector(contentId);
-                  if (tabContent) {
-                      tabContent.classList.remove('show', 'active');
-                  }
-              }
-          });
-      }
-  
-      // Function to activate tab and its content
-      function activateTabAndContent(tabLink) {
-          if (!tabLink.classList.contains('dropdown-toggle')) { // Again, ensure it's not a dropdown toggle
-              tabLink.classList.add('active');
-              var contentId = tabLink.getAttribute('href');
-              var tabContent = document.querySelector(contentId);
-              if (tabContent) {
-                  tabContent.classList.add('show', 'active');
-              }
-          }
-      }
-  
-      // Attach click event listeners to all tab links, excluding the dropdown toggle
-      tabLinks.forEach(function(tabLink) {
-          tabLink.addEventListener('click', function(event) {
-              event.preventDefault();
-  
-              // Deactivate all tabs and contents, ensuring dropdown interactions are excluded
-              deactivateAllTabsAndContents();
-  
-              // Activate clicked tab and its content, ensuring dropdown interactions are excluded
-              activateTabAndContent(this);
-          });
-      });
-  
-      // No changes required here for dropdownLinks, as we're not modifying dropdown behavior directly
-      dropdownLinks.forEach(function(link) {
-          link.addEventListener('click', function(event) {
-              event.stopPropagation(); // This remains to prevent unintended behavior, but the primary issue is addressed above
-          });
-      });
-  
-      // The remaining part of the script for activating tabs based on URL parameters or default logic remains unchanged
-  });
-  
-   document.addEventListener('DOMContentLoaded', function () {
-      // Check if the URL contains the query parameter for the Assignments tab
-      var urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('tab') === 'assignments') {
-         // Deactivate currently active tab and its content
-         document.querySelector('.nav-link.active').classList.remove('active');
-         document.querySelector('.tab-pane.fade.show.active').classList.remove('show', 'active');
-         
-         // Activate the Assignments tab
-         document.getElementById('profile-tab').classList.add('active');
-         // Activate the Assignments tab content
-         var assignmentsContent = document.getElementById('profile');
-         assignmentsContent.classList.add('show', 'active');
-     }
-     if (urlParams.get('tab') === 'onlinelearning') {
-      // Deactivate currently active tab and its content
-      document.querySelector('.nav-link.active').classList.remove('active');
-      document.querySelector('.tab-pane.fade.show.active').classList.remove('show', 'active');
-      
-      // Activate the Assignments tab
-      document.getElementById('online-learning-tab').classList.add('active');
-      // Activate the Assignments tab content
-      var assignmentsContent = document.getElementById('online-learning');
-      assignmentsContent.classList.add('show', 'active');
-  }
-  });
-</script>
 {% endblock %}

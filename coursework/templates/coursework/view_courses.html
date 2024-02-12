@@ -65,7 +65,21 @@
   </div>
 </div>
 
+<script>
+  document.getElementById('search-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch('', { 
+        method: 'GET',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById('assignment-list').innerHTML = html;
+    });
+});
 
+</script>
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
