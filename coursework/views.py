@@ -82,7 +82,7 @@ def course_detail_view(request, course_id):
     
     # Fetch all UserProfile instances
     students = UserProfile.objects.filter(user__id__in=user_ids, role=UserProfile.STUDENT)
-
+    average_grade = None
     # Calculate average grades for each student and store in a dictionary
     student_average_grades = {}
     for student in students:
