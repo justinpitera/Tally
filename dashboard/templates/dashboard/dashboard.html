@@ -1,0 +1,11 @@
+
+{% extends "base.html" %}
+{%load static%}
+{% block title %}Dashboard - Daisy{% endblock %}
+
+{% block content %}
+<a class="btn my-4" id="menu-btn"><i class="fa-solid fa-bars"></i></a>
+<div class="welcomeCard">
+    <h1 class="display-4">Welcome, {{ user.username }}!</h1>
+</div>
+{% endblock %}

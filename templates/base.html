@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daisy</title>
+    <!-- bootstrap 5 css -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/css/bootstrap.min.css" integrity="sha384-DhY6onE6f3zzKbjUPRc2hOzGAdEf4/Dz+WJwBvEYL/lkkIsI3ihufq9hk9K4lVoK" crossorigin="anonymous">
+
+    <!-- bootstrap js -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/js/bootstrap.min.js" integrity="sha384-5h4UG+6GOuV9qXh6HqOLwZMY4mnLPraeTrjT5v07o347pj6IkfuoASuGBhfDsp3d" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'dashboard/css/styles.css' %}" />
+    <link href="https://cdn.jsdelivr.net/gh/eliyantosarage/font-awesome-pro@main/fontawesome-pro-6.5.1-web/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand d-flex flex-column align-item-start" id="sidebar">
+        <a href="#" class="navbar-brand text-light mt-5">
+            <div class="display-2 font-weight-bold">daisy</div>
+        </a>
+        <ul class="navbar-nav d-flex flex-column mt-5 w-100">
+            <li class="nav-item w-100">
+                <a href="{% url 'dashboard' %}" class="nav-link text-light pl-4">Home</a>
+            </li>
+            <li class="nav-item dropdown w-100">
+                <a href="#" class="nav-link dropdown-toggle text-light pl-4" id="navbarDropdown" role="button" data-toggle="dropdown" aria-expanded="false">IOT Control</a>
+                <ul class="dropdown-menu w-100" aria-labelledby="navbarDropdown">
+                    <li><a href="{% url 'control_panel' %}" class="dropdown-item text-light pl-4 p-2">Lights</a></li>
+                    <li><a href="#" class="dropdown-item text-light pl-4 p-2">Thermostat</a></li>
+                    <li><a href="#" class="dropdown-item text-light pl-4 p-2">Cameras</a></li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown w-100">
+                <a href="#" class="nav-link dropdown-toggle text-light pl-4" id="navbarDropdown" role="button" data-toggle="dropdown" aria-expanded="false">Home Server</a>
+                <ul class="dropdown-menu w-100" aria-labelledby="navbarDropdown">
+                    <li><a href="#" class="dropdown-item text-light pl-4 p-2">Connect via FTP</a></li>
+                    <li><a href="#" class="dropdown-item text-light pl-4 p-2">Connect via SSH</a></li>
+                </ul>
+            </li>
+            <li class="nav-item w-100">
+                <a href="#" class="nav-link text-light pl-4">Toggle Dark Mode</a>
+            </li>
+        </ul>
+    </nav>
+    <section class="p-4 my-container">
+
+        {% block content %}
+        
+        {% endblock %}
+    </section>
+
+
+    
+    <script>
+        var menu_btn = document.querySelector("#menu-btn")
+        var sidebar = document.querySelector("#sidebar")
+        var container = document.querySelector(".my-container")
+        menu_btn.addEventListener("click", () => {
+            sidebar.classList.toggle("active-nav")
+            container.classList.toggle("active-cont")
+        })
+    </script>
+</body>
+<style>
+
+</style>
+</html>

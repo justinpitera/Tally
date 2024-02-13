@@ -1,0 +1,65 @@
+<!-- lights/templates/lights/control_panel.html -->
+{% extends "base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+   
+{%block content%}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<a class="btn my-4" id="menu-btn"><i class="fa-solid fa-bars"></i></a>
+
+
+<div class="container mt-5">
+    <h2>Light Control Panel</h2>
+    
+    <ul class="list-group">
+        <li class="list-group-item">
+            <h5>All Lights</h5>
+            <a href="{% url 'turn_off_all_lights' %}" class="btn my-4" id="menu-btn"><i class="far fa-lightbulb-slash"></i></a>
+            <a href="{% url 'turn_on_all_lights' %}" class="btn my-4" id="menu-btn"><i class="far fa-lightbulb"></i></a>
+            <a href="{% url 'set_all_white' %}"class="btn my-4" id="menu-btn"><i class="fa-solid fa-rotate-left"></i></a>
+            
+            <form method="POST" action="{% url 'set_color' %}">
+                {% csrf_token %}
+                <input type="color" id="colorPicker" name="color" value="#ff0000">
+                <input type="submit" value="Set Color">
+            </form>
+        </li>
+        {% for light in lights %}
+        
+            <li class="list-group-item">
+                <h5>{{ light.name }}</h5>
+                <button class="btn my-4" id="menu-btn"><i class="far fa-lightbulb-slash"></i></button>
+                <a href="{% url 'set_white' light.id %}"class="btn my-4" id="menu-btn"><i class="fad fa-sun"></i></a>
+                <button class="btn my-4" id="menu-btn"><i class="fas fa-palette"></i></button>
+                <form method="POST" action="{% url 'set_light_color' light.id %}">
+                    {% csrf_token %}
+                    <input type="color" name="color" value="#ff0000" title="Choose color">
+                    <input type="submit" value="Set Color">
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+
+<script>
+    document.getElementById('colorPicker').onchange = function() {
+        console.log('Color picked:', this.value);
+    };
+</script>
+
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="{% static 'js/lights.js' %}"></script>
+
+
+
+{%endblock%}
+
+
+</html>
