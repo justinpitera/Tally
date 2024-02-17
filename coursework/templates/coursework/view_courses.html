@@ -22,7 +22,7 @@
     <h5>Active Courses <a style="background: none; border: none; cursor: pointer;"><i class="fas fa-caret-down" id="toggleActiveCourses"></i></a></h5>
     <div class="row" id="activeCoursesSection">
       {% for user_course in user_courses %}
-      <div class="col-md-4 mb-4">
+      <div class="col-md-4 mb-4 fast" draggable="true" id="course-{{ user_course.course.id }}">
         <div class="card h-100 shadow-sm" style="border-radius: 20px;">
           <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px; width: 286px; height: 190px; object-fit: cover;" src="{{ user_course.course.image.url }}" alt="{{ user_course.course.title }} image">
           <div class="card-body d-flex flex-column">
@@ -35,17 +35,18 @@
     {% endfor %}
     </div>
     <br>
-    {% if past_courses %}
+  {% endif %}
+     {% if past_courses %}
     <h5>Past Courses <a id="togglePastCourses" style="background: none; border: none; cursor: pointer;"><i class="fas fa-caret-down"></i></a></h5>
     <div class="row" id="pastCoursesSection" style="display: none;">
-      {% for user_course in past_courses %}
+      {% for past_course in past_courses %}
       <div class="col-md-4 mb-4">
         <div class="card h-100 shadow-sm" style="border-radius: 20px;">
-          <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px; width: 286px; height: 190px; object-fit: cover;" src="{{ user_course.course.image.url }}" alt="{{ user_course.course.title }} image">
+          <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px; width: 286px; height: 190px; object-fit: cover;" src="{{ past_course.course.image.url }}" alt="{{ past_course.course.title }} image">
           <div class="card-body d-flex flex-column">
-            <h5 class="card-title">{{ user_course.course.title }}</h5>
-            <p class="card-text">{{ user_course.course.description|truncatechars:100 }}</p>
-            <a href="{% url 'view_course' user_course.course.id %}" class="mt-auto btn view-course-btn">View Course</a>
+            <h5 class="card-title">{{ past_course.course.title }}</h5>
+            <p class="card-text">{{ past_course.course.description|truncatechars:100 }}</p>
+            <a href="{% url 'view_course' past_course.course.id %}" class="mt-auto btn view-course-btn">View Course</a>
           </div>
         </div>
       </div>
@@ -53,8 +54,6 @@
     </div>
     <br>
     {% endif %}
-  {% endif %}
- 
   {% if is_instructor %}
     <h5>Instructor Options</h5>
     <div class="row">
@@ -100,6 +99,80 @@ $(document).ready(function() {
     $("#pastCoursesSection").slideToggle();
   });
 });
+</script>
+
+
+
+<script>
+function sendNewOrderToServer() {
+  // Build an array to hold the order of course IDs
+  let courseOrder = [];
+  document.querySelectorAll('.col-md-4.mb-4.fast').forEach(item => {
+    // Extract the course ID from the element's ID attribute
+    let courseId = item.getAttribute('id').replace('course-', '');
+    courseOrder.push(courseId);
+  });
+
+  // Make an AJAX request to send the order to the server
+  $.ajax({
+    url: '/update_course_order/', // Ensure this matches your Django URL
+    type: 'POST',
+    data: {
+      'courseOrder[]': courseOrder,
+      csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(), // Include CSRF token
+    },
+    success: function(response) {
+      console.log('Order updated successfully');
+    },
+    error: function(xhr, status, error) {
+      console.error('Error updating order:', error);
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', (event) => {
+  let dragged;
+
+  document.querySelectorAll('.col-md-4.mb-4.fast').forEach(item => {
+    item.addEventListener('dragstart', function(e) {
+      dragged = this; // store a ref. on the dragged elem
+      e.dataTransfer.effectAllowed = 'move'; // define move operation
+    });
+
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault(); // prevent default to allow drop
+    });
+
+    item.addEventListener('drop', function(e) {
+      e.preventDefault(); // prevent default action (open as link for some elements)
+      if (this !== dragged) {
+        let currentPos = findPos(this);
+        let draggedPos = findPos(dragged);
+        if (currentPos < draggedPos) {
+          this.parentNode.insertBefore(dragged, this);
+        } else {
+          this.parentNode.insertBefore(dragged, this.nextSibling);
+        }
+        // After rearranging the DOM elements, send the new order to the server
+        sendNewOrderToServer();
+      }
+    });
+  });
+
+  function findPos(obj) {
+    var i = 0;
+    if (obj.previousSibling) {
+      do {
+        obj = obj.previousSibling;
+        i++;
+      } while (obj);
+    }
+    return i;
+  }
+});
+
+
+
+
 </script>
 
 {% endblock %}

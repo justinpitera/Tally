@@ -221,8 +221,8 @@ def add_user_to_course(request):
 def coursework_view(request):
     user_profile = get_object_or_404(UserProfile, user=request.user)
     
-    # Fetch all courses related to the user
-    user_courses_query = UserCourse.objects.filter(user=request.user).select_related("course")
+    # Fetch all courses related to the user and order them by the 'order' field
+    user_courses_query = UserCourse.objects.filter(user=request.user).select_related("course").order_by('order')
     
     # Filter active courses: those whose start_date is today or in the future
     active_courses = user_courses_query.filter(course__start_date__gte=now().date())
@@ -363,3 +363,22 @@ def ajax_search_users(request, course_id):
 
     return JsonResponse(students_data, safe=False)
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from .models import UserCourseOrder, Course
+from django.contrib.auth.decorators import login_required
+
+@csrf_exempt
+@login_required
+@require_POST
+def update_course_order(request):
+    try:
+        course_order = request.POST.getlist('courseOrder[]')
+        for index, course_id in enumerate(course_order):
+            user_course = UserCourse.objects.get(user=request.user, course_id=course_id)
+            user_course.order = index
+            user_course.save()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})

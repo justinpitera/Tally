@@ -7,6 +7,7 @@ from assignment.views import AssignmentListView
 
 
 urlpatterns = [
+    path('update_course_order/', views.update_course_order, name='update_course_order'),
     path('coursework/', coursework_view, name='coursework'),
     path('coursework/add_user_to_course/', views.add_user_to_course, name='add_user_to_course'),
     path('coursework/delete/<int:course_id>', views.delete_course, name='delete_course'),
