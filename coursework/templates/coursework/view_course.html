@@ -12,6 +12,13 @@
    </ol>
 </nav>
 
+<!-- In your Django template -->
+<script>
+   var viewProfileUrlTemplate = "{% url 'view_profile' 1 %}";
+   // Replace 'username_placeholder' with a placeholder value that you will replace in JavaScript
+</script>
+
+
 <ul class="nav nav-tabs" id="myTab" role="tablist">
    <li class="nav-item">
       <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
@@ -176,43 +183,55 @@
    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
       <div class="card">
          <div class="card-body">
-            {% if assignments %}
-               <ul>
-                  <div class="list-group">
-                     {% for assignment in assignments %}
-                     <a href="{% url 'view_assignment' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
-                        <div class="d-flex w-100 justify-content-between">
-                           <h5 class="mb-1">{{ assignment.name }}</h5>
-                           <small class="text-muted"><strong>Assigned: </strong>{{ assignment.start_date }} | <strong>Due: </strong>{{ assignment.end_date }}</small>
-                        </div>
-                        <p class="mb-1"></p>
-                        <h6>{{ assignment.instruction|truncatechars:100 }}</h6>
-                        
-                        {% if is_instructor %}
-                           {% with status=assignments_submission_status|get_item:assignment.id %}
-                              <span class="badge bg-info text-dark">Submissions: {{ status.submission_count }}</span>
-                           {% endwith %}
-                        {% else %}
-                           {% with status=assignments_submission_status|get_item:assignment.id %}
-                              {% if status.is_late %}
-                                 <span class="badge bg-danger text-dark">Late</span>
-                              {% endif %}
-                           
-                              {% if status.submitted %}
-                                 <span class="badge bg-success text-dark">Completed</span>
-                              {% else %}
-                                 <span class="badge bg-warning text-dark">Not Completed</span>
-                              {% endif %}
-                           {% endwith %}
-                        {% endif %}     
-                     </a>
-                     {% endfor %}    
-                 </div>        
-               </ul>
-            {% else %}
+            {% if not is_instructor and not has_started %}
+            <div class="alert alert-warning" role="alert">
+               <h4 class="alert-warning">Assignments not available</h4>
+               <p>This course has not yet begun. The course will release assignments to students sequentially, aligned with their planned start dates.</p>
+               <hr>
+               <p class="mb-0">Please refer to the course information or syllabus for the official start date.</p>
+            </div>
 
-               <p>No assignments for this course.</p>
+
+            {% else %}
+            {% if assignments %}
+            <ul>
+               <div class="list-group">
+                  {% for assignment in assignments %}
+                  <a href="{% url 'view_assignment' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                     <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ assignment.name }}</h5>
+                        <small class="text-muted"><strong>Assigned: </strong>{{ assignment.start_date }} | <strong>Due: </strong>{{ assignment.end_date }}</small>
+                     </div>
+                     <p class="mb-1"></p>
+                     <h6>{{ assignment.instruction|truncatechars:100 }}</h6>
+                     
+                     {% if is_instructor %}
+                        {% with status=assignments_submission_status|get_item:assignment.id %}
+                           <span class="badge bg-info text-dark">Submissions: {{ status.submission_count }}</span>
+                        {% endwith %}
+                     {% else %}
+                        {% with status=assignments_submission_status|get_item:assignment.id %}
+                           {% if status.is_late %}
+                              <span class="badge bg-danger text-dark">Late</span>
+                           {% endif %}
+                        
+                           {% if status.submitted %}
+                              <span class="badge bg-success text-dark">Completed</span>
+                           {% else %}
+                              <span class="badge bg-warning text-dark">Not Completed</span>
+                           {% endif %}
+                        {% endwith %}
+                     {% endif %}     
+                  </a>
+                  {% endfor %}    
+              </div>        
+            </ul>
+         {% else %}
+
+            <p>No assignments for this course.</p>
+         {% endif %}
             {% endif %}
+
 
             
             {% if is_instructor %}
@@ -240,12 +259,12 @@
         </tr>
      </thead>
      <tbody>
-        {% for assignment_id, status in assignments_submission_status.items %}
-           <tr>
-              <td><a href="{% url 'view_assignment' status.assignment_id %}">{{status.assignment_name}}</td>
-              <td>{{ status.grade }}</td>
-           </tr>
-        {% endfor %}
+      {% for assignment_id, status in assignments_submission_status.items %}
+      <tr>
+         <td><a href="{% url 'view_assignment' status.assignment_id %}">{{status.assignment_name}}</td>
+         <td>{{ status.grade }}</td>
+      </tr>
+      {% endfor %}
      </tbody>
   </table>
   {% else %}
