@@ -67,23 +67,23 @@ def delete_course(request, course_id):
 
 
 
-
 @login_required
 def course_detail_view(request, course_id):
-
     # Fetch the course using the course_id
     course = get_object_or_404(Course, id=course_id)
 
-    # Get all UserCourse instances related to the course
+    # Filter assignments specifically for this course
+    assignments = course.assignments.prefetch_related('submissions').all()
+
+    # Apply search query to the filtered assignments if present
+    search_query = request.GET.get('search_query', '')
+    if search_query:
+        assignments = assignments.filter(name__icontains=search_query)
+
     user_courses = UserCourse.objects.filter(course=course).select_related('user')
-    
-    # Extract the user IDs
     user_ids = [user_course.user.id for user_course in user_courses]
-    
-    # Fetch all UserProfile instances
     students = UserProfile.objects.filter(user__id__in=user_ids, role=UserProfile.STUDENT)
-    average_grade = None
-    # Calculate average grades for each student and store in a dictionary
+
     student_average_grades = {}
     for student in students:
         average_grade = Submission.objects.filter(
@@ -91,59 +91,35 @@ def course_detail_view(request, course_id):
             assignment__course_id=course_id
         ).aggregate(Avg('grade'))['grade__avg']
         
-        # Use student ID as key and average grade as value
         student_average_grades[student.user.id] = average_grade if average_grade is not None else 'No grade'
 
-
     user_profile = get_object_or_404(UserProfile, user=request.user)
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
-
-    course = get_object_or_404(Course, id=course_id)
-    user_profile = get_object_or_404(UserProfile, user=request.user)
-    assignments = course.assignments.prefetch_related('submissions').all()
-    modules = course.modules.all()
-    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
-
-
-    # Retrieve grades for the logged-in student
-    student_submissions = Submission.objects.filter(assignment__course=course, student=user_profile.user).select_related('assignment')
-
-    # Prepare a dictionary to hold assignment IDs and their corresponding grades for the student
-    student_grades = {submission.assignment.id: submission.grade for submission in student_submissions}
-
 
     assignments_submission_status = {}
-
     for assignment in assignments:
-        assignment_name = assignment.name
-        assignment_id = assignment.id
         submissions = assignment.submissions.filter(student=request.user)
         submission_exists = submissions.exists()
         is_late = False
         submission_count = 0
-        student_grade = student_grades.get(assignment.id)  # Retrieve the student's grade for this assignment
+        student_grade = None
 
         if submission_exists:
-            latest_submission_date = submissions.latest('submitted_at').submitted_at.date()
-            is_late = assignment.end_date < latest_submission_date if assignment.end_date else False
+            latest_submission = submissions.latest('submitted_at')
+            is_late = assignment.end_date < latest_submission.submitted_at.date() if assignment.end_date else False
+            student_grade = latest_submission.grade
         
         if is_instructor:
             submission_count = assignment.submissions.count()
-        
+
         assignments_submission_status[assignment.id] = {
             'submitted': submission_exists,
             'is_late': is_late,
             'submission_count': submission_count,
             'grade': student_grade,
-            'assignment_name': assignment_name,
-            'assignment_id': assignment_id,
-            'average_grade':average_grade,
+            'assignment_name': assignment.name,
+            'assignment_id': assignment.id,
         }
-    
-    # Handle the search query
-    query = request.GET.get('q')
-    if query:
-        students = students.filter(user__username__icontains=query)
 
     if request.method == 'POST':
         form = AssignmentForm(request.POST, course_id=course_id)
@@ -160,26 +136,15 @@ def course_detail_view(request, course_id):
         form = AssignmentForm(course_id=course_id)
         formset = AttachmentFormSet(instance=Assignment())
 
-    search_query = request.GET.get('search_query', '')
-    if search_query:
-        assignments = Assignment.objects.filter(name__icontains=search_query)
-    else:
-        assignments = Assignment.objects.all()
-
     context = {
         'form': form,
         'formset': formset,
         'course': course,
         'assignments': assignments,
-        'modules': modules,
         'is_instructor': is_instructor,
         'assignments_submission_status': assignments_submission_status,
-        'course_id': course_id,
         'students': students,
-        'average_grade':average_grade,
-        'student_average_grades':student_average_grades,
-        'assignments': assignments,
-        
+        'student_average_grades': student_average_grades,
     }
 
     return render(request, 'coursework/view_course.html', context)

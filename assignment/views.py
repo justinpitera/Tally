@@ -287,13 +287,6 @@ def create_assignment(request, course_id):
     })
 
 
-
-
-
-
-
-
-
 @login_required
 def delete_assignment(request, assignment_id):
     # Fetch the assignment to be deleted
