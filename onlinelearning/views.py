@@ -3,13 +3,17 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from accounts.models import UserProfile
 from django.contrib.auth.decorators import login_required
-from assignment.models import Assignment
+from assignment.models import Assignment, Submission
 from coursework.models import Course
 from onlinelearning.models import CustomContent, Module
 from .forms import CustomContentForm, ModuleForm
 from django.contrib.contenttypes.models import ContentType
 from django.views.generic import DeleteView
 from django.views.decorators.http import require_POST
+from django.contrib.auth.models import User
+from datetime import datetime
+
+
 
 @login_required
 def onlinelearning_view(request):
@@ -35,36 +39,55 @@ def create_module(request, course_id):
 
 @login_required
 def module_view(request, module_id):
-    # Retrieve the module object based on the provided module_id
     module = get_object_or_404(Module, pk=module_id)
-    
-    # Extract the associated course_id from the module
-    course_id = module.course.id
-    
+    course = get_object_or_404(Course, id=module.course.id)
+    assignments = course.assignments.prefetch_related('submissions').all()
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
+
+    assignments_submission_status = {}
+    for assignment in assignments:
+        submissions = assignment.submissions.filter(student=request.user)
+        submission_exists = submissions.exists()
+        is_late = False
+        submission_count = 0
+
+        # Check if there are submissions and if any were submitted late
+        if submission_exists:
+            for submission in submissions:
+                # Ensure there's an end date to compare with and that the submission was late
+                if assignment.end_date and submission.submitted_at.date() > assignment.end_date:
+                    is_late = True
+                    break  # Found a late submission, no need to check further
+
+        # Count submissions if the user is an instructor
+        if is_instructor:
+            submission_count = assignment.submissions.count()
+
+        assignments_submission_status[assignment.id] = {
+            'submitted': submission_exists,
+            'is_late': is_late,
+            'submission_count': submission_count  # Include the submission count here
+        }
+
     if request.method == 'POST':
         form = CustomContentForm(request.POST, request.FILES, module_arg=module_id)
         if form.is_valid():
-            # If the form is valid, save the form and redirect
             form.save()
-            # Redirect back to the module view or another view as needed
             return redirect('module_view', module_id=module_id)
     else:
-        # Instantiate the form with any initial arguments if needed
         form = CustomContentForm(module_arg=module_id)
-    # Retrieve the user profile to check if the user is an instructor
-    user_profile = get_object_or_404(UserProfile, user=request.user)
-    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
-    
-    # Pass the module, course_id, form, and is_instructor flag to the template
+
     context = {
         'module': module,
-        'course_id': course_id,  # Include the course_id in the context
+        'course_id': course.id,
         'form': form,
-        'is_instructor': is_instructor
+        'is_instructor': is_instructor,
+        'assignments_submission_status': assignments_submission_status,
     }
-    
-    # Render the template with the provided context
-    return render(request, 'onlinelearning/module_detail.html', context)
+
+    return render(request, 'onlinelearning/view_module.html', context)
+
 
 
 @login_required
@@ -76,11 +99,11 @@ def submit_content(request, module_arg):
             return redirect('module_view', module_arg)  # Redirect to a new URL
     else:
         form = CustomContentForm(module_arg=module_arg)
-    return render(request, 'onlinelearning/module_detail.html', {'form': form})
+    return render(request, 'onlinelearning/view_module.html', {'form': form})
 
 @login_required
 @require_POST  # Ensure that this view can only be called with a POST request
-def delete_custom_content(request, content_id):
+def delete_custom(request, content_id):
     content = get_object_or_404(CustomContent, id=content_id)
 
     # Optional: Check if the user has the permission to delete
@@ -93,3 +116,46 @@ def delete_custom_content(request, content_id):
     
     # Redirect to the module view or another success URL
     return redirect('module_view', module_id=module_id)
+
+@login_required
+def edit_module(request, module_id):
+    # Get the module instance to edit
+    module = get_object_or_404(Module, id=module_id)
+    course = get_object_or_404(Course, id=module.course.id)
+    course_id = course.id
+    # If this is a POST request, process the Form data
+    if request.method == 'POST':
+        # Create a form instance and populate it with data from the request (binding):
+        form = ModuleForm(request.POST, instance=module)
+        if form.is_valid():
+            # Save the updated module back to the database
+            form.save()
+            # Redirect to a new URL:
+            return redirect(reverse('view_course', kwargs={'course_id': course_id}) + "?tab=onlinelearning")
+    # If this is a GET (or any other method), create the default form.
+    else:
+        form = ModuleForm(instance=module)
+
+    context = {
+        'form': form,
+        'module': module
+    }
+
+    return render(request, 'onlinelearning/edit_module.html', context)
+
+
+
+@login_required  # Optional: Require user login for this action
+def delete_module(request, module_id):
+
+   
+    module = get_object_or_404(Module, id=module_id)
+    course = get_object_or_404(Course, id=module.course.id)
+    course_id = course.id
+    if request.method == 'POST':
+        # Delete the module and redirect to a success page, such as the list of modules.
+        module.delete()
+        return redirect(reverse('view_course', kwargs={'course_id': course_id}) + "?tab=onlinelearning")
+
+    # If not a POST request, display confirmation page
+    return render(request, 'onlinelearning/delete_module.html', {'module': module})

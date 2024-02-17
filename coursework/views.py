@@ -1,12 +1,15 @@
+from datetime import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from assignment.models import Attachment
+from django.urls import reverse
+from assignment.forms import AssignmentForm, AttachmentFormSet
+from assignment.models import Assignment, Attachment, Submission
 from .models import Course, UserCourse
 from .forms import UserCourseForm, CourseForm
 from django.contrib.auth.decorators import login_required
 from accounts.models import UserProfile
-from django.http import FileResponse, Http404
-
+from django.http import FileResponse, Http404, JsonResponse
+from django.db.models import Avg
 
 @login_required
 def direct_unenroll(request, course_id, user_id):
@@ -60,24 +63,92 @@ def delete_course(request, course_id):
     # Redirect to the course list page or another appropriate page
     return redirect("coursework")
 
+
+
+
+
 @login_required
 def course_detail_view(request, course_id):
+    # Fetch the course using the course_id
     course = get_object_or_404(Course, id=course_id)
+
+    # Filter assignments specifically for this course
+    assignments = course.assignments.prefetch_related('submissions').all()
+
+    # Apply search query to the filtered assignments if present
+    search_query = request.GET.get('search_query', '')
+    if search_query:
+        assignments = assignments.filter(name__icontains=search_query)
+
+    user_courses = UserCourse.objects.filter(course=course).select_related('user')
+    user_ids = [user_course.user.id for user_course in user_courses]
+    students = UserProfile.objects.filter(user__id__in=user_ids, role=UserProfile.STUDENT)
+
+    student_average_grades = {}
+    for student in students:
+        average_grade = Submission.objects.filter(
+            student_id=student.user.id,
+            assignment__course_id=course_id
+        ).aggregate(Avg('grade'))['grade__avg']
+        
+        student_average_grades[student.user.id] = average_grade if average_grade is not None else 'No grade'
+
     user_profile = get_object_or_404(UserProfile, user=request.user)
-    assignments = course.assignments.all()  # Assuming Course model has related_name='assignments'
-    modules = course.modules.all()  # Assuming Module model has a ForeignKey to Course
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
-    
-    return render(
-        request,
-        "coursework/view_course.html",
-        {
-            "course": course,
-            "assignments": assignments,
-            "modules": modules,  # Include modules in the context
-            "is_instructor": is_instructor,
-        },
-    )
+
+    assignments_submission_status = {}
+    for assignment in assignments:
+        submissions = assignment.submissions.filter(student=request.user)
+        submission_exists = submissions.exists()
+        is_late = False
+        submission_count = 0
+        student_grade = None
+
+        if submission_exists:
+            latest_submission = submissions.latest('submitted_at')
+            is_late = assignment.end_date < latest_submission.submitted_at.date() if assignment.end_date else False
+            student_grade = latest_submission.grade
+        
+        if is_instructor:
+            submission_count = assignment.submissions.count()
+
+        assignments_submission_status[assignment.id] = {
+            'submitted': submission_exists,
+            'is_late': is_late,
+            'submission_count': submission_count,
+            'grade': student_grade,
+            'assignment_name': assignment.name,
+            'assignment_id': assignment.id,
+        }
+
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST, course_id=course_id)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.course = course
+            assignment.save()
+
+            formset = AttachmentFormSet(request.POST, request.FILES, instance=assignment)
+            if formset.is_valid():
+                formset.save()
+                return redirect(f'{reverse("view_course", args=[course.id])}?tab=assignments')
+    else:
+        form = AssignmentForm(course_id=course_id)
+        formset = AttachmentFormSet(instance=Assignment())
+
+    context = {
+        'form': form,
+        'formset': formset,
+        'course': course,
+        'assignments': assignments,
+        'is_instructor': is_instructor,
+        'assignments_submission_status': assignments_submission_status,
+        'students': students,
+        'student_average_grades': student_average_grades,
+    }
+
+    return render(request, 'coursework/view_course.html', context)
+
 
 @login_required
 def edit_course(request, course_id):
@@ -98,6 +169,9 @@ def edit_course(request, course_id):
         form = CourseForm(instance=course)
 
     return render(request, 'coursework/edit_course.html', {'form': form, 'course': course})
+
+
+
 
 
 @login_required
@@ -150,7 +224,7 @@ def coursework_view(request):
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
     return render(
         request,
-        "coursework/coursework.html",
+        "coursework/view_courses.html",
         {
             "user_courses": user_courses,
             "page_title": "Coursework - Tally",
@@ -183,3 +257,98 @@ def direct_enroll(request, user_id):
         form = UserCourseForm(user=user)
     
     return render(request, "coursework/direct_enroll.html", {'form': form, 'user_id': user_id})
+
+
+@login_required
+def enrolled_members(request, course_id):
+    # Fetch the course using the course_id
+    course = get_object_or_404(Course, id=course_id)
+    
+    # Get all UserCourse instances related to the course
+    user_courses = UserCourse.objects.filter(course=course)
+    
+    # Fetch all UserProfile instances from user_courses
+    users = [user_course.user for user_course in user_courses]
+    
+    # Pass the users to the template
+    return render(request, "coursework/enrolled_members.html", {"course": course, "users": users})
+
+@login_required
+def gradebook(request, course_id):
+    # Fetch the course using the course_id
+    course = get_object_or_404(Course, id=course_id)
+
+    # Get all UserCourse instances related to the course
+    user_courses = UserCourse.objects.filter(course=course).select_related('user')
+    
+    # Extract the user IDs
+    user_ids = [user_course.user.id for user_course in user_courses]
+    
+    # Fetch all UserProfile instances
+    students = UserProfile.objects.filter(user__id__in=user_ids, role=UserProfile.STUDENT)
+
+    # Calculate average grades and attach directly to each student object
+    for student in students:
+        average_grade = Submission.objects.filter(
+            student_id=student.user.id,
+            assignment__course_id=course_id
+        ).aggregate(Avg('grade'))['grade__avg']
+        
+        # Attach the average grade directly to the student object
+        student.average_grade = average_grade if average_grade is not None else 'No grade'
+
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
+
+    return render(request, "coursework/gradebook.html", {
+        "course": course,
+        "students": students,
+        "course_id": course_id,
+        "is_instructor": is_instructor
+    })
+
+from django.db.models import Q
+from django.contrib.auth.models import User
+
+from django.db.models import Avg
+
+from django.db.models import Avg
+
+@login_required
+def ajax_search_users(request, course_id):
+    query = request.GET.get('q', '')
+
+    try:
+        course = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+        return JsonResponse({"error": "Course not found"}, status=404)
+
+    instructor_user_id = course.instructor.id
+
+    students = User.objects.filter(
+        usercourse__course=course
+    ).exclude(id=instructor_user_id)
+
+    if query:
+        students = students.filter(
+            Q(username__icontains=query) | Q(email__icontains=query)
+        )
+
+    students_data = []
+    for student in students:
+        # Adjust the filter to span relationships: Submission -> Assignment -> Course
+        average_grade = Submission.objects.filter(
+            student=student, 
+            assignment__course=course  # Adjusted to use 'assignment__course'
+        ).aggregate(avg_grade=Avg('grade'))['avg_grade']
+
+        average_grade_str = f"{average_grade:.2f}" if average_grade is not None else "No grade"
+
+        students_data.append({
+            "username": student.username,
+            "email": student.email,
+            "average_grade": average_grade_str
+        })
+
+    return JsonResponse(students_data, safe=False)
+

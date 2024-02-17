@@ -1,27 +1,32 @@
-{% extends 'base.html' %} 
-{% block content %}
-{% load static %}
-<link rel="stylesheet" type="text/css" href="{% static '/assignment/css/styles.css' %}">
+{% extends 'base.html' %} {% block content %} {% load static %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static '/assignment/css/styles.css' %}"
+/>
 <script src="{% static '/assignment/js/scripts.js' %}"></script>
 <nav aria-label="breadcrumb">
-   <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'view_course' assignment.course.id %}?tab=assignments">{{assignment.course.title }}</a></li>
-      {% if is_instructor %}
-      <li class="breadcrumb-item"><a href="{% url 'assignment_view' assignment.id %}?tab=section2">{{assignment.name }}</a></li>
-      {% else %}
-      <li class="breadcrumb-item"><a href="{% url 'assignment_view' assignment.id %}?tab=section3">{{assignment.name }}</a></li>
-      {% endif %}      
-      <li class="breadcrumb-item active" aria-current="page">Add Feedback</li>
-   </ol>
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'view_course' assignment.course.id %}?tab=assignments">{{assignment.course.title }}</a>
+    </li>
+    {% if is_instructor %}
+    <li class="breadcrumb-item">
+      <a href="{% url 'view_assignment' assignment.id %}?tab=section2">{{assignment.name }}</a>
+    </li>
+    {% else %}
+    <li class="breadcrumb-item">
+      <a href="{% url 'view_assignment' assignment.id %}?tab=section3">{{assignment.name }}</a>
+
+    </li>
+    {% endif %}
+    <li class="breadcrumb-item active" aria-current="page">Add Feedback</li>
+  </ol>
 </nav>
-<h2>Add Feedback for {{submission.student.username}} </h2>
+<h2>Add Feedback for {{submission.student.username}}</h2>
 <form method="post" enctype="multipart/form-data">
-   {% csrf_token %}
-   {{ form.as_p }}
-   <button type="submit">Submit</button>
+  {% csrf_token %} {{ form.as_p }}
+  <button type="submit">Submit</button>
 </form>
 {% endblock %}
-
-
-

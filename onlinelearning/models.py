@@ -37,6 +37,7 @@ class CustomContent(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, blank=True, null=True)
     module = models.ForeignKey(Module, on_delete=models.CASCADE, blank=True, null=True)
     urltext = models.CharField(blank=True, null=True,max_length=120)
+    posted = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.get_content_type_display()

@@ -1,0 +1,49 @@
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Email</th>
+                <th>Total Grade</th>
+                <!-- Add other columns as needed -->
+            </tr>
+        </thead>
+        {% load custom_filters %}
+        <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.user.username }}</td>
+                    <td>{{ student.user.email }}</td>
+                    <td>{{ student.average_grade }}</td>
+                </tr>
+            {% endfor %}
+
+        </tbody>        
+    </table>
+</body>
+
+<style>
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+ 
+    td, th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+ 
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+ </style>
+{% endblock %}

@@ -29,10 +29,37 @@
    {% endif %}
 </ul>
 <div id="section3" class="content-section" style="display: none;">
-   {% if submissions %}
-   <a class="btn btn-outline-secondary custom-btn" href="{% url 'add_feedback' assignment.id %}">Respond to feedback</a>
-   </button>
-   {% endif %}
+   <div class="card">
+      <div class="card-header">Grade Details </div>
+
+      <div class="card-body d-flex justify-content-between align-items-start">
+         <div>
+           <p class="card-text mb-2">
+            {% if submission_grade %}
+               <p><strong>Grade:</strong> {{ submission_grade }}
+                  <br>
+               {% if submission_comments %}
+                  <strong>Comments:</strong><br> {{ submission_comments }}</p>
+
+               {% else %}
+                  <p>No comments</p>
+               {% endif %}
+
+            {% else %}
+               <p>Submission is under review</p>
+            {% endif %}
+           </p>
+           <p class="card-text">
+            {% if submissions %}
+            {% for submission in submissions %}
+            <a class="btn btn-outline-secondary custom-btn" href="{% url 'add_feedback' submission_id=submission.id %}"><i class="fas fa-comments"></i> Respond to feedback</a>
+            {% endfor %}
+            {% endif %}
+           </p>
+         </div>
+       </div>
+   </div>
+ 
    {% if feedbacks %}
    <ul>
       {% for feedback in feedbacks %}
@@ -41,7 +68,7 @@
          <strong>Message:</strong> {{ feedback.message }}<br>
          {% if feedback.file %}
          <button type="button" class="btn btn-outline-secondary custom-download-btn" onclick="event.preventDefault(); window.open('{{ feedback.file.url }}', '_blank');">
-         Download Attached File <i class="fas fa-download"></i>
+            <i class="fas fa-download"> Download Attached File</i>
          </button>
          {% endif %}
       </li>
@@ -57,9 +84,6 @@
    <div class="card">
       <div class="card-header">
          Assignment Details 
-
-
-         
       </div>
 
       <div class="card-body d-flex justify-content-between align-items-start">
@@ -76,7 +100,7 @@
              {% if assignment.attachments.all %}
                {% for attachment in assignment.attachments.all %}
                  <button type="button" class="btn btn-outline-secondary custom-download-btn mt-1" data-url="{% url 'download_attachment' attachment.id %}">
-                   Download Attachment <i class="fas fa-download"></i>
+                  <i class="fas fa-download"></i> Download Attachment
                  </button>
                {% endfor %}
              {% else %}
@@ -85,18 +109,21 @@
            </p>
          </div>
          {% if is_instructor %}
-<!-- Example Edit Button for an Assignment -->
-<button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#editAssignmentModal" data-assignment-id="{{ assignment.id }}">
-   <i class="far fa-edit"></i> Edit
-</button>
+         <div class="btn-group" role="group" aria-label="Assignment Actions">
+            <!-- Edit Button -->
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#editAssignmentModal" data-assignment-id="{{ assignment.id }}">
+               <i class="far fa-edit"></i> Edit
+            </button>
+        
 
+            <!-- Delete Button -->
+            <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#deleteAssignmentModal" data-assignment-id="{{ assignment.id }}">
+               <i class="fas fa-trash-alt"></i> Delete
+            </button>
+        </div>
+         
          {% endif %}
        </div>
-       
-
-
-
-
    </div>
    <div class="assignment-details">
       <h4>Instructions:</h4>
@@ -121,16 +148,16 @@
                <strong>Submitted at: </strong>{{ submission.submitted_at}}
             </p>
             <button type="button" class="btn btn-outline-secondary custom-download-btn" onclick="event.preventDefault(); window.open('{{ submission.file.url }}', '_blank');">
-            Download Submission <i class="fas fa-download"></i>
+               <i class="fas fa-download"></i> Download Submission
             </button>
             <a class="btn btn-outline-secondary custom-btn" href="{% url 'grade_submission' submission_id=submission.id %}">
-            Grade Submission <i class="fas fa-pen-nib"></i></i>
+               <i class="fas fa-pen-nib"></i> Grade Submission
             </a>
             <a class="btn btn-outline-secondary custom-btn" href="{% url 'add_feedback' submission_id=submission.id %}">
-            Submission Feedback <i class="fa-solid fa-comment"></i></i>
+               <i class="fa-solid fa-comment"> </i>  Submission Feedback
             </a>
             <button type="button" class="btn btn-outline-secondary custom-btn" data-url="#">
-            Flag Submission <i class="fa-solid fa-flag"></i></i></i>
+               <i class="fa-solid fa-flag"></i> Flag Submission
             </button>
          </div>
       </div>
@@ -178,7 +205,7 @@
                    <span aria-hidden="true">&times;</span>
                </button>
            </div>
-           <form method="post" action="{% url 'assignment_view' assignment_id=assignment.id %}">
+           <form method="post" action="{% url 'view_assignment' assignment_id=assignment.id %}">
                {% csrf_token %}
                <div class="modal-body">
                        <h2>Edit Assignment</h2>
@@ -218,6 +245,29 @@
                </div>
 
            </form>
+       </div>
+   </div>
+</div>
+<!-- Delete Assignment Modal (Same as previously defined) -->
+<div class="modal fade" id="deleteAssignmentModal" tabindex="-1" role="dialog" aria-labelledby="deleteAssignmentModalLabel" aria-hidden="true">
+   <div class="modal-dialog" role="document">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h5 class="modal-title" id="deleteAssignmentModalLabel">Confirm Delete Assignment</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <div class="modal-body">
+               Are you sure you want to delete this assignment?
+           </div>
+           <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+               <form method="post" action="{% url 'delete_assignment' assignment.id %}">
+                   {% csrf_token %}
+                   <button type="submit" class="btn btn-danger">Delete</button>
+               </form>
+           </div>
        </div>
    </div>
 </div>
