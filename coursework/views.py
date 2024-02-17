@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from accounts.models import UserProfile
 from django.http import FileResponse, Http404, JsonResponse
 from django.db.models import Avg
-
+from django.utils.timezone import now
 @login_required
 def direct_unenroll(request, course_id, user_id):
     # Ensure the request is POST for security reasons
@@ -220,13 +220,24 @@ def add_user_to_course(request):
 @login_required
 def coursework_view(request):
     user_profile = get_object_or_404(UserProfile, user=request.user)
-    user_courses = UserCourse.objects.filter(user=request.user).select_related("course")
+    
+    # Fetch all courses related to the user
+    user_courses_query = UserCourse.objects.filter(user=request.user).select_related("course")
+    
+    # Filter active courses: those whose start_date is today or in the future
+    active_courses = user_courses_query.filter(course__start_date__gte=now().date())
+    
+    # Filter past courses: those whose start_date is in the past
+    past_courses = user_courses_query.filter(course__start_date__lt=now().date())
+    
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
+    
     return render(
         request,
         "coursework/view_courses.html",
         {
-            "user_courses": user_courses,
+            "user_courses": active_courses,  # Updated to only include active courses
+            "past_courses": past_courses,  # Add past courses to the context
             "page_title": "Coursework - Tally",
             "is_instructor": is_instructor,
         },

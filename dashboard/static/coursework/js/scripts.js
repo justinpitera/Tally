@@ -119,3 +119,17 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     });
+
+    document.getElementById('search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch('', { 
+            method: 'GET',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('assignment-list').innerHTML = html;
+        });
+    });
+    

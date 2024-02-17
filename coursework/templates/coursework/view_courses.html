@@ -1,17 +1,15 @@
 {% extends "base.html" %}
-
-
 {% block content %}
-
 {% load static %}
+<head>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <link rel="stylesheet" type="text/css" href="{% static '/coursework/css/styles.css' %}">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+</head>
 
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
@@ -19,22 +17,66 @@
   </ol>
 </nav>
 
-
 <div class="container mt-5">
-  <h5>Active Courses</h5>
-  <div class="row">
-    {% for user_course in user_courses %}
+  {% if user_courses %}
+    <h5>Active Courses <a style="background: none; border: none; cursor: pointer;"><i class="fas fa-caret-down" id="toggleActiveCourses"></i></a></h5>
+    <div class="row" id="activeCoursesSection">
+      {% for user_course in user_courses %}
+      <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm" style="border-radius: 20px;">
+          <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px; width: 286px; height: 190px; object-fit: cover;" src="{{ user_course.course.image.url }}" alt="{{ user_course.course.title }} image">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ user_course.course.title }}</h5>
+            <p class="card-text">{{ user_course.course.description|truncatechars:100 }}</p>
+            <a href="{% url 'view_course' user_course.course.id %}" class="mt-auto btn view-course-btn">View Course</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+    <br>
+    {% if past_courses %}
+    <h5>Past Courses <a id="togglePastCourses" style="background: none; border: none; cursor: pointer;"><i class="fas fa-caret-down"></i></a></h5>
+    <div class="row" id="pastCoursesSection" style="display: none;">
+      {% for user_course in past_courses %}
+      <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm" style="border-radius: 20px;">
+          <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px; width: 286px; height: 190px; object-fit: cover;" src="{{ user_course.course.image.url }}" alt="{{ user_course.course.title }} image">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ user_course.course.title }}</h5>
+            <p class="card-text">{{ user_course.course.description|truncatechars:100 }}</p>
+            <a href="{% url 'view_course' user_course.course.id %}" class="mt-auto btn view-course-btn">View Course</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <br>
+    {% endif %}
+  {% endif %}
+ 
+  {% if is_instructor %}
+    <h5>Instructor Options</h5>
+    <div class="row">
     <div class="col-md-4 mb-4">
       <div class="card h-100 shadow-sm" style="border-radius: 20px;">
-        <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px; width: 286px; height: 190px; object-fit: cover;" src="{{ user_course.course.image.url }}" alt="{{ user_course.course.title }} image">
         <div class="card-body d-flex flex-column">
-          <h5 class="card-title">{{ user_course.course.title }}</h5>
-          <p class="card-text">{{ user_course.course.description|truncatechars:100 }}</p>
-          <a href="{% url 'view_course' user_course.course.id %}" class="mt-auto btn view-course-btn">View Course</a>
+          <h5 class="card-title">New Course</h5>
+          <a href="{% url 'create_course' %}" class="mt-auto btn view-course-btn">Create Course</a>
         </div>
       </div>
     </div>
-    {% endfor %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm" style="border-radius: 20px;">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">Manage Courses</h5>
+          <a href="{% url 'create_course' %}" class="mt-auto btn view-course-btn">Manage Courses</a>
+        </div>
+      </div>
+    </div>
+    </div>
+  {% else %}
+    <h5>Explore</h5>
     <div class="col-md-4 mb-4">
       <div class="card h-100 shadow-sm" style="border-radius: 20px;">
         <div class="card-body d-flex flex-column">
@@ -44,40 +86,20 @@
         </div>
       </div>
     </div>
-    <br>
-    <br>
-  </div>
-  <h5>Instructor Options</h5>
-  {% if is_instructor %}
-  <div class="col-md-4 mb-4">
-    <div class="card h-100 shadow-sm" style="border-radius: 20px;">
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">New Course</h5>
-        <a href="{% url 'create_course' %}" class="mt-auto btn view-course-btn">Create New Course</a>
-      </div>
-    </div>
-  </div>
   {% endif %}
 
 </div>
 
 <script>
-  document.getElementById('search-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    fetch('', { 
-        method: 'GET',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(html => {
-        document.getElementById('assignment-list').innerHTML = html;
-    });
-});
+$(document).ready(function() {
+  $("#toggleActiveCourses").click(function() {
+    $("#activeCoursesSection").slideToggle();
+  });
 
+  $("#togglePastCourses").click(function() {
+    $("#pastCoursesSection").slideToggle();
+  });
+});
 </script>
 
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 {% endblock %}
