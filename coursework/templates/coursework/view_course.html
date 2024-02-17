@@ -225,53 +225,48 @@
       </div>
    </div>
    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-      {% if not is_instructor %}
-      
-      <!-- Student grade view -->
-      <table>
-         <thead>
-            <tr>
-               <th>Assignment</th>
-               <th>Grade</th>
-            </tr>
-         </thead>
-         <tbody>
-            {% for assignment_id, status in assignments_submission_status.items %}
-               <tr>
-                  <td><a href="{% url 'view_assignment' status.assignment_id %}">{{status.assignment_name}}</td>
-                  <td>{{ status.grade }}</td>
-               </tr>
-            {% endfor %}
-         </tbody>
-      </table>
-  
-      {% endif %}
 
-      {% if is_instructor %}
-      <form id="searchForm" data-course-id="{{ course.id }}" class="d-flex">
-         <input type="text" id="searchInput" name="q" placeholder="Search by student name..." class="form-control me-2">
-         <button type="submit" class="btn btn-download-attachment" >Search</button>
-     </form>
-     
-
-     <table>
-      <thead>
-          <tr>
-              <th>Student Name</th>
-              <th>Email</th>
-              <th>Grade Average</th>
-          </tr>
-      </thead>
-      <tbody id="resultsTableBody">
-          <!-- Rows filled by JavaScript -->
-      </tbody>
-  </table>
-
-      {% endif %}
 
 
   {% if assignments_submission_status %}
+  {% if not is_instructor %}
+      
+  <!-- Student grade view -->
+  <table>
+     <thead>
+        <tr>
+           <th>Assignment</th>
+           <th>Grade</th>
+        </tr>
+     </thead>
+     <tbody>
+        {% for assignment_id, status in assignments_submission_status.items %}
+           <tr>
+              <td><a href="{% url 'view_assignment' status.assignment_id %}">{{status.assignment_name}}</td>
+              <td>{{ status.grade }}</td>
+           </tr>
+        {% endfor %}
+     </tbody>
+  </table>
+  {% else %}
+     <form id="searchForm" data-course-id="{{ course.id }}" class="d-flex">
+        <input type="text" id="searchInput" name="q" placeholder="Search by student name..." class="form-control me-2">
+        <button type="submit" class="btn btn-download-attachment" >Search</button>
+     </form>
+     <table>
+        <thead>
+           <tr>
+              <th>Student Name</th>
+              <th>Email</th>
+              <th>Grade Average</th>
+           </tr>
+        </thead>
+        <tbody id="resultsTableBody">
+           <!-- Rows filled by JavaScript -->
+        </tbody>
+     </table>
 
+  {% endif %}
   {% else %}
       <p>No grades available.</p>
   {% endif %}
