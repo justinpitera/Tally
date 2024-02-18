@@ -1,17 +1,16 @@
 {% extends "base.html" %}
-
-
 {% block content %}
-
 {% load static %}
+<head>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <link rel="stylesheet" type="text/css" href="{% static '/coursework/css/styles.css' %}">
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+</head>
 
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
@@ -19,22 +18,66 @@
   </ol>
 </nav>
 
-
 <div class="container mt-5">
-  <h5>Active Courses</h5>
-  <div class="row">
-    {% for user_course in user_courses %}
-    <div class="col-md-4 mb-4">
-      <div class="card h-100 shadow-sm" style="border-radius: 20px;">
-        <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px; width: 286px; height: 190px; object-fit: cover;" src="{{ user_course.course.image.url }}" alt="{{ user_course.course.title }} image">
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">{{ user_course.course.title }}</h5>
-          <p class="card-text">{{ user_course.course.description|truncatechars:100 }}</p>
-          <a href="{% url 'view_course' user_course.course.id %}" class="mt-auto btn view-course-btn">View Course</a>
+  {% if user_courses %}
+  <h5><a id="toggleActiveCourses" style="background: none; border: none; cursor: pointer;"><span id="activeCoursesToggle">Active Courses</span> <i class="fas fa-caret-up"></i></a></h5>
+
+  <div class="row" id="activeCoursesSection">
+      {% for user_course in user_courses %}
+      <div class="col-md-4 mb-4 fast" draggable="true" id="course-{{ user_course.course.id }}">
+        <div class="card h-100 shadow-sm" style="border-radius: 20px;">
+          <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px; width: 286px; height: 190px; object-fit: cover;" src="{{ user_course.course.image.url }}" alt="{{ user_course.course.title }} image">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ user_course.course.title }}</h5>
+            <p class="card-text">{{ user_course.course.description|truncatechars:100 }}</p>
+            <a href="{% url 'view_course' user_course.course.id %}" class="mt-auto btn view-course-btn">View Course</a>
+          </div>
         </div>
       </div>
-    </div>
     {% endfor %}
+    </div>
+    <br>
+  {% endif %}
+  {% if future_courses %}
+  <h5><a id="toggleFutureCourses" style="background: none; border: none; cursor: pointer;"><span id="futureCoursesToggle">Future Courses</span> <i class="fas fa-caret-down"></i></a></h5>
+  <div class="row" id="futureCoursesSection"  style="display: none;">
+      {% for future_course in future_courses %}
+      <div class="col-md-4 mb-4" draggable="true" id="course-{{ future_course.course.id }}">
+        <div class="card h-100 shadow-sm" style="border-radius: 20px;">
+          <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px; width: 286px; height: 190px; object-fit: cover;" src="{{ future_course.course.image.url }}" alt="{{ future_course.course.title }} image">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ future_course.course.title }}</h5>
+            <p class="card-text">{{ future_course.course.description|truncatechars:100 }}</p>
+            <a href="{% url 'view_course' future_course.course.id %}" class="mt-auto btn view-course-btn">View Course</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+    <br>
+  {% endif %}
+     {% if past_courses %}
+     <h5><a id="togglePastCourses" style="background: none; border: none; cursor: pointer;"><span id="pastCoursesToggle">Past Courses</span> <i class="fas fa-caret-down"></i></a></h5>
+     <div class="row" id="pastCoursesSection" style="display: none;">
+      {% for past_course in past_courses %}
+      <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm" style="border-radius: 20px;">
+          <img class="card-img-top" style="border-top-left-radius: 20px; border-top-right-radius: 20px; width: 286px; height: 190px; object-fit: cover;" src="{{ past_course.course.image.url }}" alt="{{ past_course.course.title }} image">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ past_course.course.title }}</h5>
+            <p class="card-text">{{ past_course.course.description|truncatechars:100 }}</p>
+            <a href="{% url 'view_course' past_course.course.id %}" class="mt-auto btn view-course-btn">View Course</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <br>
+    {% endif %}
+
+    {% if not is_instructor %}
+    <h5><a style="background: none; border: none; cursor: pointer;"><span id="toggleEnrollNow">Explore Courses</span> <i class="fas fa-caret-down" id="toggleEnrollNow"></i></a></h5>
+    <div class="col-md-4 mb-4" id="enrollNowSection" style="display: none;">
     <div class="col-md-4 mb-4">
       <div class="card h-100 shadow-sm" style="border-radius: 20px;">
         <div class="card-body d-flex flex-column">
@@ -44,40 +87,191 @@
         </div>
       </div>
     </div>
-    <br>
-    <br>
-  </div>
-  <h5>Instructor Options</h5>
+    {% endif %}
   {% if is_instructor %}
-  <div class="col-md-4 mb-4">
-    <div class="card h-100 shadow-sm" style="border-radius: 20px;">
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title">New Course</h5>
-        <a href="{% url 'create_course' %}" class="mt-auto btn view-course-btn">Create New Course</a>
+  <h5><a id="toggleInstructorOptions" style="background: none; border: none; cursor: pointer;"><span id="intructorOptionsToggle">Instructor Options</span> <i class="fas fa-caret-down"></i></a></h5>
+  <div class="row" id="instructorOptionsSection" style="display: none;">
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm" style="border-radius: 20px;">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">New Course</h5>
+          <a href="#" class="mt-auto btn view-course-btn" data-toggle="modal" data-target="#createCourseModal">Create Course</a>
+        </div>
       </div>
     </div>
-  </div>
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm" style="border-radius: 20px;">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">Manage Courses</h5>
+          <a href="#" class="mt-auto btn view-course-btn">Manage Courses</a>
+        </div>
+      </div>
+    </div>
+    </div>
+
   {% endif %}
 
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="createCourseModal" tabindex="-1" role="dialog" aria-labelledby="createCourseModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createCourseModalTitle">Create Course</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+          {% csrf_token %}
+          <div class="form-row">
+              {% for field in form %}
+                  <div class="{% if field.name == 'description' %}col-12{% else %}col-md-6 mb-3{% endif %}">
+                      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                      {{ field }}
+                      {% if field.help_text %}
+                          <small class="form-text text-muted">{{ field.help_text }}</small>
+                      {% endif %}
+                      {% for error in field.errors %}
+                          <div class="invalid-feedback">
+                              {{ error }}
+                          </div>
+                      {% endfor %}
+                  </div>
+              {% endfor %}
+          </div>
+          <button type="submit" class="btn btn-success">Create Course</button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-  document.getElementById('search-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    fetch('', { 
-        method: 'GET',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(html => {
-        document.getElementById('assignment-list').innerHTML = html;
+  $(document).ready(function() {
+    // Toggle for Active Courses
+    $("#toggleActiveCourses").click(function() {
+      $("#activeCoursesSection").slideToggle();
+      // Toggle caret direction
+      $("#toggleActiveCourses i").toggleClass("fa-caret-down fa-caret-up");
     });
-});
+  
+    // Toggle for Past Courses
+    $("#togglePastCourses").click(function() {
+      $("#pastCoursesSection").slideToggle();
+      // Toggle caret direction
+      $("#togglePastCourses i").toggleClass("fa-caret-down fa-caret-up");
+    });
+  
+    // Toggle for Instructor Options
+    $("#toggleInstructorOptions").click(function() {
+      $("#instructorOptionsSection").slideToggle();
+      // Toggle caret direction
+      $("#toggleInstructorOptions i").toggleClass("fa-caret-down fa-caret-up");
+    });
+  
+    // Toggle for Enroll Now
+    $("#toggleEnrollNow").click(function() {
+      $("#enrollNowSection").slideToggle();
+      // Toggle caret direction
+      $("#toggleEnrollNow i").toggleClass("fa-caret-down fa-caret-up");
+    });
+        // Toggle for Enroll Now
+    $("#toggleFutureCourses").click(function() {
+      $("#futureCoursesSection").slideToggle();
+      // Toggle caret direction
+      $("#toggleFutureCourses i").toggleClass("fa-caret-down fa-caret-up");
+    });
+  });
+  </script>
+  
+
+
+<script>
+  function sendNewOrderToServer() {
+    // Build an array to hold the order of course IDs
+    let courseOrder = [];
+    document.querySelectorAll('.col-md-4.mb-4.fast').forEach(item => {
+      // Extract the course ID from the element's ID attribute
+      let courseId = item.getAttribute('id').replace('course-', '');
+      courseOrder.push(courseId);
+    });
+  
+    // Make an AJAX request to send the order to the server
+    $.ajax({
+      url: '/update_course_order/', // Ensure this matches your Django URL
+      type: 'POST',
+      data: {
+        'courseOrder[]': courseOrder,
+        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(), // Include CSRF token
+      },
+      success: function(response) {
+        console.log('Order updated successfully');
+      },
+      error: function(xhr, status, error) {
+        console.error('Error updating order:', error);
+      }
+    });
+  }
+  
+  document.addEventListener('DOMContentLoaded', (event) => {
+    let dragged;
+  
+    document.querySelectorAll('.col-md-4.mb-4.fast').forEach(item => {
+      item.addEventListener('dragstart', function(e) {
+        // Check if the drag started on elements that should not initiate a drag
+        if(e.target.tagName === 'IMG' || e.target.tagName === 'A' || e.target.classList.contains('non-draggable')) {
+          e.preventDefault(); // Prevent drag from starting
+          return; // Exit the function
+        }
+        dragged = this; // store a ref. on the dragged elem
+        e.dataTransfer.effectAllowed = 'move'; // define move operation
+      });
+  
+      item.addEventListener('dragover', function(e) {
+        e.preventDefault(); // prevent default to allow drop
+      });
+  
+      item.addEventListener('drop', function(e) {
+        e.preventDefault(); // prevent default action (open as link for some elements)
+        if (this !== dragged) {
+          let currentPos = findPos(this);
+          let draggedPos = findPos(dragged);
+          if (currentPos < draggedPos) {
+            this.parentNode.insertBefore(dragged, this);
+          } else {
+            this.parentNode.insertBefore(dragged, this.nextSibling);
+          }
+          // After rearranging the DOM elements, send the new order to the server
+          sendNewOrderToServer();
+        }
+      });
+    });
+  
+    function findPos(obj) {
+      var i = 0;
+      if (obj.previousSibling) {
+        do {
+          obj = obj.previousSibling;
+          i++;
+        } while (obj);
+      }
+      return i;
+    }
+  });
+  
+  </script>
+  
+
+
+
 
 </script>
 
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 {% endblock %}

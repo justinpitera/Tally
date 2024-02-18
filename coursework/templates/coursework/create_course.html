@@ -2,18 +2,64 @@
 
 {% block content %}
 
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+       <li class="breadcrumb-item"><a href="/coursework/">Courses</a></li>
+       <li class="breadcrumb-item active" aria-current="page">Create Course</li>
+    </ol>
+ </nav>
 <div class="container mt-5">
-    <h2>Create Course</h2>
     <style>
-        .wide-description {
+        a {
+            color: #4b4276;
+            text-decoration: none;
+          }
+          a:hover, a:active {
+            color: #4b4276; /* Changes color on hover and when active */
+            text-decoration: none; /* Also ensures underline is disabled on hover and active states */
+          }
+          .progress {
             width: 100%;
-        }
-        .form-control-file {
-            border: 1px solid #ced4da;
-            padding: .375rem .75rem;
-            border-radius: .25rem;
-        }
+            background-color: #eee;
+            border: 1px solid #ccc;
+            height: 20px;
+            position: relative;
+            overflow: hidden;
+          }
+        
+          .progress-bar {
+            height: 100%;
+            background-color: #4b4276;
+            position: relative;
+            width: 10%; /* Adjust this value to set the progress */
+            background-image: linear-gradient(
+              45deg,
+              rgba(255, 255, 255, 0.15) 25%,
+              transparent 25%,
+              transparent 50%,
+              rgba(255, 255, 255, 0.15) 50%,
+              rgba(255, 255, 255, 0.15) 75%,
+              transparent 75%,
+              transparent
+            );
+            background-size: 40px 40px;
+            animation: moveStripes 2s linear infinite;
+          }
+        
+          @keyframes moveStripes {
+            from {
+              background-position: 0 0;
+            }
+            to {
+              background-position: 40px 0;
+            }
+          }
     </style>
+    <div class="progress">
+        <div class="progress-bar"></div>
+      </div>
+      
+      
     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
         <div class="form-row">

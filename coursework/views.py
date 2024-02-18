@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from accounts.models import UserProfile
 from django.http import FileResponse, Http404, JsonResponse
 from django.db.models import Avg
-
+from django.utils.timezone import now
 @login_required
 def direct_unenroll(request, course_id, user_id):
     # Ensure the request is POST for security reasons
@@ -72,6 +72,9 @@ def course_detail_view(request, course_id):
     # Fetch the course using the course_id
     course = get_object_or_404(Course, id=course_id)
 
+    # Determine if the course has started
+    has_started = course.start_date <= now().date()
+
     # Filter assignments specifically for this course
     assignments = course.assignments.prefetch_related('submissions').all()
 
@@ -98,6 +101,7 @@ def course_detail_view(request, course_id):
 
     assignments_submission_status = {}
     for assignment in assignments:
+        not_available = assignment.start_date > now().date()
         submissions = assignment.submissions.filter(student=request.user)
         submission_exists = submissions.exists()
         is_late = False
@@ -119,6 +123,7 @@ def course_detail_view(request, course_id):
             'grade': student_grade,
             'assignment_name': assignment.name,
             'assignment_id': assignment.id,
+            'not_available': not_available,  # Add this status to the dictionary
         }
 
     if request.method == 'POST':
@@ -145,6 +150,7 @@ def course_detail_view(request, course_id):
         'assignments_submission_status': assignments_submission_status,
         'students': students,
         'student_average_grades': student_average_grades,
+        'has_started': has_started,
     }
 
     return render(request, 'coursework/view_course.html', context)
@@ -174,27 +180,7 @@ def edit_course(request, course_id):
 
 
 
-@login_required
-def create_course(request):
-    if request.method == "POST":
-        form = CourseForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Temporarily save the course to assign an instructor before committing to the database
-            course = form.save(commit=False)
-            course.instructor = request.user  # Set the current user as the instructor
-            course.save()  # Commit the course to the database
 
-            # Automatically enroll the user in the course they just created
-            # Here, we assume the user should be added as an instructor.
-            # If you have different roles, adjust accordingly.
-            UserCourse.objects.create(user=request.user, course=course)
-            
-            # Redirect to a success page or the list of courses
-            messages.success(request, "Course created and you were enrolled successfully.")
-            return redirect("coursework")
-    else:
-        form = CourseForm()
-    return render(request, "coursework/create_course.html", {"form": form})
 
 @login_required
 def add_user_to_course(request):
@@ -217,20 +203,70 @@ def add_user_to_course(request):
         form = UserCourseForm()
     return render(request, "coursework/add_user_to_course.html", {"form": form})
 
+from django.shortcuts import render, get_object_or_404
+from django.utils.timezone import now
+
+
+
+
+
+
+
+
+
 @login_required
 def coursework_view(request):
     user_profile = get_object_or_404(UserProfile, user=request.user)
-    user_courses = UserCourse.objects.filter(user=request.user).select_related("course")
+    
+    # Fetch all courses related to the user and order them by the 'order' field
+    user_courses_query = UserCourse.objects.filter(user=request.user).select_related("course").order_by('order')
+    
+    # Filter active courses: those whose start_date is in the past (or today) and end_date is in the future
+    today = now().date()
+    active_courses = user_courses_query.filter(course__start_date__lte=today, course__end_date__gt=today)
+    
+    # Filter past courses: those whose end_date is in the past
+    past_courses = user_courses_query.filter(course__end_date__lt=today)
+    
+    # Filter future courses
+    future_courses = user_courses_query.filter(course__start_date__gt=today)
+
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
+
+
+
+    if request.method == "POST":
+        form = CourseForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Temporarily save the course to assign an instructor before committing to the database
+            course = form.save(commit=False)
+            course.instructor = request.user  # Set the current user as the instructor
+            course.save()  # Commit the course to the database
+
+            # Automatically enroll the user in the course they just created
+            # Here, we assume the user should be added as an instructor.
+            # If you have different roles, adjust accordingly.
+            UserCourse.objects.create(user=request.user, course=course)
+            
+            # Redirect to a success page or the list of courses
+            messages.success(request, "Course created and you were enrolled successfully.")
+            return redirect("coursework")
+    else:
+        form = CourseForm()
+    
     return render(
         request,
         "coursework/view_courses.html",
         {
-            "user_courses": user_courses,
+            "user_courses": active_courses,  # Now correctly includes courses between start and end dates
+            "past_courses": past_courses,
             "page_title": "Coursework - Tally",
             "is_instructor": is_instructor,
+            'future_courses': future_courses,
+            'form': form,
         },
     )
+
 
 @login_required
 def download_attachment(request, attachment_id):
@@ -347,8 +383,28 @@ def ajax_search_users(request, course_id):
         students_data.append({
             "username": student.username,
             "email": student.email,
-            "average_grade": average_grade_str
+            "average_grade": average_grade_str,
+            "student_id": student.id, 
         })
 
     return JsonResponse(students_data, safe=False)
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from .models import Course
+from django.contrib.auth.decorators import login_required
+
+@csrf_exempt
+@login_required
+@require_POST
+def update_course_order(request):
+    try:
+        course_order = request.POST.getlist('courseOrder[]')
+        for index, course_id in enumerate(course_order):
+            user_course = UserCourse.objects.get(user=request.user, course_id=course_id)
+            user_course.order = index
+            user_course.save()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})

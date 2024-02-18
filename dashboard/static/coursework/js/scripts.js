@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 resultsTableBody.innerHTML = ''; // Clear existing rows
                 data.forEach(user => {
                     const row = document.createElement('tr');
-                    row.innerHTML = `<td>${user.username}</td><td>${user.email}</td><td>${user.average_grade}</td>`; // Now includes average grade
+                    row.innerHTML = `<td><a href="/accounts/profile/${user.student_id}">${user.username}</a></td><td>${user.email}</td><td>${user.average_grade}</td>`; // Now includes average grade
                     resultsTableBody.appendChild(row);
                 });
             })
@@ -119,3 +119,17 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     });
+
+    document.getElementById('search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch('', { 
+            method: 'GET',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('assignment-list').innerHTML = html;
+        });
+    });
+    
