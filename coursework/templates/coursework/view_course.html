@@ -305,8 +305,19 @@
 
    <!-- Online Learning tab content -->
    <div class="tab-pane fade" id="online-learning" role="tabpanel" aria-labelledby="online-learning-tab">
-      <div class="card">
+                 <div class="card">
          <div class="card-body">
+            {% if not is_instructor and not has_started %}
+            <div class="alert alert-warning" role="alert">
+               <h4 class="alert-warning">Modules not available</h4>
+               <p>This course has not yet begun. The course will release modules to students sequentially, aligned with their planned start dates.</p>
+               <hr>
+               <p class="mb-0">Please refer to the course information or syllabus for the official start date.</p>
+            </div>
+
+
+            {% else %}
+ 
             {% if modules %}
             <ul>
                <div class="list-group">
@@ -332,6 +343,8 @@
          {% else %}
             <p>No modules for this course.</p>
          {% endif %}
+
+            {%endif%}
 
          
          {% if is_instructor %}
