@@ -180,27 +180,7 @@ def edit_course(request, course_id):
 
 
 
-@login_required
-def create_course(request):
-    if request.method == "POST":
-        form = CourseForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Temporarily save the course to assign an instructor before committing to the database
-            course = form.save(commit=False)
-            course.instructor = request.user  # Set the current user as the instructor
-            course.save()  # Commit the course to the database
 
-            # Automatically enroll the user in the course they just created
-            # Here, we assume the user should be added as an instructor.
-            # If you have different roles, adjust accordingly.
-            UserCourse.objects.create(user=request.user, course=course)
-            
-            # Redirect to a success page or the list of courses
-            messages.success(request, "Course created and you were enrolled successfully.")
-            return redirect("coursework")
-    else:
-        form = CourseForm()
-    return render(request, "coursework/create_course.html", {"form": form})
 
 @login_required
 def add_user_to_course(request):
@@ -226,6 +206,14 @@ def add_user_to_course(request):
 from django.shortcuts import render, get_object_or_404
 from django.utils.timezone import now
 
+
+
+
+
+
+
+
+
 @login_required
 def coursework_view(request):
     user_profile = get_object_or_404(UserProfile, user=request.user)
@@ -244,6 +232,27 @@ def coursework_view(request):
     future_courses = user_courses_query.filter(course__start_date__gt=today)
 
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
+
+
+
+    if request.method == "POST":
+        form = CourseForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Temporarily save the course to assign an instructor before committing to the database
+            course = form.save(commit=False)
+            course.instructor = request.user  # Set the current user as the instructor
+            course.save()  # Commit the course to the database
+
+            # Automatically enroll the user in the course they just created
+            # Here, we assume the user should be added as an instructor.
+            # If you have different roles, adjust accordingly.
+            UserCourse.objects.create(user=request.user, course=course)
+            
+            # Redirect to a success page or the list of courses
+            messages.success(request, "Course created and you were enrolled successfully.")
+            return redirect("coursework")
+    else:
+        form = CourseForm()
     
     return render(
         request,
@@ -254,6 +263,7 @@ def coursework_view(request):
             "page_title": "Coursework - Tally",
             "is_instructor": is_instructor,
             'future_courses': future_courses,
+            'form': form,
         },
     )
 

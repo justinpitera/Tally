@@ -45,6 +45,7 @@ class Submission(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions')
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     submitted_at = models.DateTimeField(auto_now_add=True, null=True)
+    graded_at = models.DateTimeField(auto_now_add=True, null=True)
     file = models.FileField(upload_to='submissions/%Y/%m/%d/')
     grade = models.IntegerField(null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
