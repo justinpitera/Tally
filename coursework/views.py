@@ -101,6 +101,7 @@ def course_detail_view(request, course_id):
 
     assignments_submission_status = {}
     for assignment in assignments:
+        not_available = assignment.start_date > now().date()
         submissions = assignment.submissions.filter(student=request.user)
         submission_exists = submissions.exists()
         is_late = False
@@ -122,6 +123,7 @@ def course_detail_view(request, course_id):
             'grade': student_grade,
             'assignment_name': assignment.name,
             'assignment_id': assignment.id,
+            'not_available': not_available,  # Add this status to the dictionary
         }
 
     if request.method == 'POST':

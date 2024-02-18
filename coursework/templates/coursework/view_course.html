@@ -206,11 +206,20 @@
                      <h6>{{ assignment.instruction|truncatechars:100 }}</h6>
                      
                      {% if is_instructor %}
+
                         {% with status=assignments_submission_status|get_item:assignment.id %}
+                           {% if status.not_available %}
+                              <span class="badge bg-dark text-white">Not Available</span>
+                           {% else %}
+                              <span class="badge bg-success text-dark">Available</span>
+                           {% endif %}
                            <span class="badge bg-info text-dark">Submissions: {{ status.submission_count }}</span>
                         {% endwith %}
                      {% else %}
                         {% with status=assignments_submission_status|get_item:assignment.id %}
+                           {% if status.not_available %}
+                           <span class="badge bg-dark text-white">Not Available</span>
+                           {% endif %}
                            {% if status.is_late %}
                               <span class="badge bg-danger text-dark">Late</span>
                            {% endif %}
