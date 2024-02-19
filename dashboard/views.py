@@ -21,6 +21,8 @@ def mark_notification_as_read(request, notification_id):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('dashboard')))
 
 
+from django.db.models import Avg, F
+
 @login_required
 def dashboard_view(request):
     unread_notifications = GradeNotification.objects.filter(receiver=request.user, read=False)
@@ -42,7 +44,12 @@ def dashboard_view(request):
         start_date__gt=today,
         start_date__lte=one_week_away
     )
-    
+
+    user_profile = UserProfile.objects.get(user=request.user)
+    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
+    average_grades_per_course = None
+
+
     overall_average_grade = None
 
     user_profile = UserProfile.objects.get(user=request.user)
@@ -50,13 +57,28 @@ def dashboard_view(request):
     if not is_instructor:
 
         overall_average_grade = Submission.objects.filter(student_id=request.user).aggregate(Avg('grade'))['grade__avg']
-        
+
+    if not is_instructor:
+        # Calculate average grade per course for the student
+        average_grades_per_course = Submission.objects.filter(
+            student_id=request.user, 
+            assignment__course__in=user_courses
+        ).values(
+            'assignment__course'  # Group by course
+        ).annotate(
+            average_grade=Avg('grade')
+        ).annotate(
+            course_id=F('assignment__course'),  # Fetch the course ID for later use
+            course_name=F('assignment__course__title')  # Assuming Course model has a 'name' field
+        ).order_by('assignment__course')
+
     context = {
         'page_title': 'Dashboard - Tally',
         'grade_notifications': unread_notifications,
-        'overall_average_grade': overall_average_grade,  
+        'average_grades_per_course': average_grades_per_course,  # Updated to pass the new data
         'available_assignments': available_assignments,
         'upcoming_assignments': upcoming_assignments,
+        'overall_average_grade': overall_average_grade,
     }
 
     return render(request, 'dashboard/dashboard.html', context)
