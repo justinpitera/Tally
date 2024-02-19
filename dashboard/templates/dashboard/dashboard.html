@@ -3,34 +3,122 @@
 {% block content %}
 
 
-  {% if user.is_authenticated %}
-    <!-- Code to display if the user is logged in -->
-    
 
 
-    <div class="jumbotron">
-      <h1 class="display-4">Welcome, {{ user.username }}!</h1>
+    <div class="card text-center">
+      <div class="card-header">
+        Welcome to Tally, {{user.username}}
+        <button type="button" class="close" aria-label="Close" style="float: right;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">Getting started:</h5>
+        <p class="card-text">Get started by enrolling in some courses</p>
+        <a href="#" class="btn btn-primary"></a>
+      </div>
 
     </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        // Check if the card was previously closed
+        if (localStorage.getItem('cardClosed') === 'true') {
+          document.querySelector('.card').style.display = 'none';
+        }
+      
+        document.querySelector('.close').addEventListener('click', function(e) {
+          e.preventDefault();
+          this.closest('.card').style.display = 'none';
+          // Save the closed state in localStorage
+          localStorage.setItem('cardClosed', 'true');
+        });
+      });
+      </script>
+      
+    <h2>Available Assignments</h2>
+    <ul>
+      {% for assignment in available_assignments %}
+        <li>{{assignment.course.title}} -{{ assignment.name }} - Due: {{ assignment.end_date }}</li>
+      {% empty %}
+        <li>No assignments available.</li>
+      {% endfor %}
+    </ul>
+    
+    <h2>Upcoming Assignments</h2>
+    <ul>
+      {% for assignment in upcoming_assignments %}
+        <li>{{ assignment.name }} - Starts: {{ assignment.start_date }}</li>
+      {% empty %}
+        <li>No upcoming assignments.</li>
+      {% endfor %}
+    </ul>
+    
+    
     <div class="container">
       <div class="row">
-        
-        <div class="col-sm"class="shadow-md">
-          'My Grades' Card Here
+        <div class="col-lg card-style">
+          <div class="card-content">
+            {% if overall_average_grade %}
+              <h5>{{overall_average_grade}}</h5>
+            {% endif %}
+          </div>
         </div>
-        <div class="col-sm">
-          'Notifications' Card Here
+        <div class="col-lg card-style">
+          <div class="card-content">
+            <div class="notification-cards">
+              {% for notification in grade_notifications %}
+              <div class="card notification-card mb-3 {% if not notification.read %}unread{% endif %}">
+                  <div class="card-body">
+                      <!-- Notification content -->
+                      <h5 class="card-title">
+                          <strong>{{ notification.course.name }} - 
+                          <a href="{% url 'view_assignment' notification.assignment.id %}?tab=section3">
+                              {{ notification.assignment.name }}
+                          </a></strong>
+                      </h5>
+                      <p class="card-text">{{ notification.comments }}</p>
+                      <p class="card-text">
+                          <small class="text-muted">Received on {{ notification.timestamp|date:"Y-m-d H:i" }}</small>
+                      </p>
+                      {% if not notification.read %}
+                      <!-- Mark as Read Button -->
+                      <a href="{% url 'mark_notification_read' notification.id %}" class="btn btn-primary btn-sm">Mark as Read</a>
+                      {% endif %}
+                  </div>
+              </div>
+              {% empty %}
+              <p>No new grade notifications to show.</p>
+              {% endfor %}
+              
+          </div>
+          
+          </div>
         </div>
-        <div class="col-sm">
-          'Resource Library' Card Here
+        <div class="col-lg card-style">
+          <div class="card-content">
+            'Resource Library' Card Here
+          </div>
         </div>
       </div>
     </div>
-{% else %}
-    <!-- Code to display if the user is not logged in -->
-    <p>Welcome, Guest!</p>
-{% endif %}
+    
 <style>
+  .card-style {
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin: 20px; /* Adjusts space around cards */
+    transition: transform 0.5s ease-in-out;
+
+  }
+  
+  .card-content {
+    padding: 20px; /* Adds some padding inside the card */
+  }
+  
+  .card-style:hover {
+    transform: scale(1.05); /* Slightly enlarges the card on hover for a nice effect */
+  }
+  
   .btn-purple {
       background-color: #4b4276 !important; /* Set the background color */
       border-color: #4b4276 !important; /* Set the border color to match */
@@ -40,6 +128,50 @@
       background-color: #39325c !important; /* Darker shade for hover/active */
       border-color: #39325c !important;
   }
+  #carouselExampleControls {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Adds shadow around the carousel for depth */
+    border: 1px solid #ddd; /* Adds a subtle border */
+    border-radius: 8px; /* Rounds the corners */
+    overflow: hidden; /* Ensures nothing spills outside the border-radius */
+    background-color: #f8f9fa; /* Light background color */
+    margin: 20px auto; /* Centers the carousel on the page with some margin */
+    width: 1120px; /* Fixed width */
+    height: 487px; /* Fixed height to maintain consistent size */
+}
+
+.carousel-inner, .carousel-item {
+    height: 100%; /* Ensures carousel items fill the height of the stage */
+}
+
+.carousel-image {
+    width: 100%; /* Image width matches the container, ensuring responsiveness */
+    max-height: 487px; /* Maximum height to fit within the carousel */
+    object-fit: contain; /* Ensures the full image is visible without cropping */
+    margin: auto; /* Centers the image if it doesn't fill the whole stage */
+}
+
   </style>
-  
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var startX, endX;
+        var carouselElement = document.querySelector('#carouselExampleControls');
+    
+        carouselElement.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+        });
+    
+        carouselElement.addEventListener('touchend', function(e) {
+            endX = e.changedTouches[0].clientX;
+    
+            if(startX - endX > 50) {
+                // Swipe left, next image
+                $('.carousel').carousel('next');
+            } else if (endX - startX > 50) {
+                // Swipe right, previous image
+                $('.carousel').carousel('prev');
+            }
+        });
+    });
+    </script>
+    
 {% endblock %}

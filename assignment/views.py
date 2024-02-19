@@ -2,6 +2,7 @@ from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from accounts.models import UserProfile
 from coursework.models import Course
+from dashboard.models import GradeNotification
 from .forms import AssignmentForm, AttachmentFormSet, FeedbackForm, GradeForm
 from django.views.generic import ListView
 from .models import Assignment, Attachment
@@ -14,7 +15,8 @@ from .models import Submission
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-
+from django.core.mail import send_mail
+from django.conf import settings
 
     
 
@@ -187,18 +189,30 @@ class CourseGradesView(LoginRequiredMixin, ListView):
 def grade_submission(request, submission_id):
     submission = get_object_or_404(Submission, pk=submission_id)
     assignment = submission.assignment
+    course = assignment.course
+    receiver = submission.student
+
+    if submission.comments:
+        comments = submission.comments
+    else:
+        comments = "No comments"
 
     if request.method == 'POST':
         form = GradeSubmissionForm(request.POST, instance=submission)
         if form.is_valid():
             form.save()
-            url = reverse('view_assignment', args=[submission.assignment.id]) + "?tab=section2"
+            # Create a new GradeNotification instance
+            notification = GradeNotification(course=course, assignment=assignment, receiver=receiver, comments=comments, read=False)
+            notification.save()
+
+            # Optionally, inform the user that a grade notification has been created
+            messages.success(request, "The submission has been graded and the student notified.")
+            url = reverse('view_assignment', args=[assignment.id]) + "?tab=section2"
             return redirect(url)
     else:
         form = GradeSubmissionForm(instance=submission)
     
     return render(request, 'assignment/grade_submission.html', {'form': form, 'submission': submission, 'assignment': assignment})
-    
 
 
 @login_required

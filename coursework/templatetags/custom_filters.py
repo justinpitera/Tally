@@ -1,3 +1,4 @@
+import os
 from django import template
 
 register = template.Library()
@@ -21,3 +22,14 @@ def basename(value):
 def get_grade(value, arg):
     """Retrieve value from the dictionary using a variable key."""
     return value.get(arg, 'No grade')
+
+@register.filter(name='calculate_status')
+def calculate_status(assignment):
+    if assignment.not_available:
+        return 'not_available'
+    elif assignment.is_late:
+        return 'late'
+    elif assignment.submitted:
+        return 'completed'
+    else:
+        return 'not_completed'

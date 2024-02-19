@@ -182,7 +182,53 @@
    </div>
    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
       <div class="card">
+         
          <div class="card-body">
+            <div class="mb-3">
+               <label for="assignmentStatusFilter" class="form-label">Filter by Status:</label>
+               <select class="form-select" id="assignmentStatusFilter">
+                  <option value="all">All</option>
+                  <option value="available">Available / Not completed</option>
+                  <option value="not_available">Not Available</option>
+                  <option value="completed">Completed</option>
+                  <option value="late">Late</option>
+              </select>
+              
+              <div class="mb-3">
+               <input type="text" class="form-control" id="assignmentSearch" placeholder="Type to search by name...">
+            </div>   
+           </div>
+           <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('assignmentSearch');
+                const statusFilter = document.getElementById('assignmentStatusFilter');
+                const assignments = document.querySelectorAll('.list-group-item');
+            
+                function filterAssignments() {
+                    const searchText = searchInput.value.toLowerCase();
+                    const selectedStatus = statusFilter.value;
+            
+                    assignments.forEach(function(assignment) {
+                        const name = assignment.dataset.name; // Assumes data-name attribute is correctly set
+                        const status = assignment.dataset.status; // Assumes data-status attribute is correctly set
+                        const matchesSearch = name.includes(searchText);
+                        const matchesStatus = (selectedStatus === 'all' || status === selectedStatus);
+            
+                        if (matchesSearch && matchesStatus) {
+                            assignment.style.display = '';
+                        } else {
+                            assignment.style.display = 'none';
+                        }
+                    });
+                }
+            
+                // Attach event listeners to both the search input and status filter
+                searchInput.addEventListener('input', filterAssignments); // Changed to 'input' for instant feedback
+                statusFilter.addEventListener('change', filterAssignments);
+            });
+            </script>
+            
+
             {% if not is_instructor and not has_started %}
             <div class="alert alert-warning" role="alert">
                <h4 class="alert-warning">Assignments not available</h4>
@@ -197,7 +243,11 @@
             <ul>
                <div class="list-group">
                   {% for assignment in assignments %}
-                  <a href="{% url 'view_assignment' assignment.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                  <a href="{% url 'view_assignment' assignment.id %}"
+                  class="list-group-item list-group-item-action flex-column align-items-start"
+                  data-status="{{ assignment.status }}"
+                  data-name="{{ assignment.name | lower }}"> <!-- Ensure name is in a searchable format -->
+                   <!-- Assignment details -->
                      <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">{{ assignment.name }}</h5>
                         <small class="text-muted"><strong>Assigned: </strong>{{ assignment.start_date }} | <strong>Due: </strong>{{ assignment.end_date }}</small>
@@ -211,7 +261,7 @@
                            {% if status.not_available %}
                               <span class="badge bg-dark text-white">Not Available</span>
                            {% else %}
-                              <span class="badge bg-success text-dark">Available</span>
+                              <span class="badge bg-info text-dark">Available</span>
                            {% endif %}
                            <span class="badge bg-info text-dark">Submissions: {{ status.submission_count }}</span>
                         {% endwith %}
@@ -219,15 +269,14 @@
                         {% with status=assignments_submission_status|get_item:assignment.id %}
                            {% if status.not_available %}
                            <span class="badge bg-dark text-white">Not Available</span>
+                           {% else %}
+                           <span class="badge bg-info text-dark">Available</span>
                            {% endif %}
                            {% if status.is_late %}
                               <span class="badge bg-danger text-dark">Late</span>
                            {% endif %}
-                        
                            {% if status.submitted %}
                               <span class="badge bg-success text-dark">Completed</span>
-                           {% else %}
-                              <span class="badge bg-warning text-dark">Not Completed</span>
                            {% endif %}
                         {% endwith %}
                      {% endif %}     
@@ -277,10 +326,10 @@
      </tbody>
   </table>
   {% else %}
-     <form id="searchForm" data-course-id="{{ course.id }}" class="d-flex">
-        <input type="text" id="searchInput" name="q" placeholder="Search by student name..." class="form-control me-2">
-        <button type="submit" class="btn btn-download-attachment" >Search</button>
-     </form>
+  <form id="searchForm" data-course-id="{{ course.id }}" class="d-flex">
+   <input type="text" id="searchInput" name="q" placeholder="Search by student name..." class="form-control me-2">
+   <button type="submit" class="btn btn-download-attachment" >Search</button>
+</form>
      <table>
         <thead>
            <tr>

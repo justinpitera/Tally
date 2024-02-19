@@ -5,7 +5,7 @@ from django.views.generic.list import ListView
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
-
+from django.db.models import Max
 
 
 class Assignment(models.Model):
@@ -14,10 +14,39 @@ class Assignment(models.Model):
     instruction = models.TextField()
     start_date = models.DateField()
     end_date = models.DateField()
-    is_submitted = models.BooleanField(default=False)
+    is_submitted = models.BooleanField(default=False) #has at least one submission
 
     def __str__(self):
         return self.name
+
+    @property
+    def status(self):
+        today = timezone.now().date()
+
+        # Check if the assignment has any submissions
+        latest_submission_date = self.submissions.aggregate(Max('submitted_at'))['submitted_at__max']
+        if latest_submission_date:
+            submission_date = latest_submission_date.date()
+        else:
+            submission_date = None
+
+        if self.is_submitted:
+            if submission_date and submission_date > self.end_date:
+                return 'late'
+            else:
+                return 'completed'
+        elif today < self.start_date:
+            return 'not_available'
+        elif today <= self.end_date:
+            return 'available'
+        # If there's a submission date and it's after the end date, mark as late
+        elif submission_date and submission_date > self.end_date:
+            return 'late'
+        elif today > self.end_date:
+            return 'not_completed'
+        else:
+            return 'not_completed'
+
 
 class AssignmentListView(ListView):
     model = Assignment
