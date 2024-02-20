@@ -50,7 +50,7 @@
         </ul>                
         <div class="other_links">
           <a href="#"><i class="fas fa-cog"></i></a>
-          <a href="#"><i class="fas fa-question-circle"></i></a>
+          <a href="#" data-toggle="modal" data-target="#offCanvasMenu"><i class="fas fa-question-circle"></i></a>
             {% if user.is_authenticated %}
               <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i></a>
             {% else %}
@@ -61,9 +61,28 @@
       </div>
 
     </div>
+
+<!-- Off-canvas menu -->
+<div class="modal fade" id="offCanvasMenu" tabindex="-1" role="dialog" aria-labelledby="offCanvasMenuLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="offCanvasMenuLabel">Help</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Off-canvas menu content here -->
+            </div>
+        </div>
+    </div>
+</div>
+
     <body>
     <div class="main_content">
       <div class="info">
+      
         {% block content %}
         
         {% endblock %}
@@ -76,4 +95,4 @@
 
 </script>
 
-</html>
+</html> 

@@ -3,6 +3,13 @@
 {% block content %}
 <link rel="stylesheet" type="text/css" href="{% static '/dashboard/css/styles.css' %}">
 <script src="{% static '/dashboard/js/scripts.js' %}"></script>
+
+
+
+
+
+
+
     <div class="card text-center">
       <div class="card-header">
         Welcome to Tally, {{user.username}}
@@ -79,63 +86,172 @@
     </ul>
   </div>
   
-  <!-- Your existing scripts for handling the custom context menu -->
   <script>
+    const navPillsPosition = document.querySelector('.nav-pills').getBoundingClientRect().top + window.scrollY;
+document.addEventListener('scroll', function() {
+    var scrollPosition = window.pageYOffset;
+    var windowSize = window.innerHeight;
+    var bodyHeight = document.body.offsetHeight;
+    var scrollIndicator = document.querySelector('.scroll-indicator');
+    var bottomOffset = 100;
+    var bottomPosition = bodyHeight - windowSize - bottomOffset;
+
+    // Logic for hiding/showing the indicator
+    if (scrollPosition >= bottomPosition) {
+        scrollIndicator.style.display = 'none';
+    } else {
+        scrollIndicator.style.display = 'block';
+    }
+
+    // Additional logic for changing color
+    const currentPosition = window.pageYOffset + window.innerHeight; // Current bottom position of the viewport
+    if (currentPosition >= navPillsPosition && currentPosition <= navPillsEndPosition) {
+        // Change color when over nav pills
+        scrollIndicator.style.color = '#000'; // Example: white
+    } else {
+        // Revert to original color when not over nav pills
+        scrollIndicator.style.color = '#9e96aa'; // Original color
+    }
+});
 
   </script>
-    <!-- Notifications Card -->
-    <div class="card card-style">
-      <div class="card-body">
-          <h4 class="card-title">Notifications</h4>
-          {% if grade_notifications %}
-          {% for notification in grade_notifications %}
-          <div class="list-group" id="customContextMenuTrigger">
-            <a href="{% url 'view_assignment' notification.assignment.id %}?tab=section3" class="list-group-item list-group-item-action flex-column align-items-start" data-notification-id="{{ notification.id }}">
-              <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">New grade posted for {{notification.course.title}}</h5>
-                <small>{{ notification.timestamp|date:"Y-m-d H:i" }}</small>
-              </div>
-              <p class="mb-1">Hey there! Just wanted to let you know that your assignment, "{{notification.assignment.name}}," has been reviewed and graded.
-              </p>
-              <small>To view your feedback, click <b>here</b></small>
-            </a>
-          </div>
-          {%endfor%}
-        {% else %}
-          <p>No new notifications...</p>
-        {% endif %}
-          
-      </div>
-  </div>
 
-    <!-- Assignments Card -->
-    <div class="card card-style">
-        <div class="card-body">
-            <h4 class="card-title">Assignments</h4>
-            <div>
-                <div class="tab active-tab" onclick="showAvailable()">Available</div>
-                <div class="tab" onclick="showUpcoming()">Upcoming</div>
+
+<div class="card card-style">
+    <div class="card-body">
+        <h4 class="card-title">Notifications</h4>
+        {% if grade_notifications %}
+        {% for notification in grade_notifications %}
+        <div class="list-group" id="customContextMenuTrigger">
+          <a href="{% url 'view_assignment' notification.assignment.id %}?tab=section3" class="list-group-item list-group-item-action flex-column align-items-start" data-notification-id="{{ notification.id }}">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1">New grade posted for {{notification.course.title}}</h5>
+              <small>{{ notification.timestamp|date:"Y-m-d H:i" }}</small>
             </div>
-            <div id="availableAssignments" class="tab-content">
-              {% for assignment in available_assignments %}
-                <li>{{assignment.course.title}} -{{ assignment.name }} - Due: {{ assignment.end_date }}</li>
-              {% empty %}
-                <li>No assignments available.</li>
-              {% endfor %}
-            </div>
-            <div id="upcomingAssignments" class="tab-content" style="display:none;">
-              {% for assignment in upcoming_assignments %}
-                <li>{{ assignment.name }} - Starts: {{ assignment.start_date }}</li>
-              {% empty %}
-                <li>No upcoming assignments.</li>
-              {% endfor %}
-            </div>
+            <p class="mb-1">{{ notification.random_message }}</p>
+            <small>To view your feedback, click <b>here</b></small>
+          </a>
         </div>
+        {% endfor %}
+      {% else %}
+        <p>No new notifications...</p>
+      {% endif %}
     </div>
 </div>
 
 
+    <!-- Assignments Card -->
+    <div class="card card-style">
+        <div class="card-body" >
+            <h4 class="card-title">Assignments</h4>
+            <ul class="nav nav-pills nav-fill">
+              <li class="nav-item">
+                  <a class="nav-link active" data-target="div1">Available <span class="badge badge-secondary">{{available_assignments.count}}</span></a>
+              </li>
 
-  
+              <li class="nav-item">
+                <a class="nav-link" data-target="div2">Upcoming <span class="badge badge-secondary">{{upcoming_assignments.count}}</span></a>
+              </li>
+            </ul>
+            <br>
+            <div id="div1" class="content-div">
+              <ul class="assignment-list">
+                {% for assignment in available_assignments %}
+                <a href="{% url 'view_assignment' assignment.id %}">
+                <li>
+                  <span class="course-title">{{assignment.course.title}}</span> -
+                  <span class="assignment-name">{{ assignment.name }}</span>
+                                    <span class="due-date"><b>Available:</b> {{ assignment.start_date }} | <b>Due:</b> {{assignment.end_date}}</span>
+                </li>
+                </a>
+                {% empty %}
+                  <p>Nothing here...</p>
+                {% endfor %}
+              </ul>
+            </div>
+
+            <div id="div2" class="content-div" style="display:none;">
+              <ul class="assignment-list">
+                {% for assignment in upcoming_assignments %}
+                <a href="{% url 'view_assignment' assignment.id %}">
+                <li>
+                  <span class="course-title">{{assignment.course.title}}</span> -
+                  <span class="assignment-name">{{ assignment.name }}</span>
+                  <span class="due-date"><b>Available:</b> {{ assignment.start_date }} | <b>Due:</b> {{assignment.end_date}}</span>
+                </li>
+                </a>
+                {% empty %}
+                  <p>Nothing here...</p>
+                {% endfor %}
+              </ul>
+            </div>
+
+          
+        </div>
+        <div class="fade-out-overlay"></div>
+          <div class="scroll-indicator">
+    <i class="fa-solid fa-arrow-down"></i>
+  </div>
+    </div>
+
+
+
+</div>
+<script>
+
+document.querySelectorAll('.nav-link').forEach(item => {
+  item.addEventListener('click', function(e) {
+    e.preventDefault(); // Prevent default anchor behavior
     
+    const targetId = this.getAttribute('data-target'); // Get the target content ID
+    document.querySelectorAll('.content-div').forEach(div => {
+      div.style.display = 'none'; // Hide all content divs
+    });
+    const targetDiv = document.getElementById(targetId);
+    targetDiv.style.display = 'block'; // Show the target content div
+
+    // Update active class for pills
+    document.querySelectorAll('.nav-link').forEach(nav => {
+      nav.classList.remove('active');
+    });
+    this.classList.add('active'); // Set current pill as active
+
+    scrollToView(targetDiv); // Scroll to make the div fully visible if needed
+  });
+});
+
+function scrollToView(element) {
+  const rect = element.getBoundingClientRect(); // Get the position of the element relative to the viewport
+    window.scrollBy({ top: rect.bottom - window.innerHeight + 100, behavior: 'smooth' }); // Scroll down to make element fully visible. Adjust the 20px offset as needed.
+}
+
+</script>
+
+
+
+
+
+<script>
+
+document.addEventListener('scroll', function() {
+  var scrollPosition = window.pageYOffset;
+  var windowSize = window.innerHeight;
+  var bodyHeight = document.body.offsetHeight;
+
+  // Offset to determine how close to the bottom you need to be to hide the indicator
+  // Decrease this number if you want the indicator to disappear sooner
+  var bottomOffset = 100; 
+
+  // Calculate the bottom position
+  var bottomPosition = bodyHeight - windowSize - bottomOffset;
+
+  if (scrollPosition >= bottomPosition) {
+    // Hide the indicator
+    document.querySelector('.scroll-indicator').style.display = 'none';
+  } else {
+    // Show the indicator
+    document.querySelector('.scroll-indicator').style.display = 'block';
+  }
+});
+</script>
 {% endblock %}

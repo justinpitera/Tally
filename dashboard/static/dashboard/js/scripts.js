@@ -47,21 +47,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 
-
-
-    function showAvailable() {
-        document.getElementById("availableAssignments").style.display = "block";
-        document.getElementById("upcomingAssignments").style.display = "none";
-        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active-tab'));
-        event.target.classList.add('active-tab');
-    }
-    function showUpcoming() {
-        document.getElementById("upcomingAssignments").style.display = "block";
-        document.getElementById("availableAssignments").style.display = "none";
-        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active-tab'));
-        event.target.classList.add('active-tab');
-    }
-
       document.addEventListener('DOMContentLoaded', (event) => {
         // Check if the card was previously closed
         if (localStorage.getItem('cardClosed') === 'true') {
@@ -138,3 +123,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
         // Adjust this function to match your URL scheme
         return "/notifications/mark-as-read/" + notificationId + "/";
     }
+
+
+
+
+
+
+
+
+
+

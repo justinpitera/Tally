@@ -1,4 +1,5 @@
 from datetime import timezone
+import random
 from django.shortcuts import render
 from django.urls import reverse
 from django.db.models import Avg
@@ -9,6 +10,11 @@ from .models import GradeNotification  # Adjust the import path according to you
 from django.contrib.auth.decorators import login_required  # Import to restrict access to logged-in users
 from django.http import HttpResponseRedirect
 from django.utils import timezone
+from .messages import MESSAGE_TEMPLATES 
+
+def get_random_message(assignment_name):
+    template = random.choice(MESSAGE_TEMPLATES)
+    return template.format(assignment_name=assignment_name)
 
 @login_required
 def mark_notification_as_read(request, notification_id):
@@ -25,7 +31,10 @@ from django.db.models import Avg, F
 
 @login_required
 def dashboard_view(request):
-    unread_notifications = GradeNotification.objects.filter(receiver=request.user, read=False)
+    grade_notifications = GradeNotification.objects.filter(receiver=request.user, read=False)
+
+    for notification in grade_notifications:
+        notification.random_message = get_random_message(notification.assignment.name)
 
     today = timezone.now().date()
     one_week_away = today + timezone.timedelta(days=7)
@@ -74,7 +83,7 @@ def dashboard_view(request):
 
     context = {
         'page_title': 'Dashboard - Tally',
-        'grade_notifications': unread_notifications,
+        'grade_notifications': grade_notifications,
         'average_grades_per_course': average_grades_per_course,  # Updated to pass the new data
         'available_assignments': available_assignments,
         'upcoming_assignments': upcoming_assignments,
