@@ -99,6 +99,8 @@ def dashboard_view(request):
         ).order_by('assignment__course')
 
     available_assignments_count = available_assignments.count() + submitted_available_assignments.count()
+    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
+
     context = {
         'page_title': 'Dashboard - Tally',
         'grade_notifications': grade_notifications,
@@ -108,6 +110,7 @@ def dashboard_view(request):
         'upcoming_assignments': upcoming_assignments,
         'overall_average_grade': overall_average_grade,
         'available_assignments_count':available_assignments_count,
+        'is_instructor': is_instructor,
     }
 
     return render(request, 'dashboard/dashboard.html', context)
