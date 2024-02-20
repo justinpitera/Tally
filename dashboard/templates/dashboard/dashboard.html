@@ -5,24 +5,10 @@
 <script src="{% static '/dashboard/js/scripts.js' %}"></script>
 
 
+<body>
 
 
 
-
-
-    <div class="card text-center">
-      <div class="card-header">
-        Welcome to Tally, {{user.username}}
-        <button type="button" class="close" aria-label="Close" style="float: right;">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="card-body">
-        <h5 class="card-title">Getting started:</h5>
-        <p class="card-text">Begin by exploring our introductory course</p>
-        <a href="#" class="btn btn-primary" style="background-color:#4b4276 !important; border-style:none;" >Begin Now</a>
-      </div>
-    </div>
 
 <div class="container mt-4">
     <!-- Grades Card -->
@@ -143,25 +129,39 @@ document.addEventListener('scroll', function() {
     <!-- Assignments Card -->
     <div class="card card-style">
         <div class="card-body" >
-            <h4 class="card-title">Assignments</h4>
+            <h4 class="card-title">Upcoming</h4>
             <ul class="nav nav-pills nav-fill">
               <li class="nav-item">
-                  <a class="nav-link active" data-target="div1">Available <span class="badge badge-secondary">{{available_assignments.count}}</span></a>
+                  <a class="nav-link active" data-target="div1">Available <span class="badge badge-secondary">{{available_assignments_count}}</span></a>
               </li>
 
               <li class="nav-item">
-                <a class="nav-link" data-target="div2">Upcoming <span class="badge badge-secondary">{{upcoming_assignments.count}}</span></a>
+                <a class="nav-link" data-target="div2">Not Available <span class="badge badge-secondary">{{upcoming_assignments.count}}</span></a>
               </li>
             </ul>
             <br>
             <div id="div1" class="content-div">
               <ul class="assignment-list">
+              <h6>Not Submitted:</h6>
                 {% for assignment in available_assignments %}
                 <a href="{% url 'view_assignment' assignment.id %}">
                 <li>
                   <span class="course-title">{{assignment.course.title}}</span> -
                   <span class="assignment-name">{{ assignment.name }}</span>
-                                    <span class="due-date"><b>Available:</b> {{ assignment.start_date }} | <b>Due:</b> {{assignment.end_date}}</span>
+                   <span class="due-date"><b><b>Due:</b> {{assignment.end_date}}</span>
+                </li>
+                </a>
+                {% empty %}
+                  <p>Nothing here...</p>
+                {% endfor %}
+                <hr>
+              <h6>Submitted:</h6>
+                {% for assignment in submitted_available_assignments %}
+                <a href="{% url 'view_assignment' assignment.id %}">
+                <li>
+                  <span class="course-title">{{assignment.course.title}}</span> -
+                  <span class="assignment-name">{{ assignment.name }}</span>
+                   <span class="due-date"><b><b>Due:</b> {{assignment.end_date}}</span>
                 </li>
                 </a>
                 {% empty %}
@@ -177,7 +177,7 @@ document.addEventListener('scroll', function() {
                 <li>
                   <span class="course-title">{{assignment.course.title}}</span> -
                   <span class="assignment-name">{{ assignment.name }}</span>
-                  <span class="due-date"><b>Available:</b> {{ assignment.start_date }} | <b>Due:</b> {{assignment.end_date}}</span>
+                  <span class="due-date"><b>Available:</b> {{ assignment.start_date }}</span>
                 </li>
                 </a>
                 {% empty %}
@@ -197,6 +197,7 @@ document.addEventListener('scroll', function() {
 
 
 </div>
+</body>
 <script>
 
 document.querySelectorAll('.nav-link').forEach(item => {
@@ -253,5 +254,28 @@ document.addEventListener('scroll', function() {
     document.querySelector('.scroll-indicator').style.display = 'block';
   }
 });
+</script>
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const content = document.querySelector('.main_content');
+    sidebar.classList.toggle('active');
+    content.classList.toggle('active'); // Toggle class to adjust margin
+}
+document.addEventListener('DOMContentLoaded', (event) => {
+  // Check if the card was previously closed
+  if (localStorage.getItem('cardClosed') === 'true') {
+    document.querySelector('.card').style.display = 'none';
+  }
+
+  document.querySelector('.close').addEventListener('click', function(e) {
+    e.preventDefault();
+    this.closest('.card').style.display = 'none';
+    // Save the closed state in localStorage
+    localStorage.setItem('cardClosed', 'true');
+  });
+});
+
+
 </script>
 {% endblock %}

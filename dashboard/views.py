@@ -29,6 +29,7 @@ def mark_notification_as_read(request, notification_id):
 
 from django.db.models import Avg, F
 
+
 @login_required
 def dashboard_view(request):
     grade_notifications = GradeNotification.objects.filter(receiver=request.user, read=False)
@@ -42,31 +43,47 @@ def dashboard_view(request):
     # Filter courses that the current user is enrolled in
     user_courses = UserCourse.objects.filter(user=request.user).values_list('course', flat=True)
 
-    # Now filter assignments based on those courses
+    # Identify assignments for which the user already has a submission
+    user_submissions = Submission.objects.filter(student_id=request.user).values_list('assignment_id', flat=True)
+
     available_assignments = Assignment.objects.filter(
         course__in=user_courses,
-        start_date__lte=today,
-        end_date__gte=today
+        start_date__lte=timezone.now(),  # Ensure the start date is on or before today
+        end_date__gte=today,  # Ensure the end date is today or in the future
+        end_date__lte=one_week_away  # Ensure the end date is within the next week
+    ).exclude(
+        id__in=user_submissions
     )
+
+        
+    submitted_available_assignments = Assignment.objects.filter(
+        course__in=user_courses,
+        start_date__lte=timezone.now(),  # Ensure the start date is on or before today
+        end_date__gte=today,  # Ensure the end date is today or in the future
+        end_date__lte=one_week_away,  # Ensure the end date is within the next week
+        id__in=user_submissions
+    )
+
+        
+    # Filter for upcoming assignments within a week
     upcoming_assignments = Assignment.objects.filter(
         course__in=user_courses,
         start_date__gt=today,
         start_date__lte=one_week_away
     )
 
+    print(available_assignments.count())
+    print(submitted_available_assignments.count())
+
+
     user_profile = UserProfile.objects.get(user=request.user)
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
-    average_grades_per_course = None
-
-
     overall_average_grade = None
 
-    user_profile = UserProfile.objects.get(user=request.user)
-    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
     if not is_instructor:
-
         overall_average_grade = Submission.objects.filter(student_id=request.user).aggregate(Avg('grade'))['grade__avg']
 
+    average_grades_per_course = None
     if not is_instructor:
         # Calculate average grade per course for the student
         average_grades_per_course = Submission.objects.filter(
@@ -78,16 +95,19 @@ def dashboard_view(request):
             average_grade=Avg('grade')
         ).annotate(
             course_id=F('assignment__course'),  # Fetch the course ID for later use
-            course_name=F('assignment__course__title')  # Assuming Course model has a 'name' field
+            course_name=F('assignment__course__title')  # Assuming Course model has a 'title' field
         ).order_by('assignment__course')
 
+    available_assignments_count = available_assignments.count() + submitted_available_assignments.count()
     context = {
         'page_title': 'Dashboard - Tally',
         'grade_notifications': grade_notifications,
         'average_grades_per_course': average_grades_per_course,  # Updated to pass the new data
         'available_assignments': available_assignments,
+        'submitted_available_assignments': submitted_available_assignments,  # Newly added context
         'upcoming_assignments': upcoming_assignments,
         'overall_average_grade': overall_average_grade,
+        'available_assignments_count':available_assignments_count,
     }
 
     return render(request, 'dashboard/dashboard.html', context)

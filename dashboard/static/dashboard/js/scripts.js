@@ -33,13 +33,32 @@ function updateCircularProgressBar(progressElement, percentage, index) {
   const rightBar = progressElement.querySelector('.progress-right .progress-bar');
   const progressValue = progressElement.querySelector('.progress-value');
 
+  // Initiate the bar animations
   rightBar.style.animation = `rotateRight${index} 1s linear forwards`;
   if (percentage > 50) {
-    leftBar.style.animation = `rotateLeft${index} 1s linear forwards 1s`; // Ensure this starts after the right bar animation
+    leftBar.style.animation = `rotateLeft${index} 1s linear forwards 1s`; // Starts after the right bar animation
   }
 
-  progressValue.textContent = `${percentage}%`;
+  // Duration of animation in milliseconds
+  const animationDuration = percentage > 50 ? 2000 : 1000; // Adjust based on your actual animation times
+  
+  let startPercentage = 0;
+  const stepTime = animationDuration / percentage;
+
+  function updateText() {
+    startPercentage++;
+    progressValue.textContent = `${startPercentage}%`;
+
+    // Stop the interval when the target percentage is reached
+    if (startPercentage >= percentage) {
+      clearInterval(interval);
+    }
+  }
+
+  // Update the progress text at each step
+  const interval = setInterval(updateText, stepTime);
 }
+
 
 // Initialize the progress bars on document ready
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -47,19 +66,19 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 
-      document.addEventListener('DOMContentLoaded', (event) => {
-        // Check if the card was previously closed
-        if (localStorage.getItem('cardClosed') === 'true') {
-          document.querySelector('.card').style.display = 'none';
-        }
-      
-        document.querySelector('.close').addEventListener('click', function(e) {
-          e.preventDefault();
-          this.closest('.card').style.display = 'none';
-          // Save the closed state in localStorage
-          localStorage.setItem('cardClosed', 'true');
-        });
-      });
+document.addEventListener('DOMContentLoaded', (event) => {
+  // Check if the card was previously closed
+  if (localStorage.getItem('cardClosed') === 'true') {
+    document.querySelector('.card').style.display = 'none';
+  }
+
+  document.querySelector('.close').addEventListener('click', function(e) {
+    e.preventDefault();
+    this.closest('.card').style.display = 'none';
+    // Save the closed state in localStorage
+    localStorage.setItem('cardClosed', 'true');
+  });
+});
 
 
       document.addEventListener('DOMContentLoaded', function() {
