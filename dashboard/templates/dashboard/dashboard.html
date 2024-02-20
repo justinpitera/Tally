@@ -85,32 +85,33 @@
   </script>
     <!-- Notifications Card -->
     <div class="card card-style">
-        <div class="card-body">
-            <h5 class="card-title">Notifications</h5>
-            {% if grade_notifications %}
-            {% for notification in grade_notifications %}
-            <div class="list-group" id="customContextMenuTrigger">
-              <a href="{% url 'view_assignment' notification.assignment.id %}?tab=section3" class="list-group-item list-group-item-action flex-column align-items-start" data-notification-id="{{ notification.id }}">
-                <div class="d-flex w-100 justify-content-between">
-                  <h5 class="mb-1">New grade posted for {{notification.course.title}}</h5>
-                  <small>{{ notification.timestamp|date:"Y-m-d H:i" }}</small>
-                </div>
-                <p class="mb-1">Your assignment, <i>{{notification.assignment.name}}</i>, was graded.</p>
-                <small>To view your feedback, click <b>here</b></small>
-              </a>
-            </div>
-            {%endfor%}
-          {% else %}
-            <p>No new notifications...</p>
-          {% endif %}
-            
-        </div>
-    </div>
+      <div class="card-body">
+          <h4 class="card-title">Notifications</h4>
+          {% if grade_notifications %}
+          {% for notification in grade_notifications %}
+          <div class="list-group" id="customContextMenuTrigger">
+            <a href="{% url 'view_assignment' notification.assignment.id %}?tab=section3" class="list-group-item list-group-item-action flex-column align-items-start" data-notification-id="{{ notification.id }}">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">New grade posted for {{notification.course.title}}</h5>
+                <small>{{ notification.timestamp|date:"Y-m-d H:i" }}</small>
+              </div>
+              <p class="mb-1">Hey there! Just wanted to let you know that your assignment, "{{notification.assignment.name}}," has been reviewed and graded.
+              </p>
+              <small>To view your feedback, click <b>here</b></small>
+            </a>
+          </div>
+          {%endfor%}
+        {% else %}
+          <p>No new notifications...</p>
+        {% endif %}
+          
+      </div>
+  </div>
 
     <!-- Assignments Card -->
     <div class="card card-style">
         <div class="card-body">
-            <h5 class="card-title">Assignments</h5>
+            <h4 class="card-title">Assignments</h4>
             <div>
                 <div class="tab active-tab" onclick="showAvailable()">Available</div>
                 <div class="tab" onclick="showUpcoming()">Upcoming</div>
