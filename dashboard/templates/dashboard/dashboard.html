@@ -17,11 +17,6 @@
       </div>
     </div>
 
-
-
-
-
-
 <div class="container mt-4">
     <!-- Grades Card -->
     <div class="card card-style">
@@ -31,17 +26,24 @@
             <div class="grades-container" style="display: flex; flex-wrap: wrap; justify-content: flex-start;">
                 <!-- Overall grade container -->
                 <div class="grade-item" style="flex: 0 1 22%; margin: 1%; text-align: center;">
-                    <h6 style="text-align: left; margin-left: 10px;"><b>Overall:</b></h6>
-                    <div class="progress blue" data-grade="{{ overall_average_grade|floatformat:"2"}}">
-                        <span class="progress-left">
-                            <span class="progress-bar"></span>
-                        </span>
-                        <span class="progress-right">
-                            <span class="progress-bar"></span>
-                        </span>
-                        <div class="progress-value"></div>
+                  <h6 style="text-align: left; margin-left: 10px;"><b>Overall:</b></h6>
+                  {% if overall_average_grade %}
+                  <div class="progress blue" data-grade="{{ overall_average_grade|floatformat:"2"}}">
+                    <span class="progress-left">
+                      <span class="progress-bar"></span>
+                    </span>
+                    <span class="progress-right">
+                      <span class="progress-bar"></span>
+                    </span>
+                    <div class="progress-value"></div>
                     </div>
-                </div>
+                  </div>
+
+                  {% else %}
+
+                  {% endif %}
+
+
                 <!-- Dynamically generated course grades -->
                 {% for course_grade in average_grades_per_course %}
                 <div class="grade-item" style="flex: 0 1 22%; margin: 1%; text-align: center;">
@@ -62,52 +64,46 @@
     </div>
 </div>
 
+<!-- Placeholder for dynamic URL generation (not using due to dynamic nature) -->
+<script type="text/javascript">
+  function getMarkAsReadUrl(notificationId) {
+      // Construct the URL manually or use a base URL and append the notification ID
+      return "/notifications/mark-as-read/" + notificationId + "/";
+  }
+  </script>
+  
+  <div id="customContextMenu" style="display: none; position: absolute; z-index: 1000;" class="custom-menu">
+    <ul>
+      <li><a id="feedBackLink" href="#">View Feedback</a></li>
+      <li><a id="markReadLink" href="#">Mark as read</a></li>
+    </ul>
+  </div>
+  
+  <!-- Your existing scripts for handling the custom context menu -->
+  <script>
 
-
-
+  </script>
     <!-- Notifications Card -->
     <div class="card card-style">
         <div class="card-body">
             <h5 class="card-title">Notifications</h5>
-            <div class="accordion" id="accordionExample">
-              <div class="card">
-                <div class="card-header" id="headingOne">
-                  <h2 class="mb-0">
-                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                      New Notifications
-                    </button>
-                  </h2>
+            {% if grade_notifications %}
+            {% for notification in grade_notifications %}
+            <div class="list-group" id="customContextMenuTrigger">
+              <a href="{% url 'view_assignment' notification.assignment.id %}?tab=section3" class="list-group-item list-group-item-action flex-column align-items-start" data-notification-id="{{ notification.id }}">
+                <div class="d-flex w-100 justify-content-between">
+                  <h5 class="mb-1">New grade posted for {{notification.course.title}}</h5>
+                  <small>{{ notification.timestamp|date:"Y-m-d H:i" }}</small>
                 </div>
-
-                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
-                  <div class="card-body">
-                  {% if grade_notifications %}
-                    {% for notification in grade_notifications %}
-                    <div class="notification-card unread mb-3">
-                        <p class="card-text">{{ notification.timestamp|date:"Y-m-d H:i" }} - New grade posted for {{notification.course.title}} - <a href="{% url 'view_assignment' notification.assignment.id %}?tab=section3" style="color:#fff !important;"><b>View Grade</b>                       <a href="{% url 'mark_notification_read' notification.id %}" class="btn btn-primary-outline btn-sm">Mark as Read</a></a>
-                    </div>
-                    {%endfor%}
-                  {% else %}
-                    <p>No new notifications...</p>
-                  {% endif %}
-                  </div>
-                </div>
-              </div>
-              <div class="card">
-                <div class="card-header" id="headingTwo">
-                  <h2 class="mb-0">
-                    <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                      All Notifications
-                    </button>
-                  </h2>
-                </div>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
-                  <div class="card-body">
-                    Some placeholder content for the second accordion panel. This panel is hidden by default.
-                  </div>
-                </div>
-              </div>
+                <p class="mb-1">Your assignment, <i>{{notification.assignment.name}}</i>, was graded.</p>
+                <small>To view your feedback, click <b>here</b></small>
+              </a>
             </div>
+            {%endfor%}
+          {% else %}
+            <p>No new notifications...</p>
+          {% endif %}
+            
         </div>
     </div>
 

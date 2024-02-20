@@ -8,7 +8,7 @@ class MessageForm(forms.ModelForm):
 
     class Meta:
         model = Message
-        fields = ['recipient', 'content']
+        fields = ['recipient', 'subject', 'content' ]
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)  # Extract the user from kwargs
@@ -19,5 +19,5 @@ class MessageForm(forms.ModelForm):
 class DirectMessageForm(forms.ModelForm):
     class Meta:
         model = Message
-        fields = ['content'] 
+        fields = ['content','subject'] 
 

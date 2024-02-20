@@ -8,18 +8,32 @@
 <a href="{% url 'send_message' %}" class="btn btn-primary" id="write-message-button">
     <i class="fas fa-pen"></i> Draft Message</a>
 </a>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link active" data-target="#inbox-content"><i class="fa-solid fa-inbox"></i>&nbsp;Inbox</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-target="#drafts-content"><i class="fa-solid fa-scroll"></i>&nbsp;Drafts</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-target="#saved-content"><i class="fa-solid fa-bookmark"></i>&nbsp;Saved</a>
+    </li>
+</ul>
 
-{% if messages %}
+<div id="inbox-content" class="tab-content active">
+    {% if messages %}
     <ul>
+        <br>
         {% for message in messages %}
         <div class="list-group">
-            <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="list-group-item list-group-item-action flex-column align-items-start">
                 <div class="d-flex w-100 justify-content-between">
-                    <small><strong>Received:</strong> {{ message.timestamp }}</small>
+                    <h5 class="mb-1">Subject: <small><i>{{ message.subject }}</i></small></h5>
+                    <small>{{ message.timestamp }}</small>
                 </div>
-                <small><strong>From:</strong>  {{ message.sender }}</small>
-                <p class="mb-1">{{ message.content }}</p>
-            </a>
+                <p class="mb-1">{{ message.content|truncatechars:50 }}</p>
+                <small>From: <a href="{% url 'view_profile' message.sender.id %}">{{ message.sender }}</a></small>
+            </div>
         </div>
         {% endfor %}
     </ul>
@@ -27,7 +41,33 @@
     <p>You have no messages.</p>
 {% endif %}
 
+
+</div>
+<div id="drafts-content" class="tab-content">
+    d
+</div>
+<div id="saved-content" class="tab-content">
+    a
+</div>
+
+
 <style>
+    .wrapper .main_content .info div {
+        margin-bottom: 5px;
+      }
+    
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    nav-link {
+        color:#4b4276;
+    }
+    nav-link:hover {
+        color:#4b4276;
+    }
     /* CSS for positioning the button at the top right */
     #write-message-button {
         position: absolute;
@@ -35,7 +75,31 @@
         right: 20px; /* Adjust the right position as needed */
         background-color:#4b4276;
         color:#fff;
+        border-style:none;
     }
 </style>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var tabs = document.querySelectorAll('.nav-link');
+        var contentPanels = document.querySelectorAll('.tab-content');
+    
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                var targetContentId = tab.getAttribute('data-target');
+                var targetContent = document.querySelector(targetContentId);
+                
+                // Remove active class from all tabs and content panels
+                tabs.forEach(function(tab) { tab.classList.remove('active'); });
+                contentPanels.forEach(function(panel) { panel.classList.remove('active'); });
+    
+                // Add active class to clicked tab and corresponding content panel
+                tab.classList.add('active');
+                targetContent.classList.add('active');
+            });
+        });
+    });
+
+</script>
 
 {% endblock %}

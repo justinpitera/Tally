@@ -134,4 +134,25 @@
               background-color: #4b4276;
               color: white;
           }
-  
+
+
+
+          
+.custom-menu ul {
+    list-style: none;
+    padding: 10px;
+    margin: 0;
+    background-color: #f0f0f0;
+    border: solid 1px #ccc;
+}
+
+.custom-menu ul li a {
+    text-decoration: none;
+    color: black;
+    display: block;
+    padding: 5px 10px;
+}
+
+.custom-menu ul li a:hover {
+    background-color: #ddd;
+}
