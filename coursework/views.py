@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.urls import reverse
 from assignment.forms import AssignmentForm, AttachmentFormSet
 from assignment.models import Assignment, Attachment, Submission
+from onlinelearning.models import Module
 from .models import Course, UserCourse
 from .forms import UserCourseForm, CourseForm
 from django.contrib.auth.decorators import login_required
@@ -71,6 +72,7 @@ def delete_course(request, course_id):
 def course_detail_view(request, course_id):
     # Fetch the course using the course_id
     course = get_object_or_404(Course, id=course_id)
+    page_title = course.title + " - Tally"
 
     # Determine if the course has started
     has_started = course.start_date <= now().date()
@@ -123,7 +125,7 @@ def course_detail_view(request, course_id):
             'grade': student_grade,
             'assignment_name': assignment.name,
             'assignment_id': assignment.id,
-            'not_available': not_available,  # Add this status to the dictionary
+            'not_available': not_available,  
         }
 
     if request.method == 'POST':
@@ -141,11 +143,16 @@ def course_detail_view(request, course_id):
         form = AssignmentForm(course_id=course_id)
         formset = AttachmentFormSet(instance=Assignment())
 
+    # Query modules for the current course
+    modules = Module.objects.filter(course=course).order_by('start_date') 
+
     context = {
         'form': form,
+        'page_title': page_title,
         'formset': formset,
         'course': course,
         'assignments': assignments,
+        'modules': modules,
         'is_instructor': is_instructor,
         'assignments_submission_status': assignments_submission_status,
         'students': students,
@@ -260,7 +267,7 @@ def coursework_view(request):
         {
             "user_courses": active_courses,  # Now correctly includes courses between start and end dates
             "past_courses": past_courses,
-            "page_title": "Coursework - Tally",
+            "page_title": "Courses - Tally",
             "is_instructor": is_instructor,
             'future_courses': future_courses,
             'form': form,

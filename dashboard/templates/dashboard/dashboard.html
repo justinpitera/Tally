@@ -30,9 +30,9 @@
         {% else %}
         {% endif %}
         <!-- generated course grades -->
-        {% for course_grade in average_grades_per_course %}
+        {% for course_grade in student_average_grades_per_course %}
         <div class="grade-item" style="flex: 0 1 22%; margin: 1%; text-align: center;">
-          <h6 style="text-align: left; margin-left: 10px;">{{course_grade.course_name}}:</h6>
+          <h6 style="text-align: left; margin-left: 10px;">{{course_grade.course_name|truncatechars:20}}:</h6>
           <div class="progress blue" data-grade="{{course_grade.average_grade|floatformat:2}}">
             <span class="progress-left">
             <span class="progress-bar"></span>
@@ -51,16 +51,19 @@
   <!-- Placeholder for dynamic URL generation (not using due to dynamic nature) -->
   <script type="text/javascript">
     function getMarkAsReadUrl(notificationId) {
-        // Construct the URL manually or use a base URL and append the notification ID
-        return "/notifications/mark-as-read/" + notificationId + "/";
-    }
+      return "/notifications/mark-as-read/" + notificationId + "/";
+  }
+  function getFeedbackURL(notificationId) {
+    return "/notifications/mark-as-read/" + notificationId + "/";
+  }
   </script>
   <div id="customContextMenu" style="display: none; position: absolute; z-index: 1000;" class="custom-menu">
     <ul>
-      <li><a id="feedBackLink" href="#">View Feedback</a></li>
+      <li><a id="feedBackLink" href="#">View Feedback</a></li> <!-- Corrected typo in href -->
       <li><a id="markReadLink" href="#">Mark as read</a></li>
     </ul>
-  </div>
+</div>
+
   <!-- Notifications card -->
   <div class="card card-style">
     <div class="card-body">
@@ -91,120 +94,152 @@
       {% endif %}
     </div>
   </div>
-      <!-- Assignments Card -->
-      <div class="card card-style">
-        <div class="card-body" >
-          <h4 class="card-title">Upcoming</h4>
-          <ul class="nav nav-pills nav-fill">
-            <li class="nav-item">
-              <a class="nav-link active" data-target="div1">Available <span class="badge badge-secondary">{{available_assignments_count}}</span></a>
+  <!-- Assignments Card -->
+  <div class="card card-style">
+    <div class="card-body" >
+      <h4 class="card-title">Upcoming</h4>
+      <ul class="nav nav-pills nav-fill">
+        <li class="nav-item">
+          <a class="nav-link active" data-target="div1">Available <span class="badge badge-secondary">{{available_assignments_count}}</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-target="div2">Not Available <span class="badge badge-secondary">{{upcoming_assignments.count}}</span></a>
+        </li>
+      </ul>
+      <br>
+      <div id="div1" class="content-div">
+        <ul class="assignment-list">
+          <h6><b>Not Submitted:</b></h6>
+          {% for assignment in available_assignments %}
+          <a href="{% url 'view_assignment' assignment.id %}">
+            <li>
+              <span class="course-title">{{assignment.course.title}}</span> -
+              <span class="assignment-name">{{ assignment.name }}</span>
+              <span class="due-date"><b>Due:</b> {{assignment.end_date}}</span>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" data-target="div2">Not Available <span class="badge badge-secondary">{{upcoming_assignments.count}}</span></a>
+          </a>
+          {% empty %}
+          <p>Nothing here...</p>
+          {% endfor %}
+          <hr>
+          <h6><b>Submitted:</b></h6>
+          {% for assignment in submitted_available_assignments %}
+          <a href="{% url 'view_assignment' assignment.id %}">
+            <li>
+              <span class="course-title">{{assignment.course.title}}</span> -
+              <span class="assignment-name">{{ assignment.name }}</span>
+              <span class="due-date"><b>Due:</b> {{assignment.end_date}}</span>
             </li>
-          </ul>
-          <br>
-          <div id="div1" class="content-div">
-            <ul class="assignment-list">
-              <h6><b>Not Submitted:</b></h6>
-              {% for assignment in available_assignments %}
-              <a href="{% url 'view_assignment' assignment.id %}">
-                <li>
-                  <span class="course-title">{{assignment.course.title}}</span> -
-                  <span class="assignment-name">{{ assignment.name }}</span>
-                  <span class="due-date"><b><b>Due:</b> {{assignment.end_date}}</span>
-                </li>
-              </a>
-              {% empty %}
-              <p>Nothing here...</p>
-              {% endfor %}
-              <hr>
-              <h6><b>Submitted:</b></h6>
-              {% for assignment in submitted_available_assignments %}
-              <a href="{% url 'view_assignment' assignment.id %}">
-                <li>
-                  <span class="course-title">{{assignment.course.title}}</span> -
-                  <span class="assignment-name">{{ assignment.name }}</span>
-                  <span class="due-date"><b><b>Due:</b> {{assignment.end_date}}</span>
-                </li>
-              </a>
-              {% empty %}
-              <p>Nothing here...</p>
-              {% endfor %}
-            </ul>
-          </div>
-          <div id="div2" class="content-div" style="display:none;">
-            <ul class="assignment-list">
-              {% for assignment in upcoming_assignments %}
-              <a href="{% url 'view_assignment' assignment.id %}">
-                <li>
-                  <span class="course-title">{{assignment.course.title}}</span> -
-                  <span class="assignment-name">{{ assignment.name }}</span>
-                  <span class="due-date"><b>Available:</b> {{ assignment.start_date }}</span>
-                </li>
-              </a>
-              {% empty %}
-              <p>Nothing here...</p>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-        <div class="fade-out-overlay"></div>
-        <div class="scroll-indicator">
-          <i class="fa-solid fa-arrow-down" onclick="scrollToBottom()"></i>
-        </div>
+          </a>
+          {% empty %}
+          <p>Nothing here...</p>
+          {% endfor %}
+        </ul>
       </div>
+      <div id="div2" class="content-div" style="display:none;">
+        <ul class="assignment-list">
+          {% for assignment in upcoming_assignments %}
+          <a href="{% url 'view_assignment' assignment.id %}">
+            <li>
+              <span class="course-title">{{assignment.course.title}}</span> -
+              <span class="assignment-name">{{ assignment.name }}</span>
+              <span class="due-date"><b>Available:</b> {{ assignment.start_date }}</span>
+            </li>
+          </a>
+          {% empty %}
+          <p>Nothing here...</p>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="fade-out-overlay"></div>
+    <div class="scroll-indicator">
+      <i class="fa-solid fa-arrow-down" onclick="scrollToBottom()"></i>
+    </div>
+  </div>
 </body>
 {% endif %}
-
-
 <!-- Instructor view -->
 {% if is_instructor %}
 <body>
-  <!-- Assignments Card -->
-  <div class="card card-style">
-  <div class="card-body" >
-    <h4 class="card-title">Upcoming</h4>
-    <ul class="nav nav-pills nav-fill">
-      <li class="nav-item">
-        <a class="nav-link active" data-target="div1">Available <span class="badge badge-secondary">{{available_assignments_count}}</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-target="div2">Not Available <span class="badge badge-secondary">{{upcoming_assignments.count}}</span></a>
-      </li>
-    </ul>
-    <br>
-    <div id="div1" class="content-div">
-      <ul class="assignment-list">
-        {% for assignment in available_assignments %}
-        <a href="{% url 'view_assignment' assignment.id %}">
-          <li>
-            <span class="course-title">{{assignment.course.title}}</span> -
-            <span class="assignment-name">{{ assignment.name }}</span>
-            <span class="due-date"><b><b>Due:</b> {{assignment.end_date}}</span>
-          </li>
-        </a>
-        {% empty %}
-        <p>Nothing here...</p>
-        {% endfor %}
-      </ul>
+
+    <!-- Statistics Card -->
+    <div class="card card-style">
+      <div class="card-body" >
+        <h4 class="card-title">Course Statistics</h4>
+                <!-- generated course grades -->
+                {% for course_grade in average_grades_per_course %}
+                <div class="grade-item" style="flex: 0 1 22%; margin: 1%; text-align: center;">
+                  <h6 style="text-align: left; margin-left: 10px;">{{course_grade.course_name|truncatechars:20}}:</h6>
+                  <div class="progress blue" data-grade="{{course_grade.average_grade|floatformat:2}}">
+                    <span class="progress-left">
+                    <span class="progress-bar"></span>
+                    </span>
+                    <span class="progress-right">
+                    <span class="progress-bar"></span>
+                    </span>
+                    <div class="progress-value"></div>
+                  </div>
+                </div>
+                {% endfor %}
+      </div>
     </div>
-    <div id="div2" class="content-div" style="display:none;">
-      <ul class="assignment-list">
-        {% for assignment in upcoming_assignments %}
-        <a href="{% url 'view_assignment' assignment.id %}">
-          <li>
-            <span class="course-title">{{assignment.course.title}}</span> -
-            <span class="assignment-name">{{ assignment.name }}</span>
-            <span class="due-date"><b>Available:</b> {{ assignment.start_date }}</span>
-          </li>
-        </a>
-        {% empty %}
-        <p>Nothing here...</p>
-        {% endfor %}
-      </ul>
+
+
+    <!-- Statistics Card -->
+    <div class="card card-style">
+      <div class="card-body" >
+        <h4 class="card-title">Notifications</h4>
+      </div>
     </div>
-  </div>
+
+
+
+    <!-- Assignments Card -->
+    <div class="card card-style">
+      <div class="card-body" >
+        <h4 class="card-title">Upcoming</h4>
+        <ul class="nav nav-pills nav-fill">
+          <li class="nav-item">
+            <a class="nav-link active" data-target="div1">Available <span class="badge badge-secondary">{{available_assignments_count}}</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-target="div2">Not Available <span class="badge badge-secondary">{{upcoming_assignments.count}}</span></a>
+          </li>
+        </ul>
+        <br>
+        <div id="div1" class="content-div">
+          <ul class="assignment-list">
+            {% for assignment in available_assignments %}
+            <a href="{% url 'view_assignment' assignment.id %}">
+              <li>
+                <span class="course-title">{{assignment.course.title}}</span> -
+                <span class="assignment-name">{{ assignment.name }}</span>
+                <span class="due-date"><b>Due:</b> {{assignment.end_date}}</span>
+              </li>
+            </a>
+            {% empty %}
+            <p>Nothing here...</p>
+            {% endfor %}
+          </ul>
+        </div>
+        <div id="div2" class="content-div" style="display:none;">
+          <ul class="assignment-list">
+            {% for assignment in upcoming_assignments %}
+            <a href="{% url 'view_assignment' assignment.id %}">
+              <li>
+                <span class="course-title">{{assignment.course.title}}</span> -
+                <span class="assignment-name">{{ assignment.name }}</span>
+                <span class="due-date"><b>Available:</b> {{ assignment.start_date }}</span>
+              </li>
+            </a>
+            {% empty %}
+            <p>Nothing here...</p>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
   <div class="fade-out-overlay"></div>
   <div class="scroll-indicator">
     <i class="fa-solid fa-arrow-down" onclick="scrollToBottom()"></i>

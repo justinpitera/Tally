@@ -91,6 +91,7 @@ def get_assignment_linked_course_id(request, assignment_id):
 @login_required
 def view_assignment(request, assignment_id):
     assignment = get_object_or_404(Assignment, id=assignment_id)
+    page_title = assignment.name + " - " + assignment.course.title + " - Tally"
     user_profile = UserProfile.objects.get(user=request.user)
     is_instructor = user_profile.role == UserProfile.INSTRUCTOR
 
@@ -128,6 +129,7 @@ def view_assignment(request, assignment_id):
     if not is_instructor:
         feedbacks = submission.feedbacks.all() if submission else []
     return render(request, 'assignment/view_assignment.html', {
+        'page_title': page_title,
         'assignment': assignment,
         'is_already_submitted': is_already_submitted,
         'is_instructor': is_instructor,

@@ -11,7 +11,6 @@ urlpatterns = [
     path('', include('messenger.urls')),
     path('', include('onlinelearning.urls')),
     path('', include('coursework.urls')),
-    path('', include('upcoming.urls')),
     path('accounts/', include('accounts.urls')),
     path('assignment/', include('assignment.urls')),
 ]

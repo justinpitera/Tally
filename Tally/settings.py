@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'messenger',
     'onlinelearning',
     'coursework',
-    'upcoming',
     'accounts',
     'assignment',
 ]

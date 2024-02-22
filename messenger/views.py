@@ -48,16 +48,19 @@ class SendDirectMessageView(CreateView):
         form.instance.recipient = get_object_or_404(User, pk=recipient_id)
         return super().form_valid(form)
     
-
 class InboxView(LoginRequiredMixin, ListView):
     model = Message
-    template_name = 'messenger/inbox.html'  # Make sure this points to the correct template
-    context_object_name = 'messages'  # This is how the message list will be referred to in your template
+    template_name = 'messenger/inbox.html'  
+    context_object_name = 'messages'  
 
     def get_queryset(self):
         # Filters messages where the recipient is the current user and orders them by timestamp
         return Message.objects.filter(recipient=self.request.user).order_by('-timestamp')
 
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add additional context here
+        context['page_title'] = 'Messenger - Tally'
+        return context
 
 

@@ -6,11 +6,14 @@ from django.db.models import Avg
 from accounts.models import UserProfile
 from assignment.models import Assignment, Submission
 from coursework.models import UserCourse
-from .models import GradeNotification  # Adjust the import path according to your project structure
-from django.contrib.auth.decorators import login_required  # Import to restrict access to logged-in users
+from .models import GradeNotification  
+from django.contrib.auth.decorators import login_required 
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from .messages import MESSAGE_TEMPLATES 
+from django.db.models import Avg, F
+
+
 
 def get_random_message(assignment_name):
     template = random.choice(MESSAGE_TEMPLATES)
@@ -26,14 +29,24 @@ def mark_notification_as_read(request, notification_id):
     # Redirect back to the dashboard or the page from which the request was made
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('dashboard')))
 
+@login_required
+def view_feedback(request, notification_id):
+    # Retrieve the notification and update its 'read' status
+    notification = GradeNotification.objects.get(id=notification_id, receiver=request.user)
+    assignment_id = notification.assignment_id
+    url_path = reverse('view_assignment', args=(assignment_id,))
+    query_string = "?tab=section3"
+    url = f"{url_path}{query_string}"
+    # Redirect back to the dashboard or the page from which the request was made
+    return HttpResponseRedirect(url)
 
-from django.db.models import Avg, F
 
 
 @login_required
 def dashboard_view(request):
     grade_notifications = GradeNotification.objects.filter(receiver=request.user, read=False)
-
+    user_profile = UserProfile.objects.get(user=request.user)
+    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
     for notification in grade_notifications:
         notification.random_message = get_random_message(notification.assignment.name)
 
@@ -76,26 +89,46 @@ def dashboard_view(request):
     print(submitted_available_assignments.count())
 
 
-    user_profile = UserProfile.objects.get(user=request.user)
-    is_instructor = user_profile.role == UserProfile.INSTRUCTOR
+   
     overall_average_grade = None
-
     if not is_instructor:
         overall_average_grade = Submission.objects.filter(student_id=request.user).aggregate(Avg('grade'))['grade__avg']
 
+
+
+
+
     average_grades_per_course = None
+    # Calculate average grade per course across all students
+    average_grades_per_course = Submission.objects.filter(
+        assignment__course__in=user_courses
+    ).exclude(
+        grade__isnull=True  # Exclude submissions where the grade is null
+    ).values(
+        'assignment__course'  # Group by course
+    ).annotate(
+        average_grade=Avg('grade')  # Calculate the average grade for the course
+    ).annotate(
+        course_id=F('assignment__course'),  # Fetch the course ID for later use
+        course_name=F('assignment__course__title')  # Fetch the course name for later use
+    ).order_by('assignment__course')
+
+
+    student_average_grades_per_course = None
     if not is_instructor:
         # Calculate average grade per course for the student
-        average_grades_per_course = Submission.objects.filter(
+        student_average_grades_per_course = Submission.objects.filter(
             student_id=request.user, 
             assignment__course__in=user_courses
+        ).exclude(
+            grade__isnull=True  # Exclude submissions where the grade is null
         ).values(
             'assignment__course'  # Group by course
         ).annotate(
             average_grade=Avg('grade')
         ).annotate(
             course_id=F('assignment__course'),  # Fetch the course ID for later use
-            course_name=F('assignment__course__title')  # Assuming Course model has a 'title' field
+            course_name=F('assignment__course__title')  
         ).order_by('assignment__course')
 
     available_assignments_count = available_assignments.count() + submitted_available_assignments.count()
@@ -104,9 +137,10 @@ def dashboard_view(request):
     context = {
         'page_title': 'Dashboard - Tally',
         'grade_notifications': grade_notifications,
-        'average_grades_per_course': average_grades_per_course,  # Updated to pass the new data
+        'student_average_grades_per_course': student_average_grades_per_course,  
+        'average_grades_per_course': average_grades_per_course,
         'available_assignments': available_assignments,
-        'submitted_available_assignments': submitted_available_assignments,  # Newly added context
+        'submitted_available_assignments': submitted_available_assignments,  
         'upcoming_assignments': upcoming_assignments,
         'overall_average_grade': overall_average_grade,
         'available_assignments_count':available_assignments_count,

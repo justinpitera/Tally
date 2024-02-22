@@ -1,25 +1,20 @@
-// custom-context-menu.js
-// Created:     Tues Feb 20, 2024
-// Last Edited: Tues Feb 20, 2024
-// Author:      Justin Pitera
-/*
-    Purpose: To operate the custom context menu of the each notification
-*/
-
 document.addEventListener('DOMContentLoaded', function() {
     const notificationItems = document.querySelectorAll('.list-group-item');
     const customMenu = document.getElementById('customContextMenu');
     let timer;
 
     function showCustomMenu(e, notificationId) {
-        // Prevent the default context menu
         e.preventDefault();
 
-        // Update the href for the mark as read link
         const markReadLink = document.getElementById('markReadLink');
         markReadLink.href = getMarkAsReadUrl(notificationId);
 
-        // Set custom menu position
+        const feedBackLink = document.getElementById('feedBackLink'); // Ensure this ID matches the HTML
+        const feedbackUrl = getFeedBackUrl(notificationId);
+        feedBackLink.href = feedbackUrl;
+
+        console.log(`Feedback URL set to: ${feedbackUrl}`); // Debugging: Log the feedback URL
+
         customMenu.style.left = `${e.pageX}px`;
         customMenu.style.top = `${e.pageY}px`;
         customMenu.style.display = 'block';
@@ -31,28 +26,22 @@ document.addEventListener('DOMContentLoaded', function() {
             showCustomMenu(e, notificationId);
         });
 
-        // Listen for touchstart event for long-press
         item.addEventListener('touchstart', function(e) {
-            // Prevent the default long press behavior of iOS
             e.preventDefault();
-
-            // Start a timer to detect long press
             timer = setTimeout(() => {
                 showCustomMenu(e, this.getAttribute('data-notification-id'));
-            }, 500); // 500ms for long press
+            }, 500);
         }, {passive: false});
 
-        // Cancel the timer if the touch ends before the long press duration
-        item.addEventListener('touchend', function(e) {
+        item.addEventListener('touchend', function() {
             clearTimeout(timer);
         });
 
-        item.addEventListener('touchmove', function(e) {
+        item.addEventListener('touchmove', function() {
             clearTimeout(timer);
         });
     });
 
-    // Hide the custom menu on touch or click elsewhere
     document.addEventListener('touchstart', hideCustomMenu);
     document.addEventListener('click', hideCustomMenu);
 
@@ -63,7 +52,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function getMarkAsReadUrl(notificationId) {
-    // Adjust this function to match your URL scheme
-    return "/notifications/mark-as-read/" + notificationId + "/";
+function getFeedBackUrl(notificationId) {
+    return `/notifications/view-feedback/${notificationId}/`; // Ensure this URL is correct
 }
