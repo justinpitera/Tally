@@ -6,47 +6,34 @@
 <!-- Student view -->
 {% if not is_instructor %}
 <body>
-  <div class="container mt-4">
-    <!-- Grades Card -->
-    <div class="card card-style">
-      <div class="card-body">
-        <h4 class="card-title">Grades</h4>
-        <!-- Grades container -->
-        <div class="grades-container" style="display: flex; flex-wrap: wrap; justify-content: flex-start;">
-          <!-- Overall grade  -->
-          <div class="grade-item" style="flex: 0 1 22%; margin: 1%; text-align: center;">
-            <h6 style="text-align: left; margin-left: 10px;"><b>Overall:</b></h6>
-            {% if overall_average_grade %}
-            <div class="progress blue" data-grade="{{ overall_average_grade|floatformat:"2"}}">
-            <span class="progress-left">
-            <span class="progress-bar"></span>
-            </span>
-            <span class="progress-right">
-            <span class="progress-bar"></span>
-            </span>
-            <div class="progress-value"></div>
-          </div>
-        </div>
-        {% else %}
-        {% endif %}
-        <!-- generated course grades -->
-        {% for course_grade in student_average_grades_per_course %}
-        <div class="grade-item" style="flex: 0 1 22%; margin: 1%; text-align: center;">
-          <h6 style="text-align: left; margin-left: 10px;">{{course_grade.course_name|truncatechars:20}}:</h6>
-          <div class="progress blue" data-grade="{{course_grade.average_grade|floatformat:2}}">
-            <span class="progress-left">
-            <span class="progress-bar"></span>
-            </span>
-            <span class="progress-right">
-            <span class="progress-bar"></span>
-            </span>
-            <div class="progress-value"></div>
-          </div>
-        </div>
-        {% endfor %}
+  <!-- Statistics Card -->
+<div class="card card-style">
+<div class="card-body" >
+<h4 class="card-title">Course Statistics</h4>
+<!-- generated course grades -->
+<div class="row">
+  {% for course_grade in average_grades_per_course %}
+  <div class="col-md-4">
+    <div class="grade-item">
+      <h6>{{course_grade.course_name|truncatechars:20}}:</h6>
+      <div class="progress blue" data-grade="{{course_grade.average_grade|floatformat:2}}">
+        <span class="progress-left">
+          <span class="progress-bar"></span>
+        </span>
+        <span class="progress-right">
+          <span class="progress-bar"></span>
+        </span>
+        <div class="progress-value"></div>
       </div>
     </div>
   </div>
+  {% if forloop.counter|divisibleby:4 and not forloop.last %}
+</div>
+<div class="row">
+  {% endif %}
+  {% endfor %}
+</div>
+</div>
   </div>
   <!-- Placeholder for dynamic URL generation (not using due to dynamic nature) -->
   <script type="text/javascript">
@@ -163,27 +150,36 @@
 {% if is_instructor %}
 <body>
 
-    <!-- Statistics Card -->
-    <div class="card card-style">
-      <div class="card-body" >
-        <h4 class="card-title">Course Statistics</h4>
-                <!-- generated course grades -->
-                {% for course_grade in average_grades_per_course %}
-                <div class="grade-item" style="flex: 0 1 22%; margin: 1%; text-align: center;">
-                  <h6 style="text-align: left; margin-left: 10px;">{{course_grade.course_name|truncatechars:20}}:</h6>
-                  <div class="progress blue" data-grade="{{course_grade.average_grade|floatformat:2}}">
-                    <span class="progress-left">
-                    <span class="progress-bar"></span>
-                    </span>
-                    <span class="progress-right">
-                    <span class="progress-bar"></span>
-                    </span>
-                    <div class="progress-value"></div>
-                  </div>
-                </div>
-                {% endfor %}
+<!-- Statistics Card -->
+<div class="card card-style">
+<div class="card-body" >
+<h4 class="card-title">Course Statistics</h4> 
+<!-- generated course grades -->
+<div class="row">
+  {% for course_grade in average_grades_per_course %}
+  <div class="col-md-4">
+    <div class="grade-item">
+      <h6>{{course_grade.course_name|truncatechars:20}}:</h6>
+      <div class="progress blue" data-grade="{{course_grade.average_grade|floatformat:2}}">
+        <span class="progress-left">
+          <span class="progress-bar"></span>
+        </span>
+        <span class="progress-right">
+          <span class="progress-bar"></span>
+        </span>
+        <div class="progress-value"></div>
       </div>
     </div>
+  </div>
+  {% if forloop.counter|divisibleby:4 and not forloop.last %}
+</div>
+<div class="row">
+  {% endif %}
+  {% endfor %}
+</div>
+
+</div>
+</div>
 
 
     <!-- Statistics Card -->
